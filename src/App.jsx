@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -13,17 +13,32 @@ function App() {
 }
 
 function AppContent() {
-  const location = useLocation(); 
+  const location = useLocation();
+  const isAuthenticated = localStorage.getItem("authToken");
+
   return (
     <>
-      {location.pathname !== '/' && <Navbar />}
-      
+      {location.pathname !== "/" && <Navbar />}
+
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Home />} />
+        {/* Si NO está autenticado, muestra Login. Si SÍ lo está, redirige a /home */}
+        <Route
+          path="/"
+          element={
+            !isAuthenticated ? <Login /> : <Navigate to="/home" replace />
+          }
+        />
+
+        {/* Si está autenticado, muestra Home. Si NO, redirige a Login */}
+        <Route
+          path="/home"
+          element={
+            isAuthenticated ? <Home /> : <Navigate to="/" replace />
+          }
+        />
       </Routes>
 
-      {location.pathname !== '/' && <Footer />}
+      {location.pathname !== "/" && <Footer />}
     </>
   );
 }

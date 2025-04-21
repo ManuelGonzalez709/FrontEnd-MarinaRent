@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const useApi = (endpoint, options = {}) => {
-  const baseUrl = 'http://localhost:8080/';
+  const baseUrl = 'http://localhost:8000/';
   const [uri, setUri] = useState(`${baseUrl}${endpoint}`);
 
   const [data, setData] = useState(null);

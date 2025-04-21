@@ -4,11 +4,6 @@ import { CheckCircleIcon } from '@heroicons/react/24/solid';
 export default function Home() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!localStorage.getItem("authToken")) {
-      navigate('/');
-    }
-  }, [navigate]);
 
   return (
     <>
@@ -16,7 +11,7 @@ export default function Home() {
         <div className="relative w-full aspect-video">
           {/* Texto encima del video */}
           <div className="absolute inset-0 flex flex-col justify-center items-center z-10 bg-black/20">
-            <h1 className="text-3xl md:text-6xl font-bold text-white text-center">Bienvenidos a Marina Rent</h1>
+            <h1 className="text-8xl md:text-7xl font-bold text-white text-center">Bienvenidos a Marina Rent</h1>
             <h2 className="text-lg md:text-xl font-semibold text-white mt-4 text-center">Diversión desde el Principio</h2>
           </div>
 
@@ -65,35 +60,63 @@ export default function Home() {
         <section className="py-16 bg-gray-50">
 
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 className="text-3xl font-semibold text-center text-blue-900">
-              ¿Qué ofrecemos?
+            <h2 className="text-5xl font-semibold text-center text-blue-900">
+              Servicios que Ofrecemos
             </h2>
-            <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid grid-cols-1 gap-8 flex-wrap lg:grid-cols-3 w-full">
 
               {/* Tarjeta 1 - Snorkel */}
-              <div className="flex flex-col items-center rounded-lg bg-white p-6 shadow-lg">
-                <img src="snorkel.jpg" alt="Snorkel" className="h-50 w-80 object-cover rounded mb-6" />
+              <div className="flex flex-col items-center rounded-lg bg-white p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <img src="snorker.jpg" alt="Snorkel" className="h-50 w-80 object-cover rounded mb-6 hover:blur-sm scale-[1.01] transition duration-1000" />
                 <h3 className="text-xl font-semibold text-blue-700">Snorkel</h3>
                 <p className="text-center text-gray-600 mt-2">
-                  Sumérgete en un mundo submarino lleno de vida marina y colores vibrantes. ¡Una experiencia inolvidable para toda la familia!
+                  Vive una experiencia única explorando los arrecifes de coral y observando la vida marina desde la superficie.
                 </p>
               </div>
 
-              {/* Tarjeta 2 - Buceo */}
-              <div className="flex flex-col items-center rounded-lg bg-white p-6 shadow-lg">
-                <img src="buceo.jpg" alt="Buceo" className="h-50 w-80 object-cover rounded mb-6" />
-                <h3 className="text-xl font-semibold text-blue-700">Buceo</h3>
+              {/* Tarjeta 2 - Viajes en Barco */}
+              <div className="flex flex-col items-center rounded-lg bg-white p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <img src="viajesBarco.jpg" alt="Viajes en Barco" className="h-50 w-80 object-cover rounded mb-6 hover:blur-sm scale-[1.01] transition duration-1000"/>
+                <h3 className="text-xl font-semibold text-blue-700">Viajes en Barco</h3>
                 <p className="text-center text-gray-600 mt-2">
-                  Explora las profundidades del océano con nuestros guías expertos. Ideal para principiantes y buzos certificados.
+                  Disfruta de un relajante paseo en barco por aguas cristalinas, descubriendo vistas panorámicas y playas escondidas.
                 </p>
               </div>
+
 
               {/* Tarjeta 3 - Excursiones */}
-              <div className="flex flex-col items-center rounded-lg bg-white p-6 shadow-lg">
-                <img src="excursion.jpg" alt="Excursiones" className="h-50 w-80 object-cover rounded mb-6" />
+              <div className="flex flex-col items-center rounded-lg bg-white p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <img src="excursiones.jpg" alt="Excursiones"className="h-50 w-80 object-cover rounded mb-6 hover:blur-sm scale-[1.01] transition duration-1000" />
                 <h3 className="text-xl font-semibold text-blue-700">Excursiones</h3>
                 <p className="text-center text-gray-600 mt-2">
-                  Aventúrate en recorridos únicos por playas paradisíacas, islas escondidas y paisajes que te dejarán sin aliento.
+                  Disfruta de excursiones guiadas por paisajes impresionantes, explorando rincones ocultos y sitios naturales impresionantes.
+                </p>
+              </div>
+              {/* Tarjeta 1 - Snorkel */}
+              <div className="flex flex-col items-center rounded-lg bg-white p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <img src="snorker.jpg" alt="Snorkel" className="h-50 w-80 object-cover rounded mb-6 hover:blur-sm scale-[1.01] transition duration-1000"/>
+                <h3 className="text-xl font-semibold text-blue-700">Snorkel</h3>
+                <p className="text-center text-gray-600 mt-2">
+                  Vive una experiencia única explorando los arrecifes de coral y observando la vida marina desde la superficie.
+                </p>
+              </div>
+
+              {/* Tarjeta 2 - Viajes en Barco */}
+              <div className="flex flex-col items-center rounded-lg bg-white p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <img src="viajesBarco.jpg" alt="Viajes en Barco"className="h-50 w-80 object-cover rounded mb-6 hover:blur-sm scale-[1.01] transition duration-1000"/>
+                <h3 className="text-xl font-semibold text-blue-700">Viajes en Barco</h3>
+                <p className="text-center text-gray-600 mt-2">
+                  Disfruta de un relajante paseo en barco por aguas cristalinas, descubriendo vistas panorámicas y playas escondidas.
+                </p>
+              </div>
+
+
+              {/* Tarjeta 3 - Excursiones */}
+              <div className="flex flex-col items-center rounded-lg bg-white p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <img src="excursiones.jpg" alt="Excursiones" className="h-50 w-80 object-cover rounded mb-6 hover:blur-sm scale-[1.01] transition duration-1000"/>
+                <h3 className="text-xl font-semibold text-blue-700">Excursiones</h3>
+                <p className="text-center text-gray-600 mt-2">
+                  Disfruta de excursiones guiadas por paisajes impresionantes, explorando rincones ocultos y sitios naturales impresionantes.
                 </p>
               </div>
 
