@@ -14,9 +14,9 @@ import { useLocation } from "react-router-dom";
 
 const navigation = [
   { name: "Inicio", href: "/home", current: true },
-  { name: "Informativos", href: "/almacen", current: false },
-  { name: "Alquileres", href: "/inventario", current: false },
-  { name: "Mis Reservas", href: "/tareas", current: false }
+  { name: "Informativos", href: "/informativos", current: false },
+  { name: "Alquileres", href: "/alquileres", current: false },
+  { name: "Mis Reservas", href: "/reservas", current: false }
 ];
 
 function classNames(...classes) {

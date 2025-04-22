@@ -1,46 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useApi from "../utilities/apiComunicator";
+import { API_URL } from "../utilities/apirest";
+import axios from "axios";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
-  const [errorMessage, setErrorMessage] = useState("");
-  const { data, loading, error, setUri, setError, setOptions, currentOptions } = useApi("api/login", false);
-  useEffect(() => {
-    if (localStorage.getItem("authToken")) {
-      navigate("/home");
-    }
-  }, [navigate]);
 
-  useEffect(() => {
-    if (data) {
-      let tokenNuevo = data.token.split("|")
-      localStorage.setItem("authToken", tokenNuevo[1]);
-      navigate("/home");
-    }
-  }, [data, navigate]);
-
-  useEffect(() => {
-    if (error) {
-        setErrorMessage("Error al iniciar sesión. Por favor verifica tus credenciales.");
-    }
-  }, [error]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (email && password) {
-      setOptions({
-        method: "POST",
-        body: JSON.stringify({ email, password }), // Asegúrate de enviar los datos como un JSON stringificado
-      });
-      
-    } else {
-      setErrorMessage("Por favor, ingresa tus credenciales.");
-    }
-  };
+ function realizarSolicitud (event){
+    event.preventDefault();
+    let url = API_URL+"login";
+    axios.post(url,{email:email, password:password}).then((response) => {
+      if(response.status == 200){
+        let token = response.data.token.split("|")[1];
+        localStorage.setItem("authToken", token);
+        setErrorMessage(null);
+        navigate("/home");
+      } 
+    }).catch((error) => {
+      if (error.response) {
+        setErrorMessage("Credenciales incorrectas. Inténtalo de nuevo.");
+      } else {
+        setErrorMessage("Error de conexión. Por favor, intenta más tarde.");
+      }
+    })
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -59,7 +45,7 @@ function Login() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={realizarSolicitud} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input

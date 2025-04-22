@@ -21,15 +21,12 @@ function AppContent() {
       {location.pathname !== "/" && <Navbar />}
 
       <Routes>
-        {/* Si NO está autenticado, muestra Login. Si SÍ lo está, redirige a /home */}
         <Route
           path="/"
           element={
             !isAuthenticated ? <Login /> : <Navigate to="/home" replace />
           }
         />
-
-        {/* Si está autenticado, muestra Home. Si NO, redirige a Login */}
         <Route
           path="/home"
           element={
@@ -37,7 +34,6 @@ function AppContent() {
           }
         />
       </Routes>
-
       {location.pathname !== "/" && <Footer />}
     </>
   );
