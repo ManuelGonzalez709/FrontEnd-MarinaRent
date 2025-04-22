@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Informativos from './pages/Informativos';
+import Alquilables from './pages/Alquilables';
 
 function App() {
   return (
@@ -33,6 +34,10 @@ function AppContent() {
         <Route
           path="/informativos"
           element={ isAuthenticated ? <Informativos /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/alquilables"
+          element={ isAuthenticated ? <Alquilables /> : <Navigate to="/" replace />}
         />
       </Routes>
       {location.pathname !== "/" && <Footer />}

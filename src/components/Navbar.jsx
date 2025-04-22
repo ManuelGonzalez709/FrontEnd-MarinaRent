@@ -15,7 +15,7 @@ import { useLocation } from "react-router-dom";
 const navigation = [
   { name: "Inicio", href: "/home", current: true },
   { name: "Informativos", href: "/informativos", current: false },
-  { name: "Alquileres", href: "/alquileres", current: false },
+  { name: "Alquileres", href: "/alquilables", current: false },
   { name: "Mis Reservas", href: "/reservas", current: false }
 ];
 
