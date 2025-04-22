@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import MarbellaMap from "../components/MarbellaMap";
 export default function Home() {
   const navigate = useNavigate();
 
@@ -123,7 +124,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        
+        <MarbellaMap />
       </main>
     </>
   );

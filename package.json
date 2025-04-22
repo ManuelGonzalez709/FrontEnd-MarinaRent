@@ -15,10 +15,12 @@
     "@tailwindcss/vite": "^4.0.17",
     "axios": "^1.8.4",
     "konva": "^9.3.20",
+    "leaflet": "^1.9.4",
     "react": "^19.0.0",
     "react-calendar": "^5.1.0",
     "react-dom": "^19.0.0",
     "react-konva": "^19.0.3",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.4.1",
     "tailwindcss": "^4.0.17"
   },
