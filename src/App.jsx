@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Informativos from './pages/Informativos';
 
 function App() {
   return (
@@ -23,15 +24,15 @@ function AppContent() {
       <Routes>
         <Route
           path="/"
-          element={
-            !isAuthenticated ? <Login /> : <Navigate to="/home" replace />
-          }
+          element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />}
         />
         <Route
           path="/home"
-          element={
-            isAuthenticated ? <Home /> : <Navigate to="/" replace />
-          }
+          element={isAuthenticated ? <Home /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/informativos"
+          element={ isAuthenticated ? <Informativos /> : <Navigate to="/" replace />}
         />
       </Routes>
       {location.pathname !== "/" && <Footer />}

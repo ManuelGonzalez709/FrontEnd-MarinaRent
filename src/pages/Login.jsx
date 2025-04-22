@@ -11,7 +11,7 @@ function Login() {
 
  function realizarSolicitud (event){
     event.preventDefault();
-    let url = API_URL+"login";
+     let url = API_URL+"api/login";
     axios.post(url,{email:email, password:password}).then((response) => {
       if(response.status == 200){
         let token = response.data.token.split("|")[1];
