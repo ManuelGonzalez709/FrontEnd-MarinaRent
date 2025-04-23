@@ -8,6 +8,7 @@ import Informativos from './pages/Informativos';
 import Alquilables from './pages/Alquilables';
 import Mostrador from './pages/Mostrador';
 import Carrito from './pages/Carrito';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -50,6 +51,10 @@ function AppContent() {
           element={isAuthenticated ? <Home /> : <Navigate to="/" replace />}
         />
         <Route
+          path="/notFound"
+          element={isAuthenticated ? <NotFound /> : <Navigate to="/" replace />}
+        />
+        <Route
           path="/informativos"
           element={isAuthenticated ? <Informativos /> : <Navigate to="/" replace />}
         />
@@ -65,6 +70,7 @@ function AppContent() {
           path="/carrito"
           element={isAuthenticated ? <Carrito cart={cart} setCart={setCart} /> : <Navigate to="/" replace />}
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
       {location.pathname !== "/" && <Footer />}

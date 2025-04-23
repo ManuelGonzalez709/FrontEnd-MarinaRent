@@ -1,15 +1,28 @@
 import React from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_URL } from "../utilities/apirest";
+import { useEffect } from 'react';
 
 export default function Mostrador({cart,setCart}) {
-    const { state } = useLocation();
+    const location = useLocation();
     const navigate = useNavigate();
-    const { elemento } = state;
+
+    useEffect(() => {
+        if (!location.state || !location.state.elemento) {
+            navigate("/notFound");
+        }
+    }, [location.state, navigate]);
+
+    // Previene el error mientras redirige
+    if (!location.state || !location.state.elemento) return null;
+
+    const { elemento } = location.state;
+
     const handleAddToCart = (e) => {
         e.preventDefault(); 
         setCart(prev => [...prev, elemento]);
     };
+
     return (
         <div class="bg-white">
             <div class="pt-6">
