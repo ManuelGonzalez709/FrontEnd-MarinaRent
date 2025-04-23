@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -6,6 +7,7 @@ import Login from "./pages/Login";
 import Informativos from './pages/Informativos';
 import Alquilables from './pages/Alquilables';
 import Mostrador from './pages/Mostrador';
+import Carrito from './pages/Carrito';
 
 function App() {
   return (
@@ -18,7 +20,22 @@ function App() {
 function AppContent() {
   const location = useLocation();
   const isAuthenticated = localStorage.getItem("authToken");
+  const [cart, setCart] = useState([]);
 
+  useEffect(() => {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+      setCart(JSON.parse(storedCart)); 
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cart.length > 0) {
+      localStorage.setItem("cart", JSON.stringify(cart)); 
+    }
+  }, [cart]); // Se activa cada vez que el carrito cambia
+  
+  
   return (
     <>
       {location.pathname !== "/" && <Navbar />}
@@ -34,17 +51,22 @@ function AppContent() {
         />
         <Route
           path="/informativos"
-          element={ isAuthenticated ? <Informativos /> : <Navigate to="/" replace />}
+          element={isAuthenticated ? <Informativos /> : <Navigate to="/" replace />}
         />
         <Route
           path="/alquilables"
-          element={ isAuthenticated ? <Alquilables /> : <Navigate to="/" replace />}
+          element={isAuthenticated ? <Alquilables /> : <Navigate to="/" replace />}
         />
-         <Route
+        <Route
           path="/mostrador"
-          element={ isAuthenticated ? <Mostrador /> : <Navigate to="/" replace />}
+          element={isAuthenticated ? <Mostrador cart={cart} setCart={setCart} /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/carrito"
+          element={isAuthenticated ? <Carrito cart={cart} setCart={setCart} /> : <Navigate to="/" replace />}
         />
       </Routes>
+
       {location.pathname !== "/" && <Footer />}
     </>
   );

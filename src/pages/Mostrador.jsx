@@ -2,11 +2,14 @@ import React from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_URL } from "../utilities/apirest";
 
-export default function Mostrador() {
+export default function Mostrador({cart,setCart}) {
     const { state } = useLocation();
     const navigate = useNavigate();
     const { elemento } = state;
-
+    const handleAddToCart = (e) => {
+        e.preventDefault(); 
+        setCart(prev => [...prev, elemento]);
+    };
     return (
         <div class="bg-white">
             <div class="pt-6">
@@ -78,7 +81,7 @@ export default function Mostrador() {
                             </div>
                         </div>
 
-                        <form class="mt-10">
+                        <form class="mt-10" onSubmit={handleAddToCart}>
                             <div>
                                 <h3 class="text-sm font-medium text-gray-900">Momento del Día</h3>
 
@@ -138,7 +141,7 @@ export default function Mostrador() {
                                 </fieldset>
                             </div>
 
-                            <button type="submit" class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden">Añadir al Carrito</button>
+                            <button type="submit" class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden" >Añadir al Carrito</button>
                         </form>
                     </div>
 

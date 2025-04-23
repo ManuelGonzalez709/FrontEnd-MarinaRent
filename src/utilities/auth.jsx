@@ -6,15 +6,16 @@ const LogoutButton = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('authToken'); 
+    navigate('/'); // Navega al inicio después de hacer logout
   };
 
   return (
-    <a onClick={handleLogout}
-    href="/"
-    className="block px-4 py-2 text-sm text-black data-focus:bg-red-200 data-focus:outline-hidden"
+    <button
+      onClick={handleLogout}
+      className="block px-4 py-2 text-sm text-black focus:bg-blue-200 focus:outline-none"
     >
-    Logout
-     </a>
+      Logout
+    </button>
   );
 };
 

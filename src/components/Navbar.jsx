@@ -10,7 +10,7 @@ import {
 import LogoutButton from "../utilities/auth";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom"; // Importamos Link de react-router-dom
-import { useLocation } from "react-router-dom";
+import { useLocation,useNavigate } from "react-router-dom";
 
 const navigation = [
   { name: "Inicio", href: "/home", current: true },
@@ -25,6 +25,12 @@ function classNames(...classes) {
 
 export default function Example() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleCarrito = () => {
+    navigate("/carrito", { state: { elemento } }); 
+  }
+ 
   return (
     <Disclosure as="nav" className="bg-white">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -90,17 +96,17 @@ export default function Example() {
                 <MenuItem>
                   <a
                     href="#"
-                    className="block px-4 py-2 text-sm text-gblack data-focus:bg-red-200 data-focus:outline-hidden"
+                    className="block px-4 py-2 text-sm text-gblack data-focus:bg-blue-200 data-focus:outline-hidden"
                   >
-                    Your Profile
+                    Mi Perfil
                   </a>
                 </MenuItem>
                 <MenuItem>
                   <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-black data-focus:bg-red-200 data-focus:outline-hidden"
+                    href="/carrito"
+                    className="block px-4 py-2 text-sm text-black data-focus:bg-blue-200 data-focus:outline-hidden"
                   >
-                    Settings
+                    Carrito
                   </a>
                 </MenuItem>
                 <MenuItem>
