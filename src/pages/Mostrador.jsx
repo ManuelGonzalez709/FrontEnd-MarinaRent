@@ -13,7 +13,6 @@ export default function Mostrador({cart,setCart}) {
         }
     }, [location.state, navigate]);
 
-    // Previene el error mientras redirige
     if (!location.state || !location.state.elemento) return null;
 
     const { elemento } = location.state;
@@ -22,7 +21,8 @@ export default function Mostrador({cart,setCart}) {
         e.preventDefault(); 
         setCart(prev => [...prev, elemento]);
     };
-
+    const imagenes = elemento.Imagen.split(";");
+    console.log(imagenes)
     return (
         <div class="bg-white">
             <div class="pt-6">
@@ -52,12 +52,12 @@ export default function Mostrador({cart,setCart}) {
                 </nav>
 
                 <div class="mx-auto mt-6 max-w-2xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:gap-x-8 lg:px-8">
-                    <img src={API_URL + "storage/photos/" + elemento.Imagen} alt="Two each of gray, white, and black shirts laying flat." class="hidden size-full rounded-lg object-cover lg:block" />
+                    <img src={API_URL + "storage/photos/" + imagenes[0]} alt="Two each of gray, white, and black shirts laying flat." class="hidden size-full rounded-lg object-cover lg:block" />
                     <div class="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
-                        <img src={API_URL + "storage/photos/" + elemento.Imagen} alt="Model wearing plain black basic tee." class="aspect-3/2 w-full rounded-lg object-cover" />
-                        <img src={API_URL + "storage/photos/" + elemento.Imagen} alt="Model wearing plain gray basic tee." class="aspect-3/2 w-full rounded-lg object-cover" />
+                        <img src={API_URL + "storage/photos/" + imagenes[1]} alt="Model wearing plain black basic tee." class="aspect-3/2 w-full rounded-lg object-cover" />
+                        <img src={API_URL + "storage/photos/" + imagenes[2]} alt="Model wearing plain gray basic tee." class="aspect-3/2 w-full rounded-lg object-cover" />
                     </div>
-                    <img src={API_URL + "storage/photos/" + elemento.Imagen} alt="Model wearing plain white basic tee." class="aspect-4/5 size-full object-cover sm:rounded-lg lg:aspect-auto" />
+                    <img src={API_URL + "storage/photos/" + imagenes[3]} alt="Model wearing plain white basic tee." class="aspect-4/5 size-full object-cover sm:rounded-lg lg:aspect-auto" />
                 </div>
 
                 <div class="mx-auto max-w-2xl px-4 pt-10 pb-16 sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:grid-rows-[auto_auto_1fr] lg:gap-x-8 lg:px-8 lg:pt-16 lg:pb-24">

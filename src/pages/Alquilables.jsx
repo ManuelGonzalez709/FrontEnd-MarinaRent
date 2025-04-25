@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from "../utilities/apirest";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 export default function Informativos() {
     const [elementos, setElementos] = useState([]);
@@ -32,8 +32,9 @@ export default function Informativos() {
     }
 
     const handleClick = (elemento) => {
-        navigate("/mostrador", { state: { elemento } }); 
+        navigate("/mostrador", { state: { elemento } });
     };
+
     return (
         <div className="bg-white">
             <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
@@ -54,7 +55,7 @@ export default function Informativos() {
                                     onClick={() => handleClick(elemento)}
                                 >
                                     <img
-                                        src={API_URL + "storage/photos/" + elemento.Imagen}
+                                        src={API_URL + "storage/photos/" + elemento.Imagen.split(";")[0]}
                                         alt={elemento.Titulo}
                                         className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:opacity-75 lg:aspect-auto lg:h-80"
                                     />
@@ -69,6 +70,7 @@ export default function Informativos() {
                                     </div>
                                 </div>
                             ))}
+
                         </div>
                     </>
                 )}
