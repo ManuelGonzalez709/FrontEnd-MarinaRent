@@ -56,16 +56,16 @@ export default function Informativos() {
                                     onClick={() => handleClick(elemento)}
                                 >
                                     <img
-                                        src={API_URL + "storage/photos/" + elemento.Imagen.split(";")[0]}
-                                        alt={elemento.Titulo}
+                                        src={API_URL + "storage/photos/" + elemento.imagen.split(";")[0]}
+                                        alt={elemento.titulo}
                                         className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:opacity-75 lg:aspect-auto lg:h-80"
                                     />
                                     <div className="mt-4 flex justify-between">
                                         <div>
                                             <h3 className="text-sm text-gray-700">
-                                                {elemento.Titulo}
+                                                {elemento.titulo}
                                             </h3>
-                                            <p className="mt-1 text-sm text-gray-500">{elemento.Fecha_publicacion}</p>
+                                            <p className="mt-1 text-sm text-gray-500">{elemento.created_at}</p>
                                         </div>
                                     </div>
                                 </div>
