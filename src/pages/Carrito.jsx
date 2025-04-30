@@ -24,17 +24,13 @@ export default function Carrito({ cart, setCart }) {
                 <p className="text-gray-500">{producto.personas} Personas | {producto.horaReserva}:00 h</p>
                 <p className="font-semibold mt-2">${producto.precio}</p>
               </div>
-              <select className="border rounded px-2 py-1">
-                <option>1</option>
-                <option>2</option>
-              </select>
               <button className="text-gray-400 hover:text-gray-600">✕</button>
             </div>
           ))}
         </div>
 
         {/* Resumen de orden fijo al lado derecho */}
-        <div className="w-full md:w-1/3 bg-gray-50 p-6 rounded-lg h-fit md:sticky md:top-10">
+        <div className="w-full md:w-1/3 bg-gray-50 p-6 rounded-lg h-fit  md:top-10">
           <h2 className="text-xl font-semibold mb-4">Order summary</h2>
           <div className="flex justify-between text-sm mb-2">
             <span>Seguro de Riesgos</span>

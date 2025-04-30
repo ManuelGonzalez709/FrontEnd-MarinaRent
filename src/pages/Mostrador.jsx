@@ -13,19 +13,20 @@ export default function Mostrador({ cart, setCart }) {
     const [personasDisponibles, setPersonasDisponibles] = useState(4)
     const [personas, setPersonas] = useState(1)
     const [loading, setLoading] = useState(true);
+    const [añadido, setAñadido] = useState(false)
 
     if (!location.state || !location.state.elemento) return null;
 
     const { elemento } = location.state;
     useEffect(() => {
-        console.log("Personas seleccinadas: ",personas)
-    },[personas])
+        console.log("Personas seleccinadas: ", personas)
+    }, [personas])
 
     useEffect(() => {
         const url = API_URL + "api/capacidadDisponible";
         const token = localStorage.getItem("authToken");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        axios.post(url, { idPublicacion: elemento.id}, { headers })
+        axios.post(url, { idPublicacion: elemento.id }, { headers })
             .then((response) => {
                 setPersonasDisponibles(response.data.max_reservables)
             })
@@ -34,22 +35,22 @@ export default function Mostrador({ cart, setCart }) {
             }).finally(() => {
                 setLoading(false);
             })
-    },[personasDisponibles])
+    }, [personasDisponibles])
 
     useEffect(() => {
         const url = API_URL + "api/disponibilidadReserva";
         const token = localStorage.getItem("authToken");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        axios.post(url, { idPublicacion: elemento.id, horaReserva: hora+":00" }, { headers })
+        axios.post(url, { idPublicacion: elemento.id, horaReserva: hora + ":00" }, { headers })
             .then((response) => {
-               console.log(response.data)
-               setDisponibilidadHora(response.data.disponible)
-               console.log("Disponibilidad de la hora:", disponibilidadHora);
+                console.log(response.data)
+                setDisponibilidadHora(response.data.disponible)
+                console.log("Disponibilidad de la hora:", disponibilidadHora);
             })
             .catch((error) => {
                 console.error("Error al cargar los informativos:", error);
             })
-    }, [hora,disponibilidadHora])
+    }, [hora, disponibilidadHora])
 
 
     useEffect(() => {
@@ -57,13 +58,14 @@ export default function Mostrador({ cart, setCart }) {
             navigate("/notFound");
     }, [location.state, navigate]);
 
-    
+
     const handleAddToCart = (e) => {
         e.preventDefault();
-        if(disponibilidadHora){
+        if (disponibilidadHora) {
             elemento.horaReserva = hora
             elemento.personas = parseInt(personas);
             setCart(prev => [...prev, elemento]);
+            setAñadido(true)
         }
     };
 
@@ -111,46 +113,62 @@ export default function Mostrador({ cart, setCart }) {
                     </div>
 
                     {loading ? (
-                    <div className="flex justify-center items-center">
-                        <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                    </div>
-                ) : (
-                    <div class="mt-4 lg:row-span-3 lg:mt-0">
-                        <h2 class="sr-only">Product information</h2>
-                        <p class="text-3xl tracking-tight text-gray-900">${elemento.precio}</p>
-                        <form class="mt-5" onSubmit={handleAddToCart}>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-900">Momento del Día</h3>
-
-                                <TimeSlider
-                                    id={elemento.id}
-                                    setHora={setHora}
-                                    hora={hora}
-                                    disponible={disponibilidadHora}
-                                />
-
-                            </div>
-
-
-                            <div class="mt-10">
-                                <div class="flex items-center justify-between">
-                                    <h3 class="text-sm font-medium text-gray-900">Personas</h3>
+                        <div className="flex justify-center items-center">
+                            <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                        </div>
+                    ) : (
+                        <div class="mt-4 lg:row-span-3 lg:mt-0">
+                            <h2 class="sr-only">Product information</h2>
+                            <p class="text-3xl tracking-tight text-gray-900">${elemento.precio}</p>
+                            <form class="mt-5" onSubmit={handleAddToCart}>
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-900">Momento del Día</h3>
+                                    <TimeSlider
+                                        id={elemento.id}
+                                        setHora={setHora}
+                                        hora={hora}
+                                        disponible={disponibilidadHora}
+                                    />
                                 </div>
-                                <SelectorPersonas
-                                    personasDisponibles={personasDisponibles}
-                                    setPersonas={setPersonas}
-                                />
-                                
-                            </div>
-                            {disponibilidadHora && personasDisponibles > 0
-                                ? <button type="submit" class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden" >Añadir al Carrito</button>
-                                : <button type="submit" class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-300 px-8 py-3 text-base font-medium text-white  disabled cursor-not-allowed" >Añadir al Carrito</button>
-                            }
-                            
-                        </form>
-                    </div>
-                )}
-                    
+
+                                <div class="mt-10">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-sm font-medium text-gray-900">Personas</h3>
+                                    </div>
+                                    <SelectorPersonas
+                                        personasDisponibles={personasDisponibles}
+                                        setPersonas={setPersonas}
+                                    />
+                                </div>
+
+                                {añadido && (
+                                    <p className="mt-4 text-green-600 font-medium text-center">
+                                        Producto añadido al carrito
+                                    </p>
+                                )}
+
+{disponibilidadHora && personasDisponibles > 0 && !añadido ? (
+  <button
+    type="submit"
+    className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden"
+  >
+    Añadir al Carrito
+  </button>
+) : (
+  <button
+    type="submit"
+    disabled
+    className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-300 px-8 py-3 text-base font-medium text-white cursor-not-allowed"
+  >
+    Añadir al Carrito
+  </button>
+)}
+
+                            </form>
+
+                        </div>
+                    )}
+
 
                     <div class="py-10 lg:col-span-2 lg:col-start-1 lg:border-r lg:border-gray-200 lg:pt-6 lg:pr-8 lg:pb-16">
 
