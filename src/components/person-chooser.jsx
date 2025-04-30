@@ -1,10 +1,11 @@
 import { useState } from 'react';
 
-const SelectorPersonas = ({ personasDisponibles }) => {
+const SelectorPersonas = ({ personasDisponibles ,setPersonas}) => {
   const [selectedPerson, setSelectedPerson] = useState(null);
 
   const handleSelect = (e) => {
     setSelectedPerson(e.target.value);
+    setPersonas(e.target.value);
   };
 
   return (

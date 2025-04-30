@@ -3,9 +3,10 @@ import { API_URL } from '../utilities/apirest';
 
 export default function Carrito({ cart, setCart }) {
   return (
+    
     <div className="max-w-7xl mx-auto p-10">
       <h1 className="text-4xl font-semibold mb-6">Carrito</h1>
-
+      {console.log(cart)}
       {/* Contenedor principal: lista y resumen lado a lado */}
       <div className="flex flex-col md:flex-row gap-8">
         
@@ -14,15 +15,14 @@ export default function Carrito({ cart, setCart }) {
           {cart.map((producto) => (
             <div key={producto.id} className="flex items-center gap-6 border-b pb-6">
               <img
-                src={API_URL + "storage/photos/" + producto.Imagen}
-                alt={producto.Titulo}
+                src={API_URL + "storage/photos/" + producto.imagen.split(";")[0]}
+                alt={producto.titulo}
                 className="h-24 w-24 rounded"
               />
               <div className="flex-1">
-                <h2 className="text-lg font-medium">{producto.Titulo}</h2>
-                <p className="text-gray-500">Color | Size</p>
-                <p className="font-semibold mt-2">${producto.Precio}</p>
-                <p className={`${producto.EstadoColor} mt-1`}>{producto.Estado}</p>
+                <h2 className="text-lg font-medium">{producto.titulo}</h2>
+                <p className="text-gray-500">{producto.personas} Personas | {producto.horaReserva}:00 h</p>
+                <p className="font-semibold mt-2">${producto.precio}</p>
               </div>
               <select className="border rounded px-2 py-1">
                 <option>1</option>
@@ -41,7 +41,7 @@ export default function Carrito({ cart, setCart }) {
             <span>$99.00</span>
           </div>
           <div className="flex justify-between text-sm mb-4">
-            <span>Taxas estimdas</span>
+            <span>Taxas estimadas</span>
             <span>$8.32</span>
           </div>
           <div className="flex justify-between font-semibold text-lg mb-6">

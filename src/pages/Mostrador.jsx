@@ -11,12 +11,16 @@ export default function Mostrador({ cart, setCart }) {
     const [hora, setHora] = useState(15);
     const [disponibilidadHora, setDisponibilidadHora] = useState(true)
     const [personasDisponibles, setPersonasDisponibles] = useState(4)
+    const [personas, setPersonas] = useState(1)
     const [loading, setLoading] = useState(true);
 
     if (!location.state || !location.state.elemento) return null;
 
     const { elemento } = location.state;
-    
+    useEffect(() => {
+        console.log("Personas seleccinadas: ",personas)
+    },[personas])
+
     useEffect(() => {
         const url = API_URL + "api/capacidadDisponible";
         const token = localStorage.getItem("authToken");
@@ -57,6 +61,8 @@ export default function Mostrador({ cart, setCart }) {
     const handleAddToCart = (e) => {
         e.preventDefault();
         if(disponibilidadHora){
+            elemento.horaReserva = hora
+            elemento.personas = parseInt(personas);
             setCart(prev => [...prev, elemento]);
         }
     };
@@ -132,6 +138,7 @@ export default function Mostrador({ cart, setCart }) {
                                 </div>
                                 <SelectorPersonas
                                     personasDisponibles={personasDisponibles}
+                                    setPersonas={setPersonas}
                                 />
                                 
                             </div>
