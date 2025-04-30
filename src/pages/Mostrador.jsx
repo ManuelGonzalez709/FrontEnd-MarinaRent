@@ -10,16 +10,32 @@ export default function Mostrador({ cart, setCart }) {
     const navigate = useNavigate();
     const [hora, setHora] = useState(15);
     const [disponibilidadHora, setDisponibilidadHora] = useState(true)
+    const [personasDisponibles, setPersonasDisponibles] = useState(4)
+    const [loading, setLoading] = useState(true);
 
     if (!location.state || !location.state.elemento) return null;
 
     const { elemento } = location.state;
     
     useEffect(() => {
+        const url = API_URL + "api/capacidadDisponible";
+        const token = localStorage.getItem("authToken");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        axios.post(url, { idPublicacion: elemento.id}, { headers })
+            .then((response) => {
+                setPersonasDisponibles(response.data.max_reservables)
+            })
+            .catch((error) => {
+                console.error("Error al cargar los informativos:", error);
+            }).finally(() => {
+                setLoading(false);
+            })
+    },[personasDisponibles])
+
+    useEffect(() => {
         const url = API_URL + "api/disponibilidadReserva";
         const token = localStorage.getItem("authToken");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        console.log(elemento.id, hora+":00")
         axios.post(url, { idPublicacion: elemento.id, horaReserva: hora+":00" }, { headers })
             .then((response) => {
                console.log(response.data)
@@ -88,6 +104,11 @@ export default function Mostrador({ cart, setCart }) {
                         <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">{elemento.titulo}</h1>
                     </div>
 
+                    {loading ? (
+                    <div className="flex justify-center items-center">
+                        <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                    </div>
+                ) : (
                     <div class="mt-4 lg:row-span-3 lg:mt-0">
                         <h2 class="sr-only">Product information</h2>
                         <p class="text-3xl tracking-tight text-gray-900">${elemento.precio}</p>
@@ -109,16 +130,20 @@ export default function Mostrador({ cart, setCart }) {
                                 <div class="flex items-center justify-between">
                                     <h3 class="text-sm font-medium text-gray-900">Personas</h3>
                                 </div>
-                                <SelectorPersonas/>
+                                <SelectorPersonas
+                                    personasDisponibles={personasDisponibles}
+                                />
                                 
                             </div>
-                            {disponibilidadHora 
+                            {disponibilidadHora && personasDisponibles > 0
                                 ? <button type="submit" class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden" >Añadir al Carrito</button>
-                                : <button type="submit" class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-300 px-8 py-3 text-base font-medium text-white  disabled" >Añadir al Carrito</button>
+                                : <button type="submit" class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-300 px-8 py-3 text-base font-medium text-white  disabled cursor-not-allowed" >Añadir al Carrito</button>
                             }
                             
                         </form>
                     </div>
+                )}
+                    
 
                     <div class="py-10 lg:col-span-2 lg:col-start-1 lg:border-r lg:border-gray-200 lg:pt-6 lg:pr-8 lg:pb-16">
 
