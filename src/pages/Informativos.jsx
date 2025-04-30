@@ -27,7 +27,7 @@ export default function Informativos() {
                 console.error("Error al cargar los informativos:", error);
             })
             .finally(() => {
-                setLoading(false); // 👈 quitar loading al final
+                setLoading(false); 
             });
     }
     const handleClick = (elemento) => {

@@ -1,26 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_URL } from "../utilities/apirest";
 import { useEffect } from 'react';
-
-export default function Mostrador({cart,setCart}) {
+import TimeSlider from '../components/time-slider';
+import SelectorPersonas from '../components/person-chooser';
+import axios from 'axios';
+export default function Mostrador({ cart, setCart }) {
     const location = useLocation();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        if (!location.state || !location.state.elemento) {
-            navigate("/notFound");
-        }
-    }, [location.state, navigate]);
+    const [hora, setHora] = useState(15);
+    const [disponibilidadHora, setDisponibilidadHora] = useState(true)
 
     if (!location.state || !location.state.elemento) return null;
 
     const { elemento } = location.state;
+    
+    useEffect(() => {
+        const url = API_URL + "api/disponibilidadReserva";
+        const token = localStorage.getItem("authToken");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        console.log(elemento.id, hora+":00")
+        axios.post(url, { idPublicacion: elemento.id, horaReserva: hora+":00" }, { headers })
+            .then((response) => {
+               console.log(response.data)
+               setDisponibilidadHora(response.data.disponible)
+               console.log("Disponibilidad de la hora:", disponibilidadHora);
+            })
+            .catch((error) => {
+                console.error("Error al cargar los informativos:", error);
+            })
+    }, [hora,disponibilidadHora])
 
+
+    useEffect(() => {
+        if (!location.state || !location.state.elemento)
+            navigate("/notFound");
+    }, [location.state, navigate]);
+
+    
     const handleAddToCart = (e) => {
-        e.preventDefault(); 
-        setCart(prev => [...prev, elemento]);
+        e.preventDefault();
+        if(disponibilidadHora){
+            setCart(prev => [...prev, elemento]);
+        }
     };
+
     const imagenes = elemento.imagen.split(";");
     return (
         <div class="bg-white">
@@ -37,7 +61,7 @@ export default function Mostrador({cart,setCart}) {
                         </li>
                         <li>
                             <div class="flex items-center">
-                                <a href={"/"+elemento.tipo+"s"} class="mr-2 text-sm font-medium text-gray-900 capitalize">{elemento.tipo+"s"}</a>
+                                <a href={"/" + elemento.tipo + "s"} class="mr-2 text-sm font-medium text-gray-900 capitalize">{elemento.tipo + "s"}</a>
                                 <svg width="16" height="20" viewBox="0 0 16 20" fill="currentColor" aria-hidden="true" class="h-5 w-4 text-gray-300">
                                     <path d="M5.697 4.34L8.98 16.532h1.327L7.025 4.341H5.697z" />
                                 </svg>
@@ -71,19 +95,13 @@ export default function Mostrador({cart,setCart}) {
                             <div>
                                 <h3 class="text-sm font-medium text-gray-900">Momento del Día</h3>
 
-                                <fieldset aria-label="Choose a color" class="mt-4">
-                                    <div class="flex items-center gap-x-6">
-                                        <label aria-label="Morning" class="relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 ring-gray-400 focus:outline-hidden">
-                                            <input type="radio" name="color-choice" value="Morning" class="sr-only" />
-                                            <i class="fas fa-sun text-yellow-500 text-2xl"></i>
-                                        </label>
+                                <TimeSlider
+                                    id={elemento.id}
+                                    setHora={setHora}
+                                    hora={hora}
+                                    disponible={disponibilidadHora}
+                                />
 
-                                        <label aria-label="Afternoon" class="relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 ring-gray-400 focus:outline-hidden">
-                                            <input type="radio" name="color-choice" value="Afternoon" class="sr-only" />
-                                            <i class="fas fa-moon text-blue-500 text-2xl"></i>
-                                        </label>
-                                    </div>
-                                </fieldset>
                             </div>
 
 
@@ -91,43 +109,14 @@ export default function Mostrador({cart,setCart}) {
                                 <div class="flex items-center justify-between">
                                     <h3 class="text-sm font-medium text-gray-900">Personas</h3>
                                 </div>
-
-                                <fieldset aria-label="Choose a size" class="mt-4">
-                                    <div class="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
-                                        <label class="group relative flex cursor-pointer items-center justify-center rounded-md border bg-white px-4 py-3 text-sm font-medium text-gray-900 uppercase shadow-xs hover:bg-gray-50 focus:outline-hidden sm:flex-1 sm:py-6">
-                                            <input type="radio" name="size-choice" value="XS" class="sr-only" />
-                                            <span>1</span>
-                                            <span class="pointer-events-none absolute -inset-px rounded-md" aria-hidden="true"></span>
-                                        </label>
-                                        <label class="group relative flex cursor-pointer items-center justify-center rounded-md border bg-white px-4 py-3 text-sm font-medium text-gray-900 uppercase shadow-xs hover:bg-gray-50 focus:outline-hidden sm:flex-1 sm:py-6">
-                                            <input type="radio" name="size-choice" value="S" class="sr-only" />
-                                            <span>2</span>
-                                            <span class="pointer-events-none absolute -inset-px rounded-md" aria-hidden="true"></span>
-                                        </label>
-                                        <label class="group relative flex cursor-not-allowed items-center justify-center rounded-md border bg-gray-50 px-4 py-3 text-sm font-medium text-gray-200 uppercase hover:bg-gray-50 focus:outline-hidden sm:flex-1 sm:py-6">
-                                            <input type="radio" name="size-choice" value="XXS" class="sr-only" />
-                                            <span>3</span>
-                                            <span aria-hidden="true" class="pointer-events-none absolute -inset-px rounded-md border-2 border-gray-200">
-                                                <svg class="absolute inset-0 size-full stroke-2 text-gray-200" viewBox="0 0 100 100" preserveAspectRatio="none" stroke="currentColor">
-                                                    <line x1="0" y1="100" x2="100" y2="0" vector-effect="non-scaling-stroke" />
-                                                </svg>
-                                            </span>
-                                        </label>
-                                        <label class="group relative flex cursor-not-allowed items-center justify-center rounded-md border bg-gray-50 px-4 py-3 text-sm font-medium text-gray-200 uppercase hover:bg-gray-50 focus:outline-hidden sm:flex-1 sm:py-6">
-                                            <input type="radio" name="size-choice" value="XXS" class="sr-only" />
-                                            <span>4</span>
-                                            <span aria-hidden="true" class="pointer-events-none absolute -inset-px rounded-md border-2 border-gray-200">
-                                                <svg class="absolute inset-0 size-full stroke-2 text-gray-200" viewBox="0 0 100 100" preserveAspectRatio="none" stroke="currentColor">
-                                                    <line x1="0" y1="100" x2="100" y2="0" vector-effect="non-scaling-stroke" />
-                                                </svg>
-                                            </span>
-                                        </label>
-
-                                    </div>
-                                </fieldset>
+                                <SelectorPersonas/>
+                                
                             </div>
-
-                            <button type="submit" class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden" >Añadir al Carrito</button>
+                            {disponibilidadHora 
+                                ? <button type="submit" class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden" >Añadir al Carrito</button>
+                                : <button type="submit" class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-300 px-8 py-3 text-base font-medium text-white  disabled" >Añadir al Carrito</button>
+                            }
+                            
                         </form>
                     </div>
 
