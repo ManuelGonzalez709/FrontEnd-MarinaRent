@@ -3,19 +3,19 @@
 import { useState } from "react"
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export default function Calendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date()) // Fecha actual
   const [events, setEvents] = useState([
-    { id: "1", title: "Design review", date: new Date(2022, 0, 3) },
-    { id: "2", title: "Sales meeting", date: new Date(2022, 0, 3) },
-    { id: "3", title: "Date night", date: new Date(2022, 0, 7) },
-    { id: "4", title: "Sam's birthday party", date: new Date(2022, 0, 12) },
-    { id: "5", title: "Maple syrup museum", date: new Date(2022, 0, 22) },
-    { id: "6", title: "Hockey game", date: new Date(2022, 0, 22) },
+    { id: "1", title: "Design review", date: new Date(2025, 4, 3) },
+    { id: "2", title: "Sales meeting", date: new Date(2025, 4, 3) },
+    { id: "3", title: "Date night", date: new Date(2025, 4, 7) },
+    { id: "4", title: "Sam's birthday party", date: new Date(2025, 4, 12) },
+    { id: "5", title: "Maple syrup museum", date: new Date(2025, 4, 22) },
+    { id: "6", title: "Hockey game", date: new Date(2025, 4, 22) },
   ])
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false)
+
+  
 
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
@@ -111,16 +111,6 @@ export default function Calendar() {
     return date.getDate() === 12 && date.getMonth() === 0 && date.getFullYear() === 2022
   }
 
-  const addEvent = (title, date) => {
-    const newEvent = {
-      id: Math.random().toString(36).substring(2, 9),
-      title,
-      date,
-    }
-    setEvents([...events, newEvent])
-    setIsAddEventOpen(false)
-  }
-
   return (
     <div className="w-full mt-5 mb-15 mx-auto bg-white rounded-lg shadow-sm border">
       <div className="flex justify-between items-center p-4 border-b">
@@ -131,7 +121,7 @@ export default function Calendar() {
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" className="rounded-none h-10" onClick={handleToday}>
-              Today
+              Hoy
             </Button>
             <Button variant="ghost" size="sm" className="rounded-none border-l h-10" onClick={handleNextMonth}>
               <ChevronRight className="h-4 w-4" />
