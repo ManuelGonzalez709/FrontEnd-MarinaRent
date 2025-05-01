@@ -10,10 +10,11 @@ export default function Mostrador({ cart, setCart }) {
     const navigate = useNavigate();
     const [hora, setHora] = useState(15);
     const [disponibilidadHora, setDisponibilidadHora] = useState(true)
-    const [personasDisponibles, setPersonasDisponibles] = useState(4)
     const [personas, setPersonas] = useState(1)
+    const [personasDisponibles, setPersonasDisponibles] = useState(4)
     const [loading, setLoading] = useState(true);
     const [añadido, setAñadido] = useState(false)
+    const [precioTotal,setPrecioTotal] = useState()
 
     if (!location.state || !location.state.elemento) return null;
 
@@ -22,6 +23,13 @@ export default function Mostrador({ cart, setCart }) {
         console.log("Personas seleccinadas: ", personas)
     }, [personas])
 
+    useEffect(() => {
+        console.log("Elemento:", cart);
+        const existeEnCarrito = cart.some(item => {return item.id === elemento.id});
+        if (existeEnCarrito) setAñadido(true);
+        else setAñadido(false);
+    }, [cart, elemento,hora]); 
+    
     useEffect(() => {
         const url = API_URL + "api/capacidadDisponible";
         const token = localStorage.getItem("authToken");
@@ -37,21 +45,22 @@ export default function Mostrador({ cart, setCart }) {
             })
     }, [personasDisponibles])
 
+    useEffect(()=>{
+        setPrecioTotal(elemento.precio * personas);
+    },[personas])
+
     useEffect(() => {
         const url = API_URL + "api/disponibilidadReserva";
         const token = localStorage.getItem("authToken");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         axios.post(url, { idPublicacion: elemento.id, horaReserva: hora + ":00" }, { headers })
             .then((response) => {
-                console.log(response.data)
                 setDisponibilidadHora(response.data.disponible)
-                console.log("Disponibilidad de la hora:", disponibilidadHora);
             })
             .catch((error) => {
                 console.error("Error al cargar los informativos:", error);
             })
     }, [hora, disponibilidadHora])
-
 
     useEffect(() => {
         if (!location.state || !location.state.elemento)
@@ -62,12 +71,17 @@ export default function Mostrador({ cart, setCart }) {
     const handleAddToCart = (e) => {
         e.preventDefault();
         if (disponibilidadHora) {
-            elemento.horaReserva = hora
-            elemento.personas = parseInt(personas);
-            setCart(prev => [...prev, elemento]);
-            setAñadido(true)
+            const nuevoElemento = {
+                ...elemento,
+                horaReserva: hora,
+                precio:precioTotal,
+                personas: parseInt(personas)
+            };
+            setCart(prev => [...prev, nuevoElemento]);
+            setAñadido(true);
         }
     };
+    
 
     const imagenes = elemento.imagen.split(";");
     return (
@@ -119,7 +133,7 @@ export default function Mostrador({ cart, setCart }) {
                     ) : (
                         <div class="mt-4 lg:row-span-3 lg:mt-0">
                             <h2 class="sr-only">Product information</h2>
-                            <p class="text-3xl tracking-tight text-gray-900">${elemento.precio}</p>
+                            <p class="text-3xl tracking-tight text-gray-900">${precioTotal}</p>
                             <form class="mt-5" onSubmit={handleAddToCart}>
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-900">Momento del Día</h3>
@@ -143,26 +157,26 @@ export default function Mostrador({ cart, setCart }) {
 
                                 {añadido && (
                                     <p className="mt-4 text-green-600 font-medium text-center">
-                                        Producto añadido al carrito
+                                        Añadido al carrito
                                     </p>
                                 )}
 
-{disponibilidadHora && personasDisponibles > 0 && !añadido ? (
-  <button
-    type="submit"
-    className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden"
-  >
-    Añadir al Carrito
-  </button>
-) : (
-  <button
-    type="submit"
-    disabled
-    className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-300 px-8 py-3 text-base font-medium text-white cursor-not-allowed"
-  >
-    Añadir al Carrito
-  </button>
-)}
+                                {disponibilidadHora && personasDisponibles > 0 && !añadido ? (
+                                    <button
+                                        type="submit"
+                                        className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden"
+                                    >
+                                        Añadir al Carrito
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="submit"
+                                        disabled
+                                        className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-300 px-8 py-3 text-base font-medium text-white cursor-not-allowed"
+                                    >
+                                        Añadir al Carrito
+                                    </button>
+                                )}
 
                             </form>
 

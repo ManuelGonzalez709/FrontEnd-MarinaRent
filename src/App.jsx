@@ -9,6 +9,7 @@ import Alquilables from './pages/Alquilables';
 import Mostrador from './pages/Mostrador';
 import Carrito from './pages/Carrito';
 import NotFound from './pages/NotFound';
+import Reservas from './pages/Reservas';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function AppContent() {
   useEffect(() => {
     if (cart.length > 0) {
       localStorage.setItem("cart", JSON.stringify(cart)); 
+      console.log("Carrito actualizado:", cart);  
     }
   }, [cart]); // Se activa cada vez que el carrito cambia
   
@@ -69,6 +71,10 @@ function AppContent() {
         <Route
           path="/carrito"
           element={isAuthenticated ? <Carrito cart={cart} setCart={setCart} /> : <Navigate to="/" replace />}
+        />
+         <Route
+          path="/reservas"
+          element={isAuthenticated ? <Reservas cart={cart} setCart={setCart} /> : <Navigate to="/" replace />}
         />
         <Route path="*" element={<NotFound />} />
       </Routes>
