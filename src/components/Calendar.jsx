@@ -1,15 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useEffect } from "react"
 import axios from "axios"
 import { API_URL } from "../utilities/apirest"
 import DayDetailsModal from "./day-details-modal"
 
 export default function Calendar() {
-  const [currentMonth, setCurrentMonth] = useState(new Date()) // Fecha actual
+  const [currentMonth, setCurrentMonth] = useState(new Date())
   const [loading, setLoading] = useState(true)
   const [events, setEvents] = useState([])
   const [selectedDay, setSelectedDay] = useState(null)
@@ -23,20 +22,27 @@ export default function Calendar() {
     axios
       .get(url, { headers })
       .then((response) => {
-        const eventosTransformados = response.data.map((reserva) => ({
+        const colores = [
+          "bg-red-200",
+          "bg-green-200",
+          "bg-yellow-200",
+          "bg-purple-200",
+          "bg-blue-200",
+          "bg-pink-200",
+        ]
+
+        const eventosTransformados = response.data.map((reserva, index) => ({
           id: reserva.id.toString(),
           title: reserva.publicacion.titulo,
           date: new Date(reserva.fecha_reserva),
+          color: colores[index % colores.length],
         }))
 
         setEvents(eventosTransformados)
 
-        // Establecer la fecha principal al primer evento del array transformado
         if (eventosTransformados.length > 0) {
           setCurrentMonth(eventosTransformados[0].date)
         }
-
-        console.log("Eventos cargados:", eventosTransformados)
       })
       .catch((error) => {
         console.error("Error al cargar los eventos:", error)
@@ -51,27 +57,15 @@ export default function Calendar() {
   const getMonthData = (date) => {
     const year = date.getFullYear()
     const month = date.getMonth()
-
-    // Get the first day of the month
     const firstDay = new Date(year, month, 1)
-
-    // Get the last day of the month
     const lastDay = new Date(year, month + 1, 0)
-
-    // Get the day of the week of the first day (0 = Sunday, 1 = Monday, etc.)
     let firstDayOfWeek = firstDay.getDay() - 1
-    if (firstDayOfWeek === -1) firstDayOfWeek = 6 // Convert Sunday from 0 to 6
+    if (firstDayOfWeek === -1) firstDayOfWeek = 6
 
-    // Calculate the number of days to show from the previous month
     const daysFromPrevMonth = firstDayOfWeek
-
-    // Calculate the total number of days to display (max 42 for 6 weeks)
     const totalDays = 42
-
-    // Create an array of date objects for the calendar
     const calendarDays = []
 
-    // Add days from the previous month
     const prevMonth = new Date(year, month - 1)
     const prevMonthLastDay = new Date(year, month, 0).getDate()
 
@@ -99,7 +93,6 @@ export default function Calendar() {
       })
     }
 
-    // Group the days into weeks
     const weeks = []
     for (let i = 0; i < calendarDays.length; i += 7) {
       weeks.push(calendarDays.slice(i, i + 7))
@@ -111,7 +104,7 @@ export default function Calendar() {
   const weeks = getMonthData(currentMonth)
 
   const formatMonth = (date) => {
-    return date.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    return date.toLocaleDateString("es-ES", { month: "long", year: "numeric" })
   }
 
   const handlePrevMonth = () => {
@@ -123,19 +116,18 @@ export default function Calendar() {
   }
 
   const handleToday = () => {
-    setCurrentMonth(new Date()) // Establecer a la fecha actual
+    setCurrentMonth(new Date())
   }
 
   const handleCancelReserva = (eventId) => {
     const updatedEvents = events.filter((event) => event.id !== eventId)
     setEvents(updatedEvents)
-  
+
     if (selectedDay) {
       const updatedDayEvents = selectedDay.events.filter((event) => event.id !== eventId)
       setSelectedDay({ ...selectedDay, events: updatedDayEvents })
     }
   }
-  
 
   const getEventsForDate = (date) => {
     return events.filter(
@@ -146,13 +138,16 @@ export default function Calendar() {
     )
   }
 
-  const isHighlighted = (date) => {
-    // Verificar si la fecha es el 12 de enero de 2022
-    return date.getDate() === 12 && date.getMonth() === 0 && date.getFullYear() === 2022
+  const isToday = (date) => {
+    const today = new Date()
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    )
   }
 
   const handleDayClick = (day, events) => {
-    console.log(events)
     setSelectedDay({
       date: day.date,
       events: events,
@@ -169,7 +164,7 @@ export default function Calendar() {
       ) : (
         <div className="w-full mt-5 mb-15 mx-auto bg-white rounded-lg shadow-sm border">
           <div className="flex justify-between items-center p-4 border-b">
-            <h2 className="text-xl font-semibold">{formatMonth(currentMonth)}</h2>
+            <h2 className="text-xl font-semibold capitalize">{formatMonth(currentMonth)}</h2>
             <div className="flex items-center gap-2">
               <div className="flex border rounded-lg overflow-hidden">
                 <Button variant="ghost" size="sm" className="rounded-none border-r h-10" onClick={handlePrevMonth}>
@@ -196,27 +191,26 @@ export default function Calendar() {
           <div className="grid grid-cols-7 grid-rows-6 h-[calc(100vh-12rem)] min-h-[600px] scroll-y-no-scrollbar overflow-y-auto">
             {weeks.flat().map((day, index) => {
               const dayEvents = getEventsForDate(day.date)
-              const isHighlightedDay = isHighlighted(day.date)
 
               return (
                 <div
                   key={index}
-                  className={`border-b border-r p-1 relative ${!day.isCurrentMonth ? "text-gray-400" : ""} cursor-pointer hover:bg-gray-50`}
+                  className={`border-b border-r p-1 relative 
+                    ${!day.isCurrentMonth ? "text-gray-400" : ""}
+                    ${isToday(day.date) ? "bg-blue-100" : ""}
+                    cursor-pointer hover:bg-gray-50`}
                   onClick={() => handleDayClick(day, dayEvents)}
                 >
                   <div className="flex flex-col h-full">
                     <div className="flex items-start justify-between">
-                      {isHighlightedDay ? (
-                        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-600 text-white">
-                          {day.date.getDate()}
-                        </div>
-                      ) : (
-                        <span className="p-1">{day.date.getDate()}</span>
-                      )}
+                      <span className="p-1 font-medium text-sm">{day.date.getDate()}</span>
                     </div>
-                    <div className="flex-1 overflow-y-hidden mt-1">
+                    <div className="flex-1 overflow-y-hidden mt-1 space-y-1">
                       {dayEvents.map((event) => (
-                        <div key={event.id} className="text-xs p-1 mb-1 truncate">
+                        <div
+                          key={event.id}
+                          className={`text-xs truncate px-1 py-0.5 rounded ${event.color} text-black`}
+                        >
                           {event.title}
                         </div>
                       ))}
@@ -228,12 +222,14 @@ export default function Calendar() {
           </div>
         </div>
       )}
-      {selectedDay && <DayDetailsModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        day={selectedDay}
-        onCancel={handleCancelReserva}
-      />}
+      {selectedDay && (
+        <DayDetailsModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          day={selectedDay}
+          onCancel={handleCancelReserva}
+        />
+      )}
     </>
   )
 }
