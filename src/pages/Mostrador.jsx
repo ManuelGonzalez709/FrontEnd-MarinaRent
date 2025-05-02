@@ -87,6 +87,12 @@ export default function Mostrador({ cart, setCart }) {
     }
   }
 
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('es-ES', options);
+}
+
   const imagenes = elemento.imagen.split(";")
   return (
     <div class="bg-white">
@@ -172,11 +178,11 @@ export default function Mostrador({ cart, setCart }) {
             </div>
           ) : (
             <div class="mt-4 lg:row-span-3 lg:mt-0">
-              <h2 class="sr-only">Product information</h2>
-              <p class="text-3xl tracking-tight text-gray-900">${precioTotal}</p>
-
+            
               {elemento.precio > 0 ? (
                 <form class="mt-5" onSubmit={handleAddToCart}>
+                    <h2 class="sr-only">Product information</h2>
+                    <p class="text-3xl tracking-tight text-gray-900">${precioTotal}</p>
                   <div>
                     <h3 class="text-sm font-medium text-gray-900">Momento del Día</h3>
                     <TimeSlider id={elemento.id} setHora={setHora} hora={hora} disponible={disponibilidadHora} />
@@ -223,6 +229,9 @@ export default function Mostrador({ cart, setCart }) {
 
               <div class="space-y-6">
                 <p class="text-base text-gray-900">{elemento.descripcion}</p>
+              </div>
+              <div class="space-y-6 mt-4">
+                <p class="text-base text-gray-500">{formatDate(elemento.fecha_evento)}</p>
               </div>
             </div>
 
