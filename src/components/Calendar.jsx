@@ -1,48 +1,50 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEffect } from "react"
 import axios from "axios"
-import { API_URL } from "../utilities/apirest";
+import { API_URL } from "../utilities/apirest"
+import DayDetailsModal from "./day-details-modal"
 
 export default function Calendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date()) // Fecha actual
   const [loading, setLoading] = useState(true)
   const [events, setEvents] = useState([])
+  const [selectedDay, setSelectedDay] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
-    const url = API_URL + "api/obtenerReservasUsuario";
-    const token = localStorage.getItem("authToken");
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const url = API_URL + "api/obtenerReservasUsuario"
+    const token = localStorage.getItem("authToken")
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
-    axios.get(url, { headers })
+    axios
+      .get(url, { headers })
       .then((response) => {
         const eventosTransformados = response.data.map((reserva) => ({
           id: reserva.id.toString(),
           title: reserva.publicacion.titulo,
           date: new Date(reserva.fecha_reserva),
-        }));
+        }))
 
-        setEvents(eventosTransformados);
+        setEvents(eventosTransformados)
 
         // Establecer la fecha principal al primer evento del array transformado
         if (eventosTransformados.length > 0) {
-          setCurrentMonth(eventosTransformados[0].date);
+          setCurrentMonth(eventosTransformados[0].date)
         }
 
-        console.log("Eventos cargados:", eventosTransformados);
+        console.log("Eventos cargados:", eventosTransformados)
       })
       .catch((error) => {
-        console.error("Error al cargar los eventos:", error);
+        console.error("Error al cargar los eventos:", error)
       })
       .finally(() => {
-        setLoading(false);
-      });
-  }, []);
-
-
+        setLoading(false)
+      })
+  }, [])
 
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
@@ -124,6 +126,17 @@ export default function Calendar() {
     setCurrentMonth(new Date()) // Establecer a la fecha actual
   }
 
+  const handleCancelReserva = (eventId) => {
+    const updatedEvents = events.filter((event) => event.id !== eventId)
+    setEvents(updatedEvents)
+  
+    if (selectedDay) {
+      const updatedDayEvents = selectedDay.events.filter((event) => event.id !== eventId)
+      setSelectedDay({ ...selectedDay, events: updatedDayEvents })
+    }
+  }
+  
+
   const getEventsForDate = (date) => {
     return events.filter(
       (event) =>
@@ -136,6 +149,15 @@ export default function Calendar() {
   const isHighlighted = (date) => {
     // Verificar si la fecha es el 12 de enero de 2022
     return date.getDate() === 12 && date.getMonth() === 0 && date.getFullYear() === 2022
+  }
+
+  const handleDayClick = (day, events) => {
+    console.log(events)
+    setSelectedDay({
+      date: day.date,
+      events: events,
+    })
+    setIsModalOpen(true)
   }
 
   return (
@@ -171,13 +193,17 @@ export default function Calendar() {
             ))}
           </div>
 
-          <div className="grid grid-cols-7 grid-rows-6 h-[calc(100vh-12rem)] min-h-[600px]">
+          <div className="grid grid-cols-7 grid-rows-6 h-[calc(100vh-12rem)] min-h-[600px] scroll-y-no-scrollbar overflow-y-auto">
             {weeks.flat().map((day, index) => {
               const dayEvents = getEventsForDate(day.date)
               const isHighlightedDay = isHighlighted(day.date)
 
               return (
-                <div key={index} className={`border-b border-r p-1 relative ${!day.isCurrentMonth ? "text-gray-400" : ""}`}>
+                <div
+                  key={index}
+                  className={`border-b border-r p-1 relative ${!day.isCurrentMonth ? "text-gray-400" : ""} cursor-pointer hover:bg-gray-50`}
+                  onClick={() => handleDayClick(day, dayEvents)}
+                >
                   <div className="flex flex-col h-full">
                     <div className="flex items-start justify-between">
                       {isHighlightedDay ? (
@@ -188,7 +214,7 @@ export default function Calendar() {
                         <span className="p-1">{day.date.getDate()}</span>
                       )}
                     </div>
-                    <div className="flex-1 overflow-y-auto mt-1">
+                    <div className="flex-1 overflow-y-hidden mt-1">
                       {dayEvents.map((event) => (
                         <div key={event.id} className="text-xs p-1 mb-1 truncate">
                           {event.title}
@@ -202,6 +228,12 @@ export default function Calendar() {
           </div>
         </div>
       )}
+      {selectedDay && <DayDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        day={selectedDay}
+        onCancel={handleCancelReserva}
+      />}
     </>
   )
 }
