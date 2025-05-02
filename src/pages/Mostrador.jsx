@@ -14,7 +14,7 @@ export default function Mostrador({ cart, setCart }) {
     const [personasDisponibles, setPersonasDisponibles] = useState(4)
     const [loading, setLoading] = useState(true);
     const [añadido, setAñadido] = useState(false)
-    const [precioTotal,setPrecioTotal] = useState()
+    const [precioTotal, setPrecioTotal] = useState()
 
     if (!location.state || !location.state.elemento) return null;
 
@@ -25,11 +25,11 @@ export default function Mostrador({ cart, setCart }) {
 
     useEffect(() => {
         console.log("Elemento:", cart);
-        const existeEnCarrito = cart.some(item => {return item.id === elemento.id});
+        const existeEnCarrito = cart.some(item => { return item.id === elemento.id });
         if (existeEnCarrito) setAñadido(true);
         else setAñadido(false);
-    }, [cart, elemento,hora]); 
-    
+    }, [cart, elemento, hora]);
+
     useEffect(() => {
         const url = API_URL + "api/capacidadDisponible";
         const token = localStorage.getItem("authToken");
@@ -45,9 +45,9 @@ export default function Mostrador({ cart, setCart }) {
             })
     }, [personasDisponibles])
 
-    useEffect(()=>{
+    useEffect(() => {
         setPrecioTotal(elemento.precio * personas);
-    },[personas])
+    }, [personas])
 
     useEffect(() => {
         const url = API_URL + "api/disponibilidadReserva";
@@ -74,14 +74,14 @@ export default function Mostrador({ cart, setCart }) {
             const nuevoElemento = {
                 ...elemento,
                 horaReserva: hora,
-                precio:precioTotal,
+                precio: precioTotal,
                 personas: parseInt(personas)
             };
             setCart(prev => [...prev, nuevoElemento]);
             setAñadido(true);
         }
     };
-    
+
 
     const imagenes = elemento.imagen.split(";");
     return (
