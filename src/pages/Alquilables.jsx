@@ -76,11 +76,21 @@ export default function Informativos() {
         }
     };
 
-    const elementosFiltrados = elementos.filter((elemento) => {
+    const elementosFiltrados = elementos
+    // Primero: filtrar publicaciones futuras o actuales
+    .filter((elemento) => {
+        const fechaEvento = new Date(elemento.fecha_evento);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0); // para ignorar la hora
+        return fechaEvento >= hoy;
+    })
+    // Segundo: aplicar filtro de fecha (mes, semana, etc.)
+    .filter((elemento) => {
         const coincideBusqueda = elemento.titulo.toLowerCase().includes(searchTerm.toLowerCase());
         const coincideFecha = filtrarPorFecha(elemento.fecha_evento);
         return coincideBusqueda && coincideFecha;
     });
+
 
     const handleClick = (elemento) => {
         navigate("/mostrador", { state: { elemento } });
