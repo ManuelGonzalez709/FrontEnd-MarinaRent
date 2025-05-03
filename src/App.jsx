@@ -10,6 +10,7 @@ import Mostrador from './pages/Mostrador';
 import Carrito from './pages/Carrito';
 import NotFound from './pages/NotFound';
 import Reservas from './pages/Reservas';
+import Perfil from './pages/Perfil';
 
 function App() {
   return (
@@ -72,9 +73,13 @@ function AppContent() {
           path="/carrito"
           element={isAuthenticated ? <Carrito cart={cart} setCart={setCart} /> : <Navigate to="/" replace />}
         />
-         <Route
+        <Route
           path="/reservas"
           element={isAuthenticated ? <Reservas cart={cart} setCart={setCart} /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/perfil"
+          element={isAuthenticated ? <Perfil/> : <Navigate to="/" replace />}
         />
         <Route path="*" element={<NotFound />} />
       </Routes>

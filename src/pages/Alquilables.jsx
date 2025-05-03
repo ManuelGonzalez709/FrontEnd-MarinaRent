@@ -77,19 +77,19 @@ export default function Informativos() {
     };
 
     const elementosFiltrados = elementos
-    // Primero: filtrar publicaciones futuras o actuales
-    .filter((elemento) => {
-        const fechaEvento = new Date(elemento.fecha_evento);
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0); // para ignorar la hora
-        return fechaEvento >= hoy;
-    })
-    // Segundo: aplicar filtro de fecha (mes, semana, etc.)
-    .filter((elemento) => {
-        const coincideBusqueda = elemento.titulo.toLowerCase().includes(searchTerm.toLowerCase());
-        const coincideFecha = filtrarPorFecha(elemento.fecha_evento);
-        return coincideBusqueda && coincideFecha;
-    });
+        // Primero: filtrar publicaciones futuras o actuales
+        .filter((elemento) => {
+            const fechaEvento = new Date(elemento.fecha_evento);
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0); // para ignorar la hora
+            return fechaEvento >= hoy;
+        })
+        // Segundo: aplicar filtro de fecha (mes, semana, etc.)
+        .filter((elemento) => {
+            const coincideBusqueda = elemento.titulo.toLowerCase().includes(searchTerm.toLowerCase());
+            const coincideFecha = filtrarPorFecha(elemento.fecha_evento);
+            return coincideBusqueda && coincideFecha;
+        });
 
 
     const handleClick = (elemento) => {
@@ -98,22 +98,23 @@ export default function Informativos() {
 
     return (
         <div className="bg-white">
-
             <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-12 lg:max-w-7xl lg:px-8">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-1">Publicaciones de Tipo Alquilable</h1>
+                <p className="text-gray-500 text-sm">Encuentra información actualizada sobre eventos con reserva previa</p>
+            </div>
+
+            {/* Buscador */}
+            <div className="mb-10">
+                <Buscador onSearch={handleSearch} onFilter={handleFilter} onReset={handleReset} />
+            </div>
+
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
                     </div>
                 ) : (
                     <>
-                        <Buscador
-                            onSearch={handleSearch}
-                            onFilter={handleFilter}
-                            onReset={handleReset}
-                        />
-                        <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-                            Publicaciones de Tipo Alquilable
-                        </h2>
                         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
 
                             {elementosFiltrados.map((elemento) => (

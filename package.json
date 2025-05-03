@@ -21,6 +21,7 @@
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.9.4",
     "konva": "^9.3.20",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.503.0",

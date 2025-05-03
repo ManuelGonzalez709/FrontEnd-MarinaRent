@@ -56,6 +56,8 @@ export default function Mostrador({ cart, setCart }) {
   }, [personas])
 
   useEffect(() => {
+    
+
     const url = API_URL + "api/disponibilidadReserva"
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}

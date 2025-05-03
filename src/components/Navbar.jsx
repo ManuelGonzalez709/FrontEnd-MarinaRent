@@ -95,7 +95,7 @@ export default function Example() {
               >
                 <MenuItem>
                   <a
-                    href="#"
+                    href="/perfil"
                     className="block px-4 py-2 text-sm text-gblack data-focus:bg-blue-200 data-focus:outline-hidden"
                   >
                     Mi Perfil
