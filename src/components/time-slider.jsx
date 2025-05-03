@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Slider } from "@/components/ui/slider"
 import { Clock, Sun, Sunrise, Sunset, Moon } from "lucide-react"
 
-export default function TimeSlider({id,hora,setHora,disponible}) {
+export default function TimeSlider({ id, hora, setHora, disponible, horaPasada }) {
   const [hour, setHour] = useState(hora)
   const [minute, setMinute] = useState(0)
   const [timeOfDay, setTimeOfDay] = useState("day")
@@ -66,8 +66,10 @@ export default function TimeSlider({id,hora,setHora,disponible}) {
   }
 
   const comprobarDisponibilidad = () => {
-    if (disponible === false) 
+    if (disponible === false)
       return <div className="text-red-500 font-semibold">No Disponible</div>
+    else if (horaPasada === true)
+      return <div className="text-red-500 font-semibold">Hora pasada</div>
   }
 
   return (

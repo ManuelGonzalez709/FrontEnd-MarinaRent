@@ -17,6 +17,7 @@ export default function Mostrador({ cart, setCart }) {
   const [loading, setLoading] = useState(true)
   const [añadido, setAñadido] = useState(false)
   const [precioTotal, setPrecioTotal] = useState()
+  const [horaPasada, setHoraPasada] = useState(false)
 
   if (!location.state || !location.state.elemento) return null
 
@@ -26,7 +27,6 @@ export default function Mostrador({ cart, setCart }) {
   }, [personas])
 
   useEffect(() => {
-    console.log("Elemento:", cart)
     const existeEnCarrito = cart.some((item) => {
       return item.id === elemento.id
     })
@@ -56,7 +56,21 @@ export default function Mostrador({ cart, setCart }) {
   }, [personas])
 
   useEffect(() => {
-    
+    axios.get(API_URL + "api/horaFecha")
+      .then((response) => {
+        if (response.data.fecha == elemento.fecha_evento.split(" ")[0]) {
+          const horaEntera = parseInt(response.data.hora.split(":")[0], 10)
+          if (horaEntera < hora) setHoraPasada(false)
+          else setHoraPasada(true)
+        }else setHoraPasada(false)
+      })
+      .catch((error) => {
+        console.error("Error al cargar los informativos:", error)
+      })
+  }, [disponibilidadHora, hora])
+
+
+  useEffect(() => {
 
     const url = API_URL + "api/disponibilidadReserva"
     const token = localStorage.getItem("authToken")
@@ -93,7 +107,7 @@ export default function Mostrador({ cart, setCart }) {
     const date = new Date(dateString);
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString('es-ES', options);
-}
+  }
 
   const imagenes = elemento.imagen.split(";")
   return (
@@ -180,14 +194,14 @@ export default function Mostrador({ cart, setCart }) {
             </div>
           ) : (
             <div class="mt-4 lg:row-span-3 lg:mt-0">
-            
+
               {elemento.precio > 0 ? (
                 <form class="mt-5" onSubmit={handleAddToCart}>
-                    <h2 class="sr-only">Product information</h2>
-                    <p class="text-3xl tracking-tight text-gray-900">${precioTotal}</p>
+                  <h2 class="sr-only">Product information</h2>
+                  <p class="text-3xl tracking-tight text-gray-900">${precioTotal}</p>
                   <div>
                     <h3 class="text-sm font-medium text-gray-900">Momento del Día</h3>
-                    <TimeSlider id={elemento.id} setHora={setHora} hora={hora} disponible={disponibilidadHora} />
+                    <TimeSlider id={elemento.id} setHora={setHora} hora={hora} disponible={disponibilidadHora} horaPasada={horaPasada} />
                   </div>
 
                   <div class="mt-10">
@@ -199,7 +213,7 @@ export default function Mostrador({ cart, setCart }) {
 
                   {añadido && <p className="mt-4 text-green-600 font-medium text-center">Añadido al carrito</p>}
 
-                  {disponibilidadHora && personasDisponibles > 0 && !añadido ? (
+                  {disponibilidadHora && personasDisponibles > 0 && !añadido && !horaPasada ? (
                     <button
                       type="submit"
                       className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden"
