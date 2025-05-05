@@ -44,16 +44,19 @@ export default function Carrito({ cart, setCart }) {
             idPublicacion: item.id
           }, { headers });
 
+          const response3 = await axios.get(API_URL + "api/horaFecha", {}, { headers });
+
           const disponibilidad = response1.data.disponible;
           const maxReservables = response2.data.personas_disponibles;
+          const horaFecha = response3.data.fecha === item.fecha_evento.split(" ")[0] && response3.data.hora.split(":")[0] < item.horaReserva
 
-          if (maxReservables >= item.personas && disponibilidad) {
+          if (maxReservables >= item.personas && disponibilidad && horaFecha) {
             nuevosCarritoNormal.push(item);
           } else {
             let causas = [];
             if (!disponibilidad) causas.push("No disponible en la hora seleccionada");
             if (item.personas > maxReservables) causas.push(`Solo hay ${maxReservables} plazas disponibles`);
-
+            if (!horaFecha)causas.push(`hora seleccionada pasada son las ${response3.data.hora.split(":")[0]}:${response3.data.hora.split(":")[1]} `);
             item.causaDesfase = causas.join(" y ");
             nuevosCarritoDesfase.push(item);
             disponible = false;

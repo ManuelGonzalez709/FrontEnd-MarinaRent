@@ -19,21 +19,14 @@ export default function Example({ admin }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Define navegación base
-  const baseNavigation = [
+  // Incluir siempre todos los elementos de navegación, incluyendo Admin
+  const navigation = [
     { name: "Inicio", href: "/home" },
     { name: "Informativos", href: "/informativos" },
     { name: "Alquileres", href: "/alquilables" },
     { name: "Mis Reservas", href: "/reservas" },
-  ];
-
-  // Añadir admin solo si corresponde
-  const fullNavigation = admin
-    ? [...baseNavigation, { name: "Admin", href: "/admin" }]
-    : baseNavigation;
-
-  // Marcar ruta actual
-  const navigation = fullNavigation.map((item) => ({
+    { name: "Admin", href: "/admin" }, // Siempre incluido pero se ocultará con CSS
+  ].map((item) => ({
     ...item,
     current: location.pathname === item.href,
   }));
@@ -62,7 +55,8 @@ export default function Example({ admin }) {
             </div>
             <div className="hidden sm:flex sm:items-center sm:justify-center flex-1">
               <div className="flex space-x-4">
-                {navigation.map((item) => (
+                {navigation.map((item, index) => (
+                  // Ocultar el elemento Admin si admin es false
                   <Link
                     key={item.name}
                     to={item.href}
@@ -70,8 +64,12 @@ export default function Example({ admin }) {
                       item.current
                         ? "bg-blue-900 text-white"
                         : "text-black hover:bg-blue-900 hover:text-white",
-                      "rounded-md px-3 py-2 text-sm font-medium"
+                      "rounded-md px-3 py-2 text-sm font-medium transition-opacity duration-300",
+                      // Ocultar Admin si no es admin
+                      item.name === "Admin" && !admin ? "opacity-0 invisible absolute" : "opacity-100 visible"
                     )}
+                    aria-hidden={item.name === "Admin" && !admin ? "true" : "false"}
+                    tabIndex={item.name === "Admin" && !admin ? -1 : 0}
                   >
                     {item.name}
                   </Link>
@@ -122,6 +120,7 @@ export default function Example({ admin }) {
       <DisclosurePanel className="sm:hidden">
         <div className="space-y-1 px-2 pt-2 pb-3">
           {navigation.map((item) => (
+            // Ocultar el elemento Admin en el menú móvil si admin es false
             <DisclosureButton
               key={item.name}
               as="a"
@@ -131,8 +130,12 @@ export default function Example({ admin }) {
                 item.current
                   ? "bg-blue-900 text-white"
                   : "text-black hover:bg-blue-900 hover:text-white",
-                "block rounded-md px-3 py-2 text-base font-medium"
+                "block rounded-md px-3 py-2 text-base font-medium transition-opacity duration-300",
+                // Ocultar Admin si no es admin
+                item.name === "Admin" && !admin ? "hidden" : "block"
               )}
+              aria-hidden={item.name === "Admin" && !admin ? "true" : "false"}
+              tabIndex={item.name === "Admin" && !admin ? -1 : 0}
             >
               {item.name}
             </DisclosureButton>

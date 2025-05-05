@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Search, Calendar } from "lucide-react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -8,49 +8,34 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import axios from "axios"
+import { API_URL } from "../utilities/apirest"
 
 export default function AdminPanel() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [publicaciones, setPublicaciones] = useState([])
+  const [usuarios,setUsuarios] = useState([])
+  const [reservas,setReservas] = useState([])
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    axios.get(API_URL + "api/publicaciones", { headers })
+      .then((response) => {setPublicaciones(response.data)})
+      .catch((error) => {console.error("Error al cargar los informativos:", error);
+    })
+    axios.get(API_URL + "api/usuarios", { headers })
+      .then((response) => {setUsuarios(response.data)})
+      .catch((error) => {console.error("Error al cargar los informativos:", error);
+    })
+    axios.get(API_URL + "api/obtenerReservasDetalladas", { headers })
+      .then((response) => {setReservas(response.data)})
+      .catch((error) => {console.error("Error al cargar los informativos:", error);
+    })
+  },[])
+ 
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navbar */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-12">
-            <a href="/" className="flex items-center">
-              <img
-                src="/placeholder.svg?height=50&width=50"
-                alt="Logo"
-                width="50"
-                height="50"
-                className="rounded-full"
-              />
-            </a>
-            <nav className="hidden md:flex items-center space-x-1">
-              <a href="/" className="px-4 py-2 text-gray-700 hover:text-gray-900">
-                Inicio
-              </a>
-              <a href="/informativos" className="px-4 py-2 text-gray-700 hover:text-gray-900">
-                Informativos
-              </a>
-              <a href="/alquileres" className="px-4 py-2 bg-blue-700 text-white rounded-md">
-                Alquileres
-              </a>
-              <a href="/reservas" className="px-4 py-2 text-gray-700 hover:text-gray-900">
-                Mis Reservas
-              </a>
-              <a href="/admin" className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
-                Admin
-              </a>
-            </nav>
-          </div>
-          <Avatar>
-            <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Usuario" />
-            <AvatarFallback>AD</AvatarFallback>
-          </Avatar>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
@@ -90,35 +75,28 @@ export default function AdminPanel() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((item) => (
-                <Card key={item} className="overflow-hidden">
+              {publicaciones.map((item) => (
+                <Card key={item.id} className="overflow-hidden">
                   <div className="relative h-48 w-full">
                     <img
-                      src="/placeholder.svg?height=200&width=400"
+                      src={API_URL + "storage/photos/" + item.imagen.split(";")[0]}
                       alt="Imagen de alquiler"
                       className="object-cover w-full h-full"
                     />
                   </div>
                   <CardContent className="p-4">
                     <h3 className="font-medium text-sm line-clamp-2 mb-1">
-                      {item === 1 && "Quo maiores consectetur reiciendis consequatur"}
-                      {item === 2 && "Praesentium rem earum ut et"}
-                      {item === 3 && "Ut qui non nemo et quaerat"}
-                      {item === 4 && "Autem alias ratione delectus vel"}
+                     {item.titulo}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      {item === 1 && "2025-05-30 00:00:00"}
-                      {item === 2 && "2025-05-30 00:00:00"}
-                      {item === 3 && "2025-07-12 00:00:00"}
-                      {item === 4 && "2025-05-05 00:00:00"}
+                      {item.fecha_evento}
                     </p>
                   </CardContent>
                   <CardFooter className="p-4 pt-0 flex justify-between items-center">
                     <span className="font-bold">
-                      {item === 1 && "5504 €"}
-                      {item === 2 && "2916 €"}
-                      {item === 3 && "9076 €"}
-                      {item === 4 && "7197 €"}
+                      { item.precio !== 0 ? "$"+item.precio : "Gratuito"
+
+                      }
                     </span>
                     <Button variant="outline" size="sm">
                       Editar
@@ -163,13 +141,13 @@ export default function AdminPanel() {
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Rol
+                      Fecha Nacimiento
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Estado
+                      Rol
                     </th>
                     <th
                       scope="col"
@@ -180,43 +158,35 @@ export default function AdminPanel() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {[
-                    { name: "Juan Pérez", email: "juan@example.com", role: "Admin", status: "Activo" },
-                    { name: "María López", email: "maria@example.com", role: "Usuario", status: "Activo" },
-                    { name: "Carlos Ruiz", email: "carlos@example.com", role: "Usuario", status: "Inactivo" },
-                    { name: "Ana Martínez", email: "ana@example.com", role: "Usuario", status: "Activo" },
-                  ].map((user, i) => (
+                  {usuarios.map((user, i) => (
                     <tr key={i}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
                             <Avatar>
                               <AvatarFallback>
-                                {user.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
+                                {user.Nombre.split(" ").map((n) => n[0]) .join("")}
+                                {user.Apellidos.split(" ") .map((n) => n[0]).join("")}
                               </AvatarFallback>
                             </Avatar>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                            <div className="text-sm font-medium text-gray-900">{user.Nombre}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="text-sm text-gray-500">{user.Email}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{user.role}</div>
+                        <div className="text-sm text-gray-500">{user.Fecha_nacimiento}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            user.status === "Activo" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                          }`}
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.Tipo === "admin" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                            }`}
                         >
-                          {user.status}
+                          {user.Tipo}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -290,60 +260,30 @@ export default function AdminPanel() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {[
-                    {
-                      id: "R-1234",
-                      user: "Juan Pérez",
-                      ad: "Quo maiores consectetur...",
-                      date: "2025-05-30",
-                      status: "Confirmada",
-                    },
-                    {
-                      id: "R-1235",
-                      user: "María López",
-                      ad: "Praesentium rem earum...",
-                      date: "2025-06-15",
-                      status: "Pendiente",
-                    },
-                    {
-                      id: "R-1236",
-                      user: "Carlos Ruiz",
-                      ad: "Ut qui non nemo et...",
-                      date: "2025-07-12",
-                      status: "Cancelada",
-                    },
-                    {
-                      id: "R-1237",
-                      user: "Ana Martínez",
-                      ad: "Autem alias ratione...",
-                      date: "2025-05-05",
-                      status: "Confirmada",
-                    },
-                  ].map((reservation, i) => (
+                  {reservas.map((reservation, i) => (
                     <tr key={i}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{reservation.id}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{reservation.user}</div>
+                        <div className="text-sm text-gray-900">{reservation.nombre_usuario}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500 max-w-xs truncate">{reservation.ad}</div>
+                        <div className="text-sm text-gray-500 max-w-xs truncate">{reservation.titulo_publicacion}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{reservation.date}</div>
+                        <div className="text-sm text-gray-500">{reservation.fecha_reserva.split(" ")[0]}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            reservation.status === "Confirmada"
-                              ? "bg-green-100 text-green-800"
-                              : reservation.status === "Pendiente"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
-                          }`}
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${reservation.estado === "pendiente"
+                            ? "bg-green-100 text-green-800"
+                            : reservation.estado === "pasada"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                            }`}
                         >
-                          {reservation.status}
+                          {reservation.estado}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
