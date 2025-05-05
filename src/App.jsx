@@ -45,20 +45,21 @@ function AppContent() {
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    axios.get(API_URL + "api/isAdmin", { headers })
-      .then((response) => {
-        if (response.status === 200)
-          setAdmin(response.data.is_admin)
-        else setAdmin(false)
-      })
-      .catch((error) => {
-        console.error("Error al cargar los informativos:", error);
-        setAdmin(false)
-      })
-  }, [])
-
-  console.log("El usuario es admin ? -> " + admin)
+    if (token != null) {
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      axios.get(API_URL + "api/isAdmin", { headers })
+        .then((response) => {
+          console.log(response)
+          if (response.status === 200)
+            setAdmin(response.data.is_admin)
+          else setAdmin(false)
+        })
+        .catch((error) => {
+          console.error("Error al cargar los informativos:", error);
+          setAdmin(false)
+        })
+    }
+  }, [isAuthenticated])
 
   return (
     <>
@@ -105,9 +106,9 @@ function AppContent() {
           path="/admin"
           element={
             isAuthenticated
-              ? admin === undefined 
+              ? admin === undefined
                 ? <div className="flex justify-center items-center"><div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div></div>
-                : admin ? <Admin />  : <Navigate to="/" replace />
+                : admin ? <Admin /> : <Navigate to="/" replace />
               : <Navigate to="/" replace />
           }
         />
