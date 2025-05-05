@@ -71,7 +71,6 @@ export default function Mostrador({ cart, setCart }) {
 
 
   useEffect(() => {
-
     const url = API_URL + "api/disponibilidadReserva"
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
@@ -187,7 +186,7 @@ export default function Mostrador({ cart, setCart }) {
           <div class="lg:col-span-2 lg:border-r lg:border-gray-200 lg:pr-8">
             <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">{elemento.titulo}</h1>
           </div>
-
+          {/*Funcion de Carga*/}
           {loading ? (
             <div className="flex justify-center items-center">
               <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
@@ -201,6 +200,7 @@ export default function Mostrador({ cart, setCart }) {
                   <p class="text-3xl tracking-tight text-gray-900">${precioTotal}</p>
                   <div>
                     <h3 class="text-sm font-medium text-gray-900">Momento del Día</h3>
+                     {/*Slider*/}
                     <TimeSlider id={elemento.id} setHora={setHora} hora={hora} disponible={disponibilidadHora} horaPasada={horaPasada} />
                   </div>
 
@@ -208,11 +208,14 @@ export default function Mostrador({ cart, setCart }) {
                     <div class="flex items-center justify-between">
                       <h3 class="text-sm font-medium text-gray-900">Personas</h3>
                     </div>
+                     {/*Selector de Personas*/}
                     <SelectorPersonas personasDisponibles={personasDisponibles} setPersonas={setPersonas} />
                   </div>
 
+                   {/*Añadido al carrito*/}
                   {añadido && <p className="mt-4 text-green-600 font-medium text-center">Añadido al carrito</p>}
 
+                   {/*Comprobaciones antes de compra*/}
                   {disponibilidadHora && personasDisponibles > 0 && !añadido && !horaPasada ? (
                     <button
                       type="submit"
