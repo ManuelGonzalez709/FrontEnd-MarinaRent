@@ -399,7 +399,7 @@ export default function EditPublicationModal({ isOpen, onClose, publicacion, onU
                           alt={`Imagen ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 text-center">
+                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 rounded-b-lg text-white text-xs p-1 text-center">
                           {image.isExisting ? "Existente" : "Nueva"}
                         </div>
                       </div>
