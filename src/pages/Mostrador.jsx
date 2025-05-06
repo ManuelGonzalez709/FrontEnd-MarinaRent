@@ -38,8 +38,7 @@ export default function Mostrador({ cart, setCart }) {
     const url = API_URL + "api/capacidadDisponible"
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
-    axios
-      .post(url, { idPublicacion: elemento.id }, { headers })
+    axios.post(url, { idPublicacion: elemento.id }, { headers })
       .then((response) => {
         setPersonasDisponibles(response.data.max_reservables)
       })

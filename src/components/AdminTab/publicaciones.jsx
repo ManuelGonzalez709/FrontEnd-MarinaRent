@@ -8,20 +8,30 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import axios from "axios"
 import { API_URL } from '../../utilities/apirest';
+import EditPublicationModal from './modal-publicaciones'
+
 export default function publicaciones() {
     const [searchQuery, setSearchQuery] = useState("")
     const [publicaciones, setPublicaciones] = useState([])
     const [loading, setLoading] = useState(true)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [publication, setPublication] = useState()
 
     useEffect(() => {
+        console.log("Recargando datos")
         const token = localStorage.getItem("authToken");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         axios.get(API_URL + "api/publicaciones", { headers })
-            .then((response) => { setPublicaciones(response.data) })
+            .then((response) => { setPublicaciones(response.data); })
             .catch((error) => {
                 console.error("Error al cargar los informativos:", error);
             }).finally(() => { setLoading(false) })
-    }, [])
+    }, [isModalOpen])
+
+    const handleUpdate = (updatedPublication) => {
+        console.log("Publicación actualizada:", updatedPublication)
+        setPublication(updatedPublication)
+    }
 
     return (
         <>
@@ -42,10 +52,7 @@ export default function publicaciones() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <Button className="ml-4">
-                            <Calendar className="mr-2 h-4 w-4" />
-                            Filtrar por fecha
-                        </Button>
+                        <Button>Añadir nuevo anuncio</Button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -72,17 +79,27 @@ export default function publicaciones() {
 
                                         }
                                     </span>
-                                    <Button variant="outline" size="sm">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setPublication(item);
+                                            setIsModalOpen(true);
+                                        }}
+                                    >
                                         Editar
                                     </Button>
+
                                 </CardFooter>
                             </Card>
                         ))}
                     </div>
-
-                    <div className="mt-8 flex justify-end">
-                        <Button>Añadir nuevo anuncio</Button>
-                    </div>
+                    <EditPublicationModal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        publicacion={publication}
+                        onUpdate={handleUpdate}
+                    />
                 </>
             )}
         </>
