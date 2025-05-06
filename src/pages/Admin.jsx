@@ -16,7 +16,7 @@ export default function AdminPanel() {
         <Tabs defaultValue="anuncios" className="w-full">
           <TabsList className="mb-8">
             <TabsTrigger value="anuncios" className="text-base px-6">
-              Anuncios
+              Publicaciones
             </TabsTrigger>
             <TabsTrigger value="usuarios" className="text-base px-6">
               Usuarios
