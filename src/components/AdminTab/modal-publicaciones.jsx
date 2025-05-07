@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ImageIcon, Save, X } from "lucide-react"
+import { ImageIcon, Save, X, Plus } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
@@ -12,10 +12,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import axios from "axios"
 import { API_URL } from "../../utilities/apirest"
 
-export default function EditPublicationModal({ isOpen, onClose, publicacion, onUpdate }) {
-  const [formData, setFormData] = useState({})
+export default function ProductModal({ isOpen, onClose, product, onUpdate, isAddMode = false }) {
+  const [formData, setFormData] = useState({
+    titulo: "",
+    descripcion: "",
+    fecha_evento: "",
+    tipo: "informativo",
+    precio: 0,
+    aforo_maximo: 1,
+  })
   const [isLoading, setIsLoading] = useState(false)
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
   const [errors, setErrors] = useState({})
   const [imagePreviews, setImagePreviews] = useState([])
   const [newImages, setNewImages] = useState([])
@@ -23,18 +29,18 @@ export default function EditPublicationModal({ isOpen, onClose, publicacion, onU
   const REQUIRED_IMAGES = 4
 
   useEffect(() => {
-    if (publicacion) {
+    if (product && !isAddMode) {
       // Formatear la fecha para el input de tipo date
-      const fechaEvento = publicacion.fecha_evento ? new Date(publicacion.fecha_evento).toISOString().split("T")[0] : ""
+      const fechaEvento = product.fecha_evento ? new Date(product.fecha_evento).toISOString().split("T")[0] : ""
 
       setFormData({
-        ...publicacion,
+        ...product,
         fecha_evento: fechaEvento,
       })
 
       // Preparar las previsualizaciones de imágenes
-      if (publicacion.imagen) {
-        const existingImages = publicacion.imagen.split(";").filter(Boolean)
+      if (product.imagen) {
+        const existingImages = product.imagen.split(";").filter(Boolean)
         setExistingImageCount(existingImages.length)
 
         const imageUrls = existingImages.map((img) => ({
@@ -48,12 +54,24 @@ export default function EditPublicationModal({ isOpen, onClose, publicacion, onU
         setImagePreviews([])
         setExistingImageCount(0)
       }
-
-      // Resetear nuevas imágenes y errores al abrir el modal
-      setNewImages([])
-      setErrors({})
+    } else {
+      // Reset form for add mode
+      setFormData({
+        titulo: "",
+        descripcion: "",
+        fecha_evento: "",
+        tipo: "informativo",
+        precio: 0,
+        aforo_maximo: 1,
+      })
+      setImagePreviews([])
+      setExistingImageCount(0)
     }
-  }, [publicacion])
+
+    // Resetear nuevas imágenes y errores al abrir el modal
+    setNewImages([])
+    setErrors({})
+  }, [product, isOpen, isAddMode])
 
   const validateForm = () => {
     const newErrors = {}
@@ -217,8 +235,10 @@ export default function EditPublicationModal({ isOpen, onClose, publicacion, onU
         }
       })
 
-      // Añadir el id_publicacion
-      formDataToSend.append("id_publicacion", publicacion.id)
+      // Si estamos en modo edición, añadir el ID
+      if (!isAddMode && product?.id) {
+        formDataToSend.append("id_publicacion", product.id)
+      }
 
       // Separar las imágenes existentes y nuevas
       const existingImages = imagePreviews.filter((img) => img.isExisting)
@@ -234,20 +254,15 @@ export default function EditPublicationModal({ isOpen, onClose, publicacion, onU
         formDataToSend.append("imagenes_existentes[]", img.filename)
       })
 
-      // Imprimir información de depuración
-      console.log(
-        "Imágenes existentes mantenidas:",
-        existingImages.map((img) => img.filename),
-      )
-      console.log("Nuevas imágenes:", newImageObjects.length)
-      console.log("Total imágenes:", imagePreviews.length)
-
       // Configurar la petición
-      const token = localStorage.getItem("authToken");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const token = localStorage.getItem("authToken")
+      const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
+      // Determinar la URL de la API según el modo (añadir o editar)
+      const apiEndpoint = isAddMode ? API_URL + "api/publicaciones" : API_URL + "api/actualizar"
 
       // Realizar la petición POST a la API
-      const response = await axios.post(API_URL + "api/actualizar", formDataToSend, { headers })
+      const response = await axios.post(apiEndpoint, formDataToSend, { headers })
 
       if (response.data && onUpdate) {
         onUpdate(response.data)
@@ -255,17 +270,15 @@ export default function EditPublicationModal({ isOpen, onClose, publicacion, onU
 
       onClose()
     } catch (error) {
-      console.error("Error al actualizar la publicación:", error)
+      console.error(`Error al ${isAddMode ? "crear" : "actualizar"} la publicación:`, error)
       setErrors({
         ...errors,
-        general: "Ha ocurrido un error al actualizar la publicación",
+        general: `Ha ocurrido un error al ${isAddMode ? "crear" : "actualizar"} la publicación`,
       })
     } finally {
       setIsLoading(false)
     }
   }
-
-  if (!publicacion) return null
 
   // Verificar si se ha alcanzado el límite de imágenes
   const showAddImageButton = imagePreviews.length < REQUIRED_IMAGES
@@ -273,13 +286,15 @@ export default function EditPublicationModal({ isOpen, onClose, publicacion, onU
   // Contar imágenes existentes y nuevas para depuración
   const existingImagesCount = imagePreviews.filter((img) => img.isExisting).length
   const newImagesCount = imagePreviews.filter((img) => !img.isExisting).length
-
+  console.log(product)
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden flex flex-col max-h-[90vh]">
         <DialogHeader className="p-6 pb-2">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold">Editar Publicación</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">
+              {isAddMode ? "Añadir Producto" : "Editar Publicación"}
+            </DialogTitle>
           </div>
         </DialogHeader>
 
@@ -431,17 +446,17 @@ export default function EditPublicationModal({ isOpen, onClose, publicacion, onU
             <Button
               type="submit"
               disabled={isLoading || imagePreviews.length !== REQUIRED_IMAGES}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-green-600 hover:bg-green-700"
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  Guardando...
+                  {isAddMode ? "Creando..." : "Guardando..."}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  <Save className="h-4 w-4" />
-                  Guardar Cambios
+                  {isAddMode ? <Plus className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+                  {isAddMode ? "Crear Producto" : "Guardar Cambios"}
                 </span>
               )}
             </Button>

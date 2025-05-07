@@ -1,36 +1,40 @@
-import React from 'react'
-
-import { useEffect, useState } from "react"
-import { Search, Calendar } from "lucide-react"
-
+import React, { useEffect, useState } from "react"
+import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import axios from "axios"
-import { API_URL } from '../../utilities/apirest';
-import EditPublicationModal from './modal-publicaciones'
+import { API_URL } from '../../utilities/apirest'
+import ProductModal from "./modal-publicaciones" // Asegúrate de importar este correctamente
 
-export default function publicaciones() {
+export default function Publicaciones() {
     const [searchQuery, setSearchQuery] = useState("")
     const [publicaciones, setPublicaciones] = useState([])
     const [loading, setLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [publication, setPublication] = useState()
 
+    const [addModalOpen, setAddModalOpen] = useState(false) // <-- Estado para el modal de agregar producto
+
     useEffect(() => {
         console.log("Recargando datos")
         const token = localStorage.getItem("authToken");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         axios.get(API_URL + "api/publicaciones", { headers })
-            .then((response) => { setPublicaciones(response.data); })
+            .then((response) => setPublicaciones(response.data))
             .catch((error) => {
-                console.error("Error al cargar los informativos:", error);
-            }).finally(() => { setLoading(false) })
-    }, [isModalOpen])
+                console.error("Error al cargar los informativos:", error)
+            }).finally(() => setLoading(false))
+    }, [isModalOpen, addModalOpen]) // <-- Recarga cuando se cierra cualquier modal
 
     const handleUpdate = (updatedPublication) => {
         console.log("Publicación actualizada:", updatedPublication)
         setPublication(updatedPublication)
+    }
+
+    const handleProductAdded = (newProduct) => {
+        console.log("Nuevo producto agregado:", newProduct)
+        // Opcional: recargar lista manualmente o usar efecto
     }
 
     return (
@@ -52,7 +56,9 @@ export default function publicaciones() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <Button>Añadir nuevo anuncio</Button>
+                        <Button onClick={() => setAddModalOpen(true)}>
+                            Añadir nuevo producto
+                        </Button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -75,30 +81,37 @@ export default function publicaciones() {
                                 </CardContent>
                                 <CardFooter className="p-4 pt-0 flex justify-between items-center">
                                     <span className="font-bold">
-                                        {item.precio !== 0 ? "$" + item.precio : "Gratuito"
-
-                                        }
+                                        {item.precio !== 0 ? "$" + item.precio : "Gratuito"}
                                     </span>
                                     <Button
                                         variant="outline"
                                         size="sm"
                                         onClick={() => {
-                                            setPublication(item);
-                                            setIsModalOpen(true);
+                                            setPublication(item)
+                                            setIsModalOpen(true)
                                         }}
                                     >
                                         Editar
                                     </Button>
-
                                 </CardFooter>
                             </Card>
                         ))}
                     </div>
-                    <EditPublicationModal
+
+                    {/* Modal para editar publicaciones existentes */}
+                    <ProductModal
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
-                        publicacion={publication}
+                        product={publication}
                         onUpdate={handleUpdate}
+                    />
+
+                    {/* Modal para agregar un nuevo producto */}
+                    <ProductModal
+                        isOpen={addModalOpen}
+                        onClose={() => setAddModalOpen(false)}
+                        onUpdate={handleProductAdded}
+                        isAddMode={true}
                     />
                 </>
             )}
