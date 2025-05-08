@@ -1,26 +1,115 @@
-import React from 'react'
+"use client"
 
 import { useEffect, useState } from "react"
-import { Search, Calendar } from "lucide-react"
-
+import { Search, Calendar } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
-import { API_URL } from '../../utilities/apirest';
-export default function reservas() {
+import { API_URL } from "../../utilities/apirest"
+import ReservasModal from "./modal-reservas"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
+export default function Reservas() {
     const [reservas, setReservas] = useState([])
     const [loading, setLoading] = useState(true)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedReserva, setSelectedReserva] = useState(null)
+    const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false)
+    const [reservaToCancel, setReservaToCancel] = useState(null)
 
     useEffect(() => {
-        const token = localStorage.getItem("authToken");
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        axios.get(API_URL + "api/obtenerReservasDetalladas", { headers })
-            .then((response) => { setReservas(response.data) })
-            .catch((error) => {
-                console.error("Error al cargar los informativos:", error);
-            }).finally(() => { setLoading(false) })
+        fetchReservas()
     }, [])
+
+    const fetchReservas = () => {
+        setLoading(true)
+        const token = localStorage.getItem("authToken")
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
+        axios
+            .get(API_URL + "api/obtenerReservasDetalladas", { headers })
+            .then((response) => {
+                setReservas(response.data)
+            })
+            .catch((error) => {
+                console.error("Error al cargar las reservas:", error)
+            })
+            .finally(() => {
+                setLoading(false)
+            })
+    }
+
+    const handleEditClick = (reservation) => {
+        // Get the complete reservation data if needed
+        const token = localStorage.getItem("authToken")
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
+        axios
+            .get(`${API_URL}api/reservas/${reservation.id}`, { headers })
+            .then((response) => {
+                setSelectedReserva(response.data)
+                setIsModalOpen(true)
+            })
+            .catch((error) => {
+                console.error("Error al obtener detalles de la reserva:", error)
+                // Fallback to using the data we already have
+                setSelectedReserva(reservation)
+                setIsModalOpen(true)
+            })
+    }
+
+    const handleNewReservation = () => {
+        setSelectedReserva(null)
+        setIsModalOpen(true)
+    }
+
+    const handleModalClose = (refresh = false) => {
+        setIsModalOpen(false)
+        setSelectedReserva(null)
+
+        // Refresh the reservations list if needed
+        if (refresh) {
+            fetchReservas()
+        }
+    }
+
+    const handleCancelReservation = (reservaId) => {
+        setReservaToCancel(reservaId)
+        setIsAlertDialogOpen(true)
+    }
+
+    const confirmCancelReservation = () => {
+        if (!reservaToCancel) return
+
+        setLoading(true)
+        const token = localStorage.getItem("authToken")
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
+        axios
+            .delete(`${API_URL}api/reservas/${reservaToCancel}`, { headers })
+            .then((response) => {
+                console.log("Reserva cancelada", response.data)
+                setIsModalOpen(false)
+                fetchReservas()
+            })
+            .catch((error) => {
+                console.error("Error al cancelar la reserva:", error)
+            })
+            .finally(() => {
+                setLoading(false)
+                setIsAlertDialogOpen(false)
+                setReservaToCancel(null)
+            })
+    }
 
     return (
         <>
@@ -40,7 +129,6 @@ export default function reservas() {
                                 <Calendar className="mr-2 h-4 w-4" />
                                 Filtrar por fecha
                             </Button>
-                            <Button>Nueva reserva</Button>
                         </div>
                     </div>
 
@@ -104,26 +192,70 @@ export default function reservas() {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span
                                                 className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${reservation.estado === "pendiente"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : reservation.estado === "pasada"
-                                                        ? "bg-yellow-100 text-yellow-800"
-                                                        : "bg-red-100 text-red-800"
+                                                        ? "bg-green-100 text-green-800"
+                                                        : reservation.estado === "pasada"
+                                                            ? "bg-yellow-100 text-yellow-800"
+                                                            : "bg-red-100 text-red-800"
                                                     }`}
                                             >
                                                 {reservation.estado}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
-                                                Editar
-                                            </Button>
+                                            <div className="flex justify-end gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleEditClick(reservation)}
+                                                >
+                                                    Editar
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() => handleCancelReservation(reservation.id)}
+                                                >
+                                                    Cancelar
+                                                </Button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                </>)}
+
+                    {/* Reservation Modal */}
+                    <ReservasModal
+                        isOpen={isModalOpen}
+                        setIsOpen={(open) => {
+                            if (!open) handleModalClose()
+                            else setIsModalOpen(open)
+                        }}
+                        reserva={selectedReserva}
+                        onCancelReservation={handleCancelReservation}
+                    />
+
+                    {/* Confirmation Dialog for Cancellation */}
+                    <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Esta acción cancelará la reserva y no se puede deshacer.
+                                    Se notificará al usuario sobre la cancelación.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={confirmCancelReservation} className="bg-red-600 hover:bg-red-700">
+                                    Confirmar cancelación
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </>
+            )}
         </>
     )
 }
