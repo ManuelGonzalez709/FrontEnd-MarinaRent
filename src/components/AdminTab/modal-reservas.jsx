@@ -37,67 +37,68 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
   const [emailUsuario, setEmailUsuario] = useState("")
   const [publicacionTitulo, setPublicacionTitulo] = useState("")
 
-  // Load reservation data when the component receives a reservation
   useEffect(() => {
-    if (reserva) {
-      // Format the date to be compatible with the datetime-local input
-      const formattedDate = reserva.fecha_reserva ? reserva.fecha_reserva.split(" ")[0] : ""
-      const formattedTime = reserva.fecha_reserva
-        ? Number.parseInt(reserva.fecha_reserva.split(" ")[1].split(":")[0])
-        : 15
+    if (!reserva || !isOpen) return
 
-      setHora(formattedTime)
+    const fetchData = async () => {
+      try {
+        let currentReserva = reserva
 
-      setFormData({
-        id: reserva.id,
-        usuario_id: reserva.usuario_id?.toString() || "",
-        publicacion_id: reserva.publicacion_id?.toString() || "",
-        fecha_reserva: formattedDate,
-        total_pagar: reserva.total_pagar?.toString() || "",
-        personas: reserva.personas?.toString() || "",
-      })
+        // Si sólo tenemos un ID y no todos los datos de reserva
+        if (typeof reserva === "number") {
+          const res = await axios.get(`${API_URL}api/reservas/${reserva}`)
+          currentReserva = res.data
+        }
 
-      // Fetch user email if available
-      if (reserva.email_usuario) {
-        setEmailUsuario(reserva.email_usuario)
-      } else if (reserva.usuario_id) {
-        fetchUserEmail(reserva.usuario_id)
+        // Fecha y hora
+        const formattedDate = currentReserva.fecha_reserva?.split(" ")[0] || ""
+        const formattedTime = parseInt(currentReserva.fecha_reserva?.split(" ")[1]?.split(":")[0]) || 15
+        setHora(formattedTime)
+
+        // Actualiza form
+        setFormData({
+          id: currentReserva.id,
+          usuario_id: currentReserva.usuario_id?.toString() || "",
+          publicacion_id: currentReserva.publicacion_id?.toString() || "",
+          fecha_reserva: formattedDate,
+          total_pagar: currentReserva.total_pagar?.toString() || "",
+          personas: currentReserva.personas?.toString() || "",
+        })
+        // Email
+        if (currentReserva.email_usuario) {
+          setEmailUsuario(currentReserva.email_usuario)
+        } else if (currentReserva.usuario_id) {
+          fetchUserEmail(currentReserva.usuario_id)
+        }
+
+        // Publicación
+        if (currentReserva.titulo_publicacion) {
+          setPublicacionTitulo(currentReserva.titulo_publicacion)
+        } else if (currentReserva.publicacion_id) {
+          fetchPublicationTitle(currentReserva.publicacion_id)
+        }
+
+        checkTimeAvailability(currentReserva.publicacion_id, formattedTime)
+        checkCapacity(currentReserva.publicacion_id)
+      } catch (error) {
+        console.error("Error al cargar datos de la reserva", error)
       }
-
-      // Fetch publication title if available
-      if (reserva.titulo_publicacion) {
-        setPublicacionTitulo(reserva.titulo_publicacion)
-      } else if (reserva.publicacion_id) {
-        fetchPublicationTitle(reserva.publicacion_id)
-      }
-
-      checkTimeAvailability(reserva.publicacion_id, formattedTime)
-      checkCapacity(reserva.publicacion_id)
-    } else {
-      // Reset form when creating a new reservation
-      setFormData({
-        usuario_id: "",
-        publicacion_id: "",
-        fecha_reserva: "",
-        total_pagar: "",
-        personas: "",
-      })
-      setEmailUsuario("")
-      setPublicacionTitulo("")
     }
-  }, [reserva, isOpen,hora])
 
-  // Check if the selected time is in the past
+    fetchData()
+  }, [reserva, isOpen])
+
   useEffect(() => {
-    if (reserva && formData.fecha_reserva) {
+    if (formData.fecha_reserva && reserva) {
       axios
         .get(API_URL + "api/horaFecha")
         .then((response) => {
           if (response.data.fecha === formData.fecha_reserva) {
-            const horaEntera = Number.parseInt(response.data.hora.split(":")[0], 10)
-            if (horaEntera < hora) setHoraPasada(false)
-            else setHoraPasada(true)
-          } else setHoraPasada(false)
+            const horaActual = parseInt(response.data.hora.split(":")[0], 10)
+            setHoraPasada(horaActual >= hora)
+          } else {
+            setHoraPasada(false)
+          }
         })
         .catch((error) => {
           console.error("Error al comprobar la hora:", error)
@@ -105,7 +106,6 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     }
   }, [hora, formData.fecha_reserva, reserva])
 
-  // Check time availability when hour changes
   useEffect(() => {
     if (reserva && formData.publicacion_id) {
       checkTimeAvailability(formData.publicacion_id, hora)
@@ -122,7 +122,6 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     axios
       .post(url, { idPublicacion: publicacionId, horaReserva: hora + ":00" }, { headers })
       .then((response) => {
-        console.log("Disponibilidad de Hora --> "+response.data+" "+ publicacionId, hora + ":00")
         setDisponibilidadHora(response.data.disponible)
       })
       .catch((error) => {
@@ -140,7 +139,6 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     axios
       .post(url, { idPublicacion: publicacionId }, { headers })
       .then((response) => {
-        console.log("Disponibilidad de Personas --> "+response.data+" "+ publicacionId)
         setPersonasDisponibles(response.data.max_reservables)
       })
       .catch((error) => {
@@ -155,6 +153,7 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     axios
       .get(`${API_URL}api/usuarios/${userId}`, { headers })
       .then((response) => {
+        console.log(response)
         if (response.data && response.data.Email) {
           setEmailUsuario(response.data.Email)
         }
@@ -191,46 +190,30 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
-    // Prepare data for submission
     const dataToSubmit = {
       ...formData,
-      usuario_id: Number.parseInt(formData.usuario_id),
-      publicacion_id: Number.parseInt(formData.publicacion_id),
-      total_pagar: Number.parseFloat(formData.total_pagar),
-      personas: Number.parseInt(formData.personas),
+      usuario_id: parseInt(formData.usuario_id),
+      publicacion_id: parseInt(formData.publicacion_id),
+      total_pagar: parseFloat(formData.total_pagar),
+      personas: parseInt(formData.personas),
       fecha_reserva: `${formData.fecha_reserva} ${hora}:00:00`,
       notificar: notificarCambio,
     }
 
-    if (reserva) {
-      // Update existing reservation
-      axios
-        .post(`${API_URL}api/reservas/actualizar`, dataToSubmit, { headers })
-        .then((response) => {
-          console.log("Reserva actualizada", response.data)
-          setIsOpen(false) // Close the modal
-        })
-        .catch((error) => {
-          console.error("Error al actualizar reserva", error)
-        })
-        .finally(() => {
-          setIsLoading(false)
-        })
-    } else {
-      // Create new reservation
-      axios
-        .post(`${API_URL}api/reservas`, dataToSubmit, { headers })
-        .then((response) => {
-          console.log("Reserva guardada", response.data)
-          setIsOpen(false) // Close the modal
-        })
-        .catch((error) => {
-          console.error("Error al crear reserva", error)
-        })
-        .finally(() => {
-          setIsLoading(false)
-        })
-    }
+    const url = reserva ? `${API_URL}api/reservas/actualizar` : `${API_URL}api/reservas`
+
+    axios
+      .post(url, dataToSubmit, { headers })
+      .then((response) => {
+        console.log("Reserva guardada", response.data)
+        setIsOpen(false)
+      })
+      .catch((error) => {
+        console.error("Error al guardar reserva", error)
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   const handleCancelReservation = () => {
@@ -251,7 +234,6 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
-            {/* Usuario (read-only email) */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-1 block">Usuario</label>
               {emailUsuario ? (
@@ -262,15 +244,14 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
               ) : (
                 <Input
                   name="usuario_id"
-                  type="number"
+                  type="email"
                   value={formData.usuario_id}
                   onChange={handleChange}
-                  placeholder="ID de usuario"
+                  placeholder="Email"
                 />
               )}
             </div>
 
-            {/* Publicación (read-only title) */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-1 block">Publicación</label>
               {publicacionTitulo ? (
@@ -348,12 +329,11 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
                     <SelectValue placeholder="Selecciona número de personas" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">1 persona</SelectItem>
-                    <SelectItem value="2">2 personas</SelectItem>
-                    <SelectItem value="3">3 personas</SelectItem>
-                    <SelectItem value="4">4 personas</SelectItem>
-                    <SelectItem value="5">5 personas</SelectItem>
-                    <SelectItem value="6">6 personas</SelectItem>
+                    {[1, 2, 3, 4, 5, 6].map((n) => (
+                      <SelectItem key={n} value={n.toString()}>
+                        {n} persona{n > 1 ? "s" : ""}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               )}
