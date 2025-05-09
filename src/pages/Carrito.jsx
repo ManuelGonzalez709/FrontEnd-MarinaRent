@@ -39,24 +39,35 @@ export default function Carrito({ cart, setCart }) {
             idPublicacion: item.id,
             horaReserva: item.horaReserva + ":00"
           }, { headers });
-
+        
           const response2 = await axios.post(API_URL + "api/capacidadDisponible", {
             idPublicacion: item.id
           }, { headers });
-
+        
           const response3 = await axios.get(API_URL + "api/horaFecha", {}, { headers });
-
+        
           const disponibilidad = response1.data.disponible;
           const maxReservables = response2.data.personas_disponibles;
-          const horaFecha = response3.data.fecha === item.fecha_evento.split(" ")[0] && response3.data.hora.split(":")[0] < item.horaReserva
-
+          const mismaFecha = response3.data.fecha === item.fecha_evento.split(" ")[0];
+          let horaFecha = true;
+        
+          if (mismaFecha) {
+            const horaServ = parseInt(response3.data.hora.split(":")[0], 10);
+            const horaItem = item.horaReserva;
+            horaFecha = horaServ < horaItem;
+          }
+        
+          console.log(mismaFecha + " " + horaFecha);
+          console.log("Fecha Server -> " + response3.data.fecha + " = " + item.fecha_evento.split(" ")[0] + " <- Fecha Evento");
+          console.log("Hora Server -> " + parseInt(response3.data.hora.split(":")[0], 10) + " = " + item.horaReserva + " <- Hora Evento");
+          
           if (maxReservables >= item.personas && disponibilidad && horaFecha) {
             nuevosCarritoNormal.push(item);
           } else {
             let causas = [];
             if (!disponibilidad) causas.push("No disponible en la hora seleccionada");
             if (item.personas > maxReservables) causas.push(`Solo hay ${maxReservables} plazas disponibles`);
-            if (!horaFecha)causas.push(`hora seleccionada pasada son las ${response3.data.hora.split(":")[0]}:${response3.data.hora.split(":")[1]} `);
+            if (!horaFecha) causas.push(`Hora seleccionada pasada, son las ${response3.data.hora.split(":")[0]}:${response3.data.hora.split(":")[1]}`);
             item.causaDesfase = causas.join(" y ");
             nuevosCarritoDesfase.push(item);
             disponible = false;
@@ -85,11 +96,11 @@ export default function Carrito({ cart, setCart }) {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
     setLoading(true);
-
+    
     const peticiones = cart.map((elemento) => {
       return axios.post(url, {
         publicacion_id: elemento.id,
-        hora_reserva: elemento.horaReserva + ":00",
+        hora_reserva: elemento.horaReserva.toString().padStart(2, "0") + ":00",
         total_pagar: elemento.precio,
         personas: elemento.personas
       }, { headers });
@@ -116,41 +127,41 @@ export default function Carrito({ cart, setCart }) {
     <div className="max-w-7xl mx-auto p-10">
       {carritoDesfase.length == 0 && carritoNormal.length == 0 && !loading ? (
         <div className="max-w-4xl mx-auto px-4 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-blue-50 rounded-xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between"
-        >
-          <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight uppercase text-gray-800 mb-2">Carrito Vacío</h2>
-            <div className="w-20 h-1 bg-blue-600 mb-6"></div>
-            <p className="text-gray-600 mb-8">
-              Aún no has añadido ningún evento al carrito. Descubre nuestras sombrillas, tumbonas, paddle surf y mucho más para disfrutar del sol al máximo.
-            </p>
-            <Button
-              onClick={() => navigate("/alquilables")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 rounded-md font-medium text-lg"
-            >
-              ¡ALQUILA AHORA!
-            </Button>
-          </div>
           <motion.div
-            className="md:w-1/2 relative"
-            animate={{
-              y: [0, -10, 0],
-            }}
-            transition={{
-              repeat: Number.POSITIVE_INFINITY,
-              duration: 3,
-              ease: "easeInOut",
-            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-blue-50 rounded-xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between"
           >
-            <img src="https://cdn-icons-png.flaticon.com/512/869/869869.png" alt="Sombrilla de playa" />
+            <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight uppercase text-gray-800 mb-2">Carrito Vacío</h2>
+              <div className="w-20 h-1 bg-blue-600 mb-6"></div>
+              <p className="text-gray-600 mb-8">
+                Aún no has añadido ningún evento al carrito. Descubre nuestras sombrillas, tumbonas, paddle surf y mucho más para disfrutar del sol al máximo.
+              </p>
+              <Button
+                onClick={() => navigate("/alquilables")}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 rounded-md font-medium text-lg"
+              >
+                ¡ALQUILA AHORA!
+              </Button>
+            </div>
+            <motion.div
+              className="md:w-1/2 relative"
+              animate={{
+                y: [0, -10, 0],
+              }}
+              transition={{
+                repeat: Number.POSITIVE_INFINITY,
+                duration: 3,
+                ease: "easeInOut",
+              }}
+            >
+              <img src="https://cdn-icons-png.flaticon.com/512/869/869869.png" alt="Sombrilla de playa" />
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </div>
-      
+        </div>
+
       ) : (
         <>
 
