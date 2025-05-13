@@ -18,7 +18,7 @@ import { API_URL } from "../../utilities/apirest"
 import TimeSlider from "../time-slider"
 import SelectorPersonas from "../person-chooser"
 import { Label } from "@/components/ui/label"
-import { AlertCircle, Mail, BookOpen } from "lucide-react"
+import { AlertCircle, Mail, BookOpen,Calendar } from "lucide-react"
 
 export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelReservation }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -277,9 +277,10 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
                             )}
                         </div>
 
-                        <div>
-                            <label className="text-sm font-medium text-gray-700 mb-1 block">Fecha de Reserva</label>
-                            <Input name="fecha_reserva" type="date" value={formData.fecha_reserva} onChange={handleChange} />
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Fecha de Reserva</label>
+                        <div className="flex items-center p-2 bg-gray-50 rounded-md border border-gray-200">
+                            <Calendar className="h-4 w-4 text-gray-500 mr-2" />
+                            <span className="text-sm text-gray-700">{formData.fecha_reserva}</span>
                         </div>
 
                         <div>
