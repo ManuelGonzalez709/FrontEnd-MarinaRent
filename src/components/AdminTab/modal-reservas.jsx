@@ -201,7 +201,7 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
     axios
-    .post(`${API_URL}api/intercambiarFechas`, { id: publicationId,nueva_fecha_reserva:fecha }, { headers })
+    .post(`${API_URL}api/intercambiarFechas`, { id: publicationId,nueva_fecha_reserva:fecha,correo:true }, { headers })
       .then((response) => {
         if (response.status == 200) 
           return         
