@@ -25,6 +25,7 @@ export default function Example({ admin }) {
     { name: "Informativos", href: "/informativos" },
     { name: "Alquileres", href: "/alquilables" },
     { name: "Mis Reservas", href: "/reservas" },
+    { name: "Carrito", href: "/carrito" },
     { name: "Admin", href: "/admin" }, // Siempre incluido pero se ocultará con CSS
   ].map((item) => ({
     ...item,
@@ -98,14 +99,6 @@ export default function Example({ admin }) {
                     className="block px-4 py-2 text-sm text-black hover:bg-blue-200"
                   >
                     Mi Perfil
-                  </a>
-                </MenuItem>
-                <MenuItem>
-                  <a
-                    href="/carrito"
-                    className="block px-4 py-2 text-sm text-black hover:bg-blue-200"
-                  >
-                    Carrito
                   </a>
                 </MenuItem>
                 <MenuItem>

@@ -18,7 +18,7 @@ import { API_URL } from "../../utilities/apirest"
 import TimeSlider from "../time-slider"
 import SelectorPersonas from "../person-chooser"
 import { Label } from "@/components/ui/label"
-import { AlertCircle, Mail, BookOpen,Calendar } from "lucide-react"
+import { AlertCircle, Mail, BookOpen, Calendar } from "lucide-react"
 
 export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelReservation }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -29,13 +29,15 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
         total_pagar: "",
         personas: "",
     })
+    const [horaInicio, setHoraInicio] = useState(0)
     const [hora, setHora] = useState(15)
     const [disponibilidadHora, setDisponibilidadHora] = useState(true)
     const [horaPasada, setHoraPasada] = useState(false)
     const [personasDisponibles, setPersonasDisponibles] = useState(4)
-    const [notificarCambio, setNotificarCambio] = useState(false)
+    const [notificarCambio, setNotificarCambio] = useState(true)
     const [emailUsuario, setEmailUsuario] = useState("")
     const [publicacionTitulo, setPublicacionTitulo] = useState("")
+    const [mensaje, setMensaje] = useState("")
 
     useEffect(() => {
         if (!reserva || !isOpen) return
@@ -43,7 +45,7 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
         const fetchData = async () => {
             try {
                 let currentReserva = reserva
-
+                console.log("Reserva recibida:", reserva)
                 // Si sólo tenemos un ID y no todos los datos de reserva
                 if (typeof reserva === "number") {
                     const res = await axios.get(`${API_URL}api/reservas/${reserva}`)
@@ -52,8 +54,9 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
 
                 // Fecha y hora
                 const formattedDate = currentReserva.fecha_reserva?.split(" ")[0] || ""
-                const formattedTime = parseInt(currentReserva.fecha_reserva?.split(" ")[1]?.split(":")[0]) || 15
+                const formattedTime = Number.parseInt(currentReserva.fecha_reserva?.split(" ")[1]?.split(":")[0]) || 15
                 setHora(formattedTime)
+                setHoraInicio(formattedTime)
 
                 // Actualiza form
                 setFormData({
@@ -64,21 +67,24 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
                     total_pagar: currentReserva.total_pagar?.toString() || "",
                     personas: currentReserva.personas?.toString() || "",
                 })
+
+                // Establecer el número de personas seleccionadas
+                if (currentReserva.personas) {
+                    handlePersonasChange(currentReserva.personas)
+                }
+
                 // Email
                 if (currentReserva.email_usuario) {
                     setEmailUsuario(currentReserva.email_usuario)
                 } else if (currentReserva.usuario_id) {
                     fetchUserEmail(currentReserva.usuario_id)
                 }
-
                 // Publicación
                 if (currentReserva.titulo_publicacion) {
                     setPublicacionTitulo(currentReserva.titulo_publicacion)
                 } else if (currentReserva.publicacion_id) {
                     fetchPublicationTitle(currentReserva.publicacion_id)
                 }
-
-                checkTimeAvailability(currentReserva.publicacion_id, formattedTime)
                 checkCapacity(currentReserva.publicacion_id)
             } catch (error) {
                 console.error("Error al cargar datos de la reserva", error)
@@ -89,39 +95,30 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     }, [reserva, isOpen])
 
     useEffect(() => {
-        if (!formData.fecha_reserva || !reserva || !formData.publicacion_id) return;
-
+        if (!formData.fecha_reserva || !formData.publicacion_id) return
         const checkHora = async () => {
             try {
                 // Verificar si la hora ya ha pasado
-                const horaRes = await axios.get(API_URL + "api/horaFecha");
+                const horaRes = await axios.get(API_URL + "api/horaFecha")
                 if (horaRes.data.fecha === formData.fecha_reserva) {
-                    const horaActual = parseInt(horaRes.data.hora.split(":")[0], 10);
-                    setHoraPasada(horaActual >= hora);
+                    const horaActual = Number.parseInt(horaRes.data.hora.split(":")[0], 10)
+                    setHoraPasada(horaActual >= hora)
                 } else {
-                    setHoraPasada(false);
+                    setHoraPasada(false)
                 }
-
-                // Verificar disponibilidad de la hora
-                checkTimeAvailability(formData.publicacion_id, hora);
+                if (hora != horaInicio) checkTimeAvailability(formData.publicacion_id, hora)
+                else setDisponibilidadHora(true)
             } catch (error) {
-                console.error("Error al comprobar hora y disponibilidad:", error);
+                console.error("Error al comprobar hora y disponibilidad:", error)
             }
-        };
-        
-        checkHora();
-    }, [hora, formData.fecha_reserva, reserva, formData.publicacion_id]);
-
-
-    useEffect(() => {
-        if (reserva && formData.publicacion_id) {
-            checkTimeAvailability(formData.publicacion_id, hora)
         }
-    }, [hora, reserva])
+
+        checkHora()
+    }, [hora, formData.fecha_reserva, formData.publicacion_id])
 
     const checkTimeAvailability = (publicacionId, hora) => {
+        console.log("Comprobando disponibilidad de hora:", publicacionId, hora)
         if (!publicacionId) return
-
         const url = API_URL + "api/disponibilidadReserva"
         const token = localStorage.getItem("authToken")
         const headers = token ? { Authorization: `Bearer ${token}` } : {}
@@ -129,6 +126,7 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
         axios
             .post(url, { idPublicacion: publicacionId, horaReserva: hora + ":00" }, { headers })
             .then((response) => {
+                console.log("Disponibilidad de hora:", response.data)
                 setDisponibilidadHora(response.data.disponible)
             })
             .catch((error) => {
@@ -146,6 +144,7 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
         axios
             .post(url, { idPublicacion: publicacionId }, { headers })
             .then((response) => {
+                console.log("Capacidad disponible:", response.data)
                 setPersonasDisponibles(response.data.max_reservables)
             })
             .catch((error) => {
@@ -196,18 +195,19 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
         setIsLoading(true)
         const token = localStorage.getItem("authToken")
         const headers = token ? { Authorization: `Bearer ${token}` } : {}
-
+        const horaFormateada = hora.toString().padStart(2, '0');
         const dataToSubmit = {
             ...formData,
-            usuario_id: parseInt(formData.usuario_id),
-            publicacion_id: parseInt(formData.publicacion_id),
-            total_pagar: parseFloat(formData.total_pagar),
-            personas: parseInt(formData.personas),
-            fecha_reserva: `${formData.fecha_reserva} ${hora}:00:00`,
+            id: formData.id, // <-- este campo debe existir
+            usuario_id: Number.parseInt(formData.usuario_id),
+            publicacion_id: Number.parseInt(formData.publicacion_id),
+            total_pagar: Number.parseFloat(formData.total_pagar),
+            personas: Number.parseInt(formData.personas),
+            fecha_reserva: `${formData.fecha_reserva} ${horaFormateada}:00:00`,
             notificar: notificarCambio,
         }
-
-        const url = reserva ? `${API_URL}api/reservas/actualizar` : `${API_URL}api/reservas`
+        console.log("Datos a enviar:", dataToSubmit)
+        const url = `${API_URL}api/actualizarReservas`;
 
         axios
             .post(url, dataToSubmit, { headers })
@@ -231,7 +231,7 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-            <DialogContent className="max-w-6xl w-[9000px]">
+            <DialogContent className="w-[1000px] !max-w-none">
                 <DialogHeader>
                     <DialogTitle>{reserva ? "Editar Reserva" : "Nueva Reserva"}</DialogTitle>
                     <DialogDescription>
@@ -243,20 +243,10 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
                     <div className="space-y-4">
                         <div>
                             <label className="text-sm font-medium text-gray-700 mb-1 block">Usuario</label>
-                            {emailUsuario ? (
-                                <div className="flex items-center p-2 bg-gray-50 rounded-md border border-gray-200">
-                                    <Mail className="h-4 w-4 text-gray-500 mr-2" />
-                                    <span className="text-sm text-gray-700">{emailUsuario}</span>
-                                </div>
-                            ) : (
-                                <Input
-                                    name="usuario_id"
-                                    type="email"
-                                    value={formData.usuario_id}
-                                    onChange={handleChange}
-                                    placeholder="Email"
-                                />
-                            )}
+                            <div className="flex items-center p-2 bg-gray-50 rounded-md border border-gray-200">
+                                <Mail className="h-4 w-4 text-gray-500 mr-2" />
+                                <span className="text-sm text-gray-700">{emailUsuario}</span>
+                            </div>
                         </div>
 
                         <div>
@@ -310,9 +300,9 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
                             )}
 
                             {!disponibilidadHora && (
-                                <div className="flex items-center mt-2 text-red-500 text-sm">
-                                    <AlertCircle className="h-4 w-4 mr-1" />
-                                    <span>Esta hora no está disponible</span>
+                                <div className="flex items-center mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-700">
+                                    <AlertCircle className="h-4 w-4 mr-2" />
+                                    <span>Esta hora ya está reservada la hora será intercambiada.</span>
                                 </div>
                             )}
 
@@ -327,7 +317,19 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
                         <div>
                             <label className="text-sm font-medium text-gray-700 mb-1 block">Número de Personas</label>
                             {reserva ? (
-                                <SelectorPersonas personasDisponibles={personasDisponibles} setPersonas={handlePersonasChange} />
+                                personasDisponibles > 0 ? (
+                                    <SelectorPersonas
+                                        personasDisponibles={personasDisponibles}
+                                        setPersonas={handlePersonasChange}
+                                        selected={formData.personas?.toString()}
+                                    />
+
+                                ) : (
+                                    <div className="flex items-center p-3 bg-red-50 rounded-md border border-red-200 text-red-700">
+                                        <AlertCircle className="h-4 w-4 mr-2" />
+                                        <span>Aforo completo. No es posible cambiar el número de personas.</span>
+                                    </div>
+                                )
                             ) : (
                                 <Select
                                     value={formData.personas}
@@ -337,7 +339,7 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
                                         <SelectValue placeholder="Selecciona número de personas" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {[1, 2, 3, 4, 5, 6].map((n) => (
+                                        {[1, 2, 3, 4].map((n) => (
                                             <SelectItem key={n} value={n.toString()}>
                                                 {n} persona{n > 1 ? "s" : ""}
                                             </SelectItem>
@@ -346,17 +348,16 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
                                 </Select>
                             )}
                         </div>
+                        {mensaje && (
+                            <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md text-blue-700 text-sm">
+                                <span>{mensaje}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <DialogFooter className="flex flex-col sm:flex-row sm:justify-between gap-2">
-                    <div>
-                        {reserva && (
-                            <Button variant="destructive" onClick={handleCancelReservation}>
-                                Cancelar Reserva
-                            </Button>
-                        )}
-                    </div>
+                <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
+
                     <div className="flex gap-2">
                         {isLoading ? (
                             <Button disabled>Guardando...</Button>
@@ -365,7 +366,7 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
                                 <Button variant="outline" onClick={() => setIsOpen(false)}>
                                     Cerrar
                                 </Button>
-                                <Button onClick={handleSave} disabled={reserva && (!disponibilidadHora || horaPasada)}>
+                                <Button onClick={handleSave} disabled={reserva && horaPasada}>
                                     Guardar cambios
                                 </Button>
                             </>

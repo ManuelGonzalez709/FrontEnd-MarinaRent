@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-const SelectorPersonas = ({ personasDisponibles ,setPersonas}) => {
-  const [selectedPerson, setSelectedPerson] = useState(null);
+const SelectorPersonas = ({ personasDisponibles ,setPersonas,selected}) => {
+  const [selectedPerson, setSelectedPerson] = useState(selected);
 
   const handleSelect = (e) => {
     setSelectedPerson(e.target.value);
