@@ -100,7 +100,7 @@ export default function Informativos() {
         <div className="bg-white">
             <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-12 lg:max-w-7xl lg:px-8">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-1">Publicaciones de Tipo Alquilable</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-1">Publicaciones de Tipo Reservable</h1>
                 <p className="text-gray-500 text-sm">Encuentra información actualizada sobre eventos con reserva previa</p>
             </div>
 

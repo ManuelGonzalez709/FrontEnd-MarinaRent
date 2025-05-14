@@ -23,7 +23,7 @@ export default function Example({ admin }) {
   const navigation = [
     { name: "Inicio", href: "/home" },
     { name: "Informativos", href: "/informativos" },
-    { name: "Alquileres", href: "/alquilables" },
+    { name: "Reservables", href: "/alquilables" },
     { name: "Mis Reservas", href: "/reservas" },
     { name: "Carrito", href: "/carrito" },
     { name: "Admin", href: "/admin" }, // Siempre incluido pero se ocultará con CSS

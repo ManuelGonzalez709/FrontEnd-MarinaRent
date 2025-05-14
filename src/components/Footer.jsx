@@ -8,23 +8,28 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Enlaces rápidos</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
+                <a href="/home" className="text-gray-300 hover:text-white">
                   Inicio
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
-                  Almacen
+                <a href="/informativos" className="text-gray-300 hover:text-white">
+                  Informativos
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
-                  Inventario
+                <a href="/alquileres" className="text-gray-300 hover:text-white">
+                  Alquileres
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white">
-                  Tareas
+                <a href="/reservas" className="text-gray-300 hover:text-white">
+                  Mis Reservas
+                </a>
+              </li>
+              <li>
+                <a href="/carrito" className="text-gray-300 hover:text-white">
+                  Carrito
                 </a>
               </li>
             </ul>
@@ -39,11 +44,11 @@ export default function Footer() {
                   href="mailto:contacto@empresa.com"
                   className="text-gray-300 hover:text-white"
                 >
-                  contacto@qualicard.com
+                  manuel5365@gmail.com
                 </a>
               </li>
               <li>
-                <p className="text-gray-300">Teléfono: +34 612 345 678</p>
+                <p className="text-gray-300">Teléfono: +34 641 130 893</p>
               </li>
             </ul>
           </div>
@@ -85,7 +90,7 @@ export default function Footer() {
 
         <div className="mt-8 text-center text-sm text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} Qualica-RD. Todos los derechos
+            &copy; {new Date().getFullYear()} Marina Rent. Todos los derechos
             reservados.
           </p>
         </div>
