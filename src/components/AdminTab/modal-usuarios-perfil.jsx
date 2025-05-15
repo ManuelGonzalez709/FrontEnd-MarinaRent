@@ -34,6 +34,8 @@ export default function UsuariosModal({ isOpen, setIsOpen, user, isProfileEdit =
         id_usuario: user.id,
         Nombre: user.Nombre,
         Apellidos: user.Apellidos,
+        Email: user.Email,
+        Tipo: user.Tipo,
         Fecha_nacimiento: user.Fecha_nacimiento,
       })
     }
