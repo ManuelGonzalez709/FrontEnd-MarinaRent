@@ -27,11 +27,23 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
   const [newImages, setNewImages] = useState([])
   const [existingImageCount, setExistingImageCount] = useState(0)
   const REQUIRED_IMAGES = 4
+  // Add a state to track if we're in the process of closing the modal
+  const [isClosing, setIsClosing] = useState(false)
 
   useEffect(() => {
     if (product && !isAddMode) {
       // Formatear la fecha para el input de tipo date
-      const fechaEvento = product.fecha_evento ? new Date(product.fecha_evento).toISOString().split("T")[0] : ""
+      // Fix timezone issue by ensuring we don't lose a day when formatting
+      let fechaEvento = ""
+      if (product.fecha_evento) {
+        // Parse the date and adjust for timezone to prevent day shift
+        const date = new Date(product.fecha_evento)
+        // Format as YYYY-MM-DD without timezone conversion
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, "0")
+        const day = String(date.getDate()).padStart(2, "0")
+        fechaEvento = `${year}-${month}-${day}`
+      }
 
       setFormData({
         ...product,
@@ -71,6 +83,8 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
     // Resetear nuevas imágenes y errores al abrir el modal
     setNewImages([])
     setErrors({})
+    // Reset the closing state when the modal opens
+    setIsClosing(false)
   }, [product, isOpen, isAddMode])
 
   const validateForm = () => {
@@ -207,6 +221,12 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
     }
   }
 
+  // Create a safe close function that sets the closing state first
+  const handleClose = () => {
+    setIsClosing(true)
+    onClose()
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -264,10 +284,34 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
       // Realizar la petición POST a la API
       const response = await axios.post(apiEndpoint, formDataToSend, { headers })
 
-      if (response.data && onUpdate) {
-        onUpdate(response.data)
+      
+
+      // Si estamos en modo edición y la fecha ha cambiado, actualizar la fecha en las reservas
+      if (!isAddMode && product?.id && formData.fecha_evento !== product.fecha_evento) {
+        try {
+          await axios.post(
+            API_URL + "api/actualizarFechaPublicacion",
+            {
+              publicacion_id: product.id,
+              nueva_fecha_evento: formData.fecha_evento,
+            },
+            { headers },
+          )
+          console.log("Fecha de evento actualizada correctamente")
+        } catch (error) {
+          console.error("Error al actualizar la fecha del evento:", error)
+          setErrors({
+            ...errors,
+            general: "Ha ocurrido un error al actualizar la fecha del evento",
+          })
+          setIsLoading(false)
+          return // No cerrar el modal si hay error
+        }
       }
 
+      // Mark as closing before actually closing
+      setIsClosing(true)
+      // Solo cerrar el modal después de que todas las operaciones se completen
       onClose()
     } catch (error) {
       console.error(`Error al ${isAddMode ? "crear" : "actualizar"} la publicación:`, error)
@@ -288,7 +332,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
   const newImagesCount = imagePreviews.filter((img) => !img.isExisting).length
   console.log(product)
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={isClosing ? onClose : handleClose}>
       <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden flex flex-col max-h-[90vh]">
         <DialogHeader className="p-6 pb-2">
           <div className="flex items-center justify-between">
@@ -440,7 +484,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
           </ScrollArea>
 
           <div className="flex justify-end gap-3 p-4 border-t mt-auto bg-white">
-            <Button variant="outline" type="button" onClick={onClose}>
+            <Button variant="outline" type="button" onClick={handleClose}>
               Cancelar
             </Button>
             <Button
