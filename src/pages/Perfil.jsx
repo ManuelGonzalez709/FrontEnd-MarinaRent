@@ -1,14 +1,15 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import axios from "axios"
 import { API_URL } from "../utilities/apirest"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalendarDays, MapPin, Mail, Phone, Shield, Clock, Anchor, Ship, Compass } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CalendarDays, MapPin, Mail, Phone, Shield, Clock, Anchor, Ship, Compass } from 'lucide-react'
+import UsuariosModal from "../components/AdminTab/modal-usuarios-perfil" // Importamos el modal de usuarios
 
 export default function PerfilPage() {
     const [profile, setProfile] = useState(null);
@@ -16,12 +17,12 @@ export default function PerfilPage() {
     const [activeTab, setActiveTab] = useState("perfil");
     const [reservas, setReservas] = useState([]);
     const [imagenes, setImagenes] = useState([]);
-
+    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar la apertura del modal
 
     useEffect(() => {
         fetchProfile();
         fetchReservas();
-    }, []);
+    }, [isModalOpen]); // Actualizamos cuando se cierre el modal
 
     const fetchProfile = async () => {
         const token = localStorage.getItem("authToken");
@@ -64,6 +65,11 @@ export default function PerfilPage() {
     const formatearFecha = (fecha) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(fecha).toLocaleDateString('es-ES', options);
+    };
+
+    // Función para abrir el modal de edición
+    const handleEditProfile = () => {
+        setIsModalOpen(true);
     };
 
     if (loading) {
@@ -156,11 +162,11 @@ export default function PerfilPage() {
                             </div>
                         </CardContent>
                         <CardFooter>
-                            <Button variant="outline" className="w-full">Editar perfil</Button>
+                            <Button variant="outline" className="w-full" onClick={handleEditProfile}>
+                                Editar perfil
+                            </Button>
                         </CardFooter>
                     </Card>
-
-
                 </div>
 
                 <div className="md:col-span-2">
@@ -208,14 +214,22 @@ export default function PerfilPage() {
                                             );
                                         })}
                                     </div>
-
                                 </CardContent>
-
                             </Card>
                         </TabsContent>
                     </Tabs>
                 </div>
             </div>
+
+            {/* Modal de edición de usuario */}
+            {isModalOpen && (
+                <UsuariosModal
+                    isOpen={isModalOpen}
+                    setIsOpen={setIsModalOpen}
+                    user={profile}
+                    isProfileEdit={true} // Indicamos que es una edición desde el perfil
+                />
+            )}
         </div>
     );
 }
