@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Search, Calendar } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
@@ -25,20 +25,31 @@ export default function Reservas() {
   const [selectedReserva, setSelectedReserva] = useState(null)
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false)
   const [reservaToCancel, setReservaToCancel] = useState(null)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
   useEffect(() => {
-    fetchReservas()
-  }, [])
+    fetchReservas(currentPage)
+  }, [currentPage])
 
-  const fetchReservas = () => {
+  const fetchReservas = (page = 1) => {
     setLoading(true)
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
     axios
-      .get(API_URL + "api/obtenerReservasDetalladas", { headers })
+      .post(API_URL + "api/reservasPaginadas", { pagina: page }, { headers })
       .then((response) => {
-        setReservas(response.data)
+        if (response.data.success) {
+          setReservas(response.data.data)
+          setCurrentPage(response.data.page)
+          setTotalPages(response.data.totalPages)
+        } else {
+          console.error("Error en la respuesta:", response.data)
+        }
       })
       .catch((error) => {
         console.error("Error al cargar las reservas:", error)
@@ -67,18 +78,13 @@ export default function Reservas() {
       })
   }
 
-  const handleNewReservation = () => {
-    setSelectedReserva(null)
-    setIsModalOpen(true)
-  }
-
   const handleModalClose = (refresh = false) => {
     setIsModalOpen(false)
     setSelectedReserva(null)
 
     // Refresh the reservations list if needed
     if (refresh) {
-      fetchReservas()
+      fetchReservas(currentPage)
     }
   }
 
@@ -99,7 +105,7 @@ export default function Reservas() {
       .then((response) => {
         console.log("Reserva cancelada", response.data)
         setIsModalOpen(false)
-        fetchReservas()
+        fetchReservas(currentPage)
       })
       .catch((error) => {
         console.error("Error al cancelar la reserva:", error)
@@ -110,6 +116,19 @@ export default function Reservas() {
         setReservaToCancel(null)
       })
   }
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage)
+    }
+  }
+
+  // Filter reservations based on search query
+  const filteredReservas = reservas.filter(
+    (reservation) =>
+      reservation.nombre_usuario.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      reservation.titulo_publicacion.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
 
   return (
     <>
@@ -122,13 +141,13 @@ export default function Reservas() {
           <div className="flex justify-between items-center mb-6">
             <div className="relative w-full max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <Input type="search" placeholder="Buscar reservas..." className="pl-10 pr-4 py-2 w-full" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline">
-                <Calendar className="mr-2 h-4 w-4" />
-                Filtrar por fecha
-              </Button>
+              <Input
+                type="search"
+                placeholder="Buscar reservas..."
+                className="pl-10 pr-4 py-2 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
           </div>
 
@@ -175,7 +194,7 @@ export default function Reservas() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {reservas.map((reservation, i) => (
+                {filteredReservas.map((reservation, i) => (
                   <tr key={i}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{reservation.id}</div>
@@ -224,6 +243,31 @@ export default function Reservas() {
             </table>
           </div>
 
+          {/* Pagination Controls - Similar to publicaciones component */}
+          {!searchQuery && (
+            <div className="flex justify-center items-center mt-8 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
           {/* Reservation Modal */}
           <ReservasModal
             isOpen={isModalOpen}
@@ -258,4 +302,3 @@ export default function Reservas() {
     </>
   )
 }
-    

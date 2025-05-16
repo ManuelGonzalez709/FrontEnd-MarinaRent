@@ -23,7 +23,7 @@ export default function Mostrador({ cart, setCart }) {
 
   const { elemento } = location.state
   useEffect(() => {
-    console.log("Personas seleccinadas: ", personas)
+    console.log("Personas seleccionadas: ", personas)
   }, [personas])
 
   useEffect(() => {
@@ -38,7 +38,8 @@ export default function Mostrador({ cart, setCart }) {
     const url = API_URL + "api/capacidadDisponible"
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
-    axios.post(url, { idPublicacion: elemento.id }, { headers })
+    axios
+      .post(url, { idPublicacion: elemento.id }, { headers })
       .then((response) => {
         setPersonasDisponibles(response.data.max_reservables)
       })
@@ -55,19 +56,19 @@ export default function Mostrador({ cart, setCart }) {
   }, [personas])
 
   useEffect(() => {
-    axios.get(API_URL + "api/horaFecha")
+    axios
+      .get(API_URL + "api/horaFecha")
       .then((response) => {
         if (response.data.fecha == elemento.fecha_evento.split(" ")[0]) {
-          const horaEntera = parseInt(response.data.hora.split(":")[0], 10)
+          const horaEntera = Number.parseInt(response.data.hora.split(":")[0], 10)
           if (horaEntera < hora) setHoraPasada(false)
           else setHoraPasada(true)
-        }else setHoraPasada(false)
+        } else setHoraPasada(false)
       })
       .catch((error) => {
         console.error("Error al cargar los informativos:", error)
       })
   }, [disponibilidadHora, hora])
-
 
   useEffect(() => {
     const url = API_URL + "api/disponibilidadReserva"
@@ -102,9 +103,9 @@ export default function Mostrador({ cart, setCart }) {
   }
 
   function formatDate(dateString) {
-    const date = new Date(dateString);
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('es-ES', options);
+    const date = new Date(dateString)
+    const options = { year: "numeric", month: "long", day: "numeric" }
+    return date.toLocaleDateString("es-ES", options)
   }
 
   const imagenes = elemento.imagen.split(";")
@@ -192,29 +193,34 @@ export default function Mostrador({ cart, setCart }) {
             </div>
           ) : (
             <div class="mt-4 lg:row-span-3 lg:mt-0">
-
-              {elemento.precio > 0 ? (
+              {elemento.tipo !== "informativo" ? (
                 <form class="mt-5" onSubmit={handleAddToCart}>
                   <h2 class="sr-only">Product information</h2>
                   <p class="text-3xl tracking-tight text-gray-900">${precioTotal}</p>
                   <div>
                     <h3 class="text-sm font-medium text-gray-900">Momento del Día</h3>
-                     {/*Slider*/}
-                    <TimeSlider id={elemento.id} setHora={setHora} hora={hora} disponible={disponibilidadHora} horaPasada={horaPasada} />
+                    {/*Slider*/}
+                    <TimeSlider
+                      id={elemento.id}
+                      setHora={setHora}
+                      hora={hora}
+                      disponible={disponibilidadHora}
+                      horaPasada={horaPasada}
+                    />
                   </div>
 
                   <div class="mt-10">
                     <div class="flex items-center justify-between">
                       <h3 class="text-sm font-medium text-gray-900">Personas</h3>
                     </div>
-                     {/*Selector de Personas*/}
+                    {/*Selector de Personas*/}
                     <SelectorPersonas personasDisponibles={personasDisponibles} setPersonas={setPersonas} />
                   </div>
 
-                   {/*Añadido al carrito*/}
+                  {/*Añadido al carrito*/}
                   {añadido && <p className="mt-4 text-green-600 font-medium text-center">Añadido al carrito</p>}
 
-                   {/*Comprobaciones antes de compra*/}
+                  {/*Comprobaciones antes de compra*/}
                   {disponibilidadHora && personasDisponibles > 0 && !añadido && !horaPasada ? (
                     <button
                       type="submit"
@@ -235,7 +241,7 @@ export default function Mostrador({ cart, setCart }) {
               ) : (
                 <div className="mt-5 p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <p className="text-gray-700 font-medium">Este producto no está disponible para alquiler</p>
-                  <p className="text-gray-500 text-sm mt-2">Este artículo es simplemente informativo</p>
+                  <p className="text-gray-500 text-sm mt-2">Este artículo es de tipo informativo</p>
                 </div>
               )}
             </div>
