@@ -106,7 +106,9 @@ export default function PerfilPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-4 left-4 text-white">
                         <h1 className="text-3xl font-bold">{profile.Nombre} {profile.Apellidos}</h1>
-                        <p className="text-sm opacity-90">Miembro desde 2023</p>
+                        <p className="text-sm opacity-90">
+                            Miembro desde {new Date(profile.created_at).getFullYear()}
+                        </p>
                     </div>
                 </div>
             </div>

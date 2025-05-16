@@ -77,7 +77,7 @@ function Login() {
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-6">
-          ¿No tienes cuenta? <span className="underline cursor-pointer hover:text-blue-700">Regístrate</span>
+          ¿No tienes cuenta? <span className="underline cursor-pointer hover:text-blue-700"><a href="/registro">Regístrate</a></span>
         </p>
       </div>
     </div>

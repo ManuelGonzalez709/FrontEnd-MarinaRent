@@ -12,6 +12,7 @@ import NotFound from './pages/NotFound';
 import Reservas from './pages/Reservas';
 import Perfil from './pages/Perfil';
 import Admin from './pages/Admin';
+import Registro from './pages/Register';
 import { API_URL } from './utilities/apirest';
 import axios from 'axios';
 
@@ -63,13 +64,19 @@ function AppContent() {
 
   return (
     <>
-      {location.pathname !== "/" && <Navbar admin={admin} />}
+      {location.pathname !== "/" && location.pathname !== "/registro" && <Navbar admin={admin} />}
 
       <Routes>
+
         <Route
           path="/"
           element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />}
         />
+        <Route
+          path="/registro"
+          element={!isAuthenticated ? <Registro /> : <Navigate to="/home" replace />}
+        />
+
         <Route
           path="/home"
           element={isAuthenticated ? <Home /> : <Navigate to="/" replace />}
@@ -116,7 +123,7 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {location.pathname !== "/" && <Footer />}
+      {location.pathname !== "/" && location.pathname !== "/registro" && <Footer />}
     </>
   );
 }
