@@ -8,24 +8,28 @@ function Login() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
- function realizarSolicitud (event){
+  function realizarSolicitud(event) {
+    setIsLoading(true);
     event.preventDefault();
-     let url = API_URL+"api/login";
-    axios.post(url,{email:email, password:password}).then((response) => {
-      if(response.status == 200){
+    let url = API_URL + "api/login";
+    axios.post(url, { email: email, password: password }).then((response) => {
+      if (response.status == 200) {
         let token = response.data.token.split("|")[1];
         localStorage.setItem("authToken", token);
         setErrorMessage(null);
         navigate("/home");
-      } 
+      }
     }).catch((error) => {
       if (error.response) {
         setErrorMessage("Credenciales incorrectas. Inténtalo de nuevo.");
       } else {
         setErrorMessage("Error de conexión. Por favor, intenta más tarde.");
       }
-    })
+    }).finally(() => {
+      setIsLoading(false);
+    });
   }
 
   return (
@@ -72,7 +76,16 @@ function Login() {
             type="submit"
             className="w-full py-2 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition-colors"
           >
-            Iniciar Sesión
+            {isLoading ? (
+              <>
+                <div className="flex justify-center items-center">
+                  <span className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                </div>
+              </>
+
+            ) : (
+              <span>Iniciar Sesión</span>
+            )}
           </button>
         </form>
 

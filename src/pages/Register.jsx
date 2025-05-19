@@ -13,19 +13,23 @@ export default function Registro() {
   const [password, setPassword] = useState("")
   const [password_confirmation, setPasswordConfirmation] = useState("")
   const [errorMessage, setErrorMessage] = useState(null)
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   function realizarRegistro(event) {
+    setIsLoading(true);
     event.preventDefault()
 
     // Validación de contraseña
     if (password !== password_confirmation) {
+      setIsLoading(false);
       setErrorMessage("Las contraseñas no coinciden. Inténtalo de nuevo.")
       return
     }
 
     // Validar longitud mínima
     if (password.length < 6) {
+      setIsLoading(false);
       setErrorMessage("La contraseña debe tener al menos 6 caracteres.")
       return
     }
@@ -37,6 +41,7 @@ export default function Registro() {
     const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)
 
     if (!(hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar)) {
+      setIsLoading(false);
       setErrorMessage("La contraseña debe incluir mayúsculas, minúsculas, números y caracteres especiales.")
       return
     }
@@ -64,6 +69,7 @@ export default function Registro() {
       })
       .catch((error) => {
         console.log(error)
+        setIsLoading(false);
         if (error.response) {
           if (error.response.status === 422) {
             setErrorMessage("El email ya está registrado o los datos son inválidos.")
@@ -73,7 +79,9 @@ export default function Registro() {
         } else {
           setErrorMessage("Error de conexión. Por favor, intenta más tarde.")
         }
-      })
+      }).finally(() => {
+        setIsLoading(false);
+      });
   }
 
   function getPasswordStrength(password) {
@@ -206,7 +214,16 @@ export default function Registro() {
             type="submit"
             className="w-full py-2 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition-colors"
           >
-            Registrarse
+            {isLoading ? (
+              <>
+                <div className="flex justify-center items-center">
+                  <span className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                </div>
+              </>
+
+            ) : (
+              <span>Registrate</span>
+            )}
           </button>
         </form>
 
