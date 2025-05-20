@@ -198,15 +198,16 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
   }
 
   const intercambiarFechas = (publicationId, fecha) => {
+    console.log("Intercambio de Fechas "+publicationId, fecha+" "+notificarCambio)
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
-    axios
-      .post(
+      axios.post(
         `${API_URL}api/intercambiarFechas`,
         { id: publicationId, nueva_fecha_reserva: fecha, correo: notificarCambio },
         { headers },
       )
       .then((response) => {
+        console.log("Fechas intercambiadas", response.data)
         if (response.status == 200) return
       })
       .catch((error) => {
@@ -267,11 +268,9 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
 
     setDisponibilidadHora(true)
     const url = `${API_URL}api/actualizarReservas`
-
     axios
       .post(url, dataToSubmit, { headers })
       .then((response) => {
-        console.log("Reserva guardada", response.data)
         setIsOpen(false)
       })
       .catch((error) => {

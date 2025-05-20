@@ -31,7 +31,7 @@ export default function Example({ admin }) {
     ...item,
     current: location.pathname === item.href,
   }));
-  
+
   return (
     <Disclosure as="nav" className="bg-white">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -94,13 +94,19 @@ export default function Example({ admin }) {
               </div>
               <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 transition focus:outline-hidden">
                 <MenuItem>
-                  <a
-                    href="/perfil"
-                    className="block px-4 py-2 text-sm text-black hover:bg-blue-200"
-                  >
-                    Mi Perfil
-                  </a>
+                  {({ active }) => (
+                    <button
+                      onClick={() => navigate("/perfil")}
+                      className={classNames(
+                        active ? "bg-blue-200" : "",
+                        "w-full text-left px-4 py-2 text-sm text-black"
+                      )}
+                    >
+                      Mi Perfil
+                    </button>
+                  )}
                 </MenuItem>
+
                 <MenuItem>
                   <LogoutButton />
                 </MenuItem>
