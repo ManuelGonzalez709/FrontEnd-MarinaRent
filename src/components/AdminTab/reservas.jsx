@@ -32,8 +32,9 @@ export default function Reservas() {
   const [totalPages, setTotalPages] = useState(1)
 
   useEffect(() => {
+    if(!isModalOpen)
     fetchReservas(currentPage)
-  }, [currentPage])
+  }, [currentPage,isModalOpen])
 
   const fetchReservas = (page = 1) => {
     setLoading(true)

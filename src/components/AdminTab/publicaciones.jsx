@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import axios from "axios"
-import { API_URL } from "../../utilities/apirest"
+import { API_URL,IMAGE_URL } from "../../utilities/apirest"
 import ProductModal from "./modal-publicaciones"
 
 export default function Publicaciones() {
@@ -123,7 +123,7 @@ export default function Publicaciones() {
               <Card key={item.id} className="overflow-hidden">
                 <div className="relative h-48 w-full">
                   <img
-                    src={API_URL + "storage/photos/" + item.imagen.split(";")[0] || "/placeholder.svg"}
+                    src={IMAGE_URL + item.imagen.split(";")[0] || "/placeholder.svg"}
                     alt="Imagen de alquiler"
                     className="object-cover w-full h-full"
                   />

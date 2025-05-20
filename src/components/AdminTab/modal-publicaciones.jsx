@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import axios from "axios"
-import { API_URL } from "../../utilities/apirest"
+import { API_URL,IMAGE_URL } from "../../utilities/apirest"
 
 export default function ProductModal({ isOpen, onClose, product, onUpdate, isAddMode = false }) {
   const [formData, setFormData] = useState({
@@ -56,7 +56,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
         setExistingImageCount(existingImages.length)
 
         const imageUrls = existingImages.map((img) => ({
-          url: API_URL + "storage/photos/" + img,
+          url: IMAGE_URL + img,
           isExisting: true,
           filename: img,
         }))

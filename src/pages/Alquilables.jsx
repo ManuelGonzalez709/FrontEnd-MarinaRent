@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { API_URL } from "../utilities/apirest"
+import { API_URL,IMAGE_URL } from "../utilities/apirest"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import Buscador from "../components/buscador"
@@ -25,7 +25,7 @@ export default function Informativos() {
     const url = API_URL + "api/alquilablesPaginados"
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
-
+    console.log(IMAGE_URL)
     axios
       .post(url, { pagina }, { headers })
       .then((response) => {
@@ -177,7 +177,7 @@ export default function Informativos() {
                     onClick={() => handleClick(elemento)}
                   >
                     <img
-                      src={API_URL + "storage/photos/" + elemento.imagen.split(";")[0] || "/placeholder.svg"}
+                      src={IMAGE_URL + elemento.imagen.split(";")[0] || "/placeholder.svg"}
                       alt={elemento.titulo}
                       className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:opacity-75 lg:aspect-auto lg:h-80"
                     />

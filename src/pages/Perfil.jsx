@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
-import { API_URL } from "../utilities/apirest"
+import { API_URL,IMAGE_URL } from "../utilities/apirest"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CalendarDays, MapPin, Mail, Phone, Shield, Clock, Anchor, Ship, Compass } from 'lucide-react'
 import UsuariosModal from "../components/AdminTab/modal-usuarios-perfil" // Importamos el modal de usuarios
@@ -193,7 +193,7 @@ export default function PerfilPage() {
                                                 <div key={item.id} className="flex items-start gap-4 pb-4 border-b last:border-0">
                                                     <div className="rounded-md overflow-hidden w-16 h-16 flex-shrink-0">
                                                         <img
-                                                            src={imagenes[0] ? API_URL + "storage/photos/" + imagenes[0] : "/placeholder.svg"}
+                                                            src={imagenes[0] ? IMAGE_URL + imagenes[0] : "/placeholder.svg"}
                                                             alt={publicacion?.titulo || "Sin título"}
                                                             width={100}
                                                             height={100}

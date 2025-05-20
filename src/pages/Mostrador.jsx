@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { API_URL } from "../utilities/apirest"
+import { IMAGE_URL } from "../utilities/apirest"
 import { useEffect } from "react"
 import TimeSlider from "../components/time-slider"
 import SelectorPersonas from "../components/person-chooser"
@@ -159,24 +160,24 @@ export default function Mostrador({ cart, setCart }) {
 
         <div class="mx-auto mt-6 max-w-2xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:gap-x-8 lg:px-8">
           <img
-            src={API_URL + "storage/photos/" + imagenes[0] || "/placeholder.svg"}
+            src={IMAGE_URL + imagenes[0] || "/placeholder.svg"}
             alt="Two each of gray, white, and black shirts laying flat."
             class="hidden size-full rounded-lg object-cover lg:block"
           />
           <div class="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
             <img
-              src={API_URL + "storage/photos/" + imagenes[1] || "/placeholder.svg"}
+              src={IMAGE_URL + imagenes[1] || "/placeholder.svg"}
               alt="Model wearing plain black basic tee."
               class="aspect-3/2 w-full rounded-lg object-cover"
             />
             <img
-              src={API_URL + "storage/photos/" + imagenes[2] || "/placeholder.svg"}
+              src={IMAGE_URL + imagenes[2] || "/placeholder.svg"}
               alt="Model wearing plain gray basic tee."
               class="aspect-3/2 w-full rounded-lg object-cover"
             />
           </div>
           <img
-            src={API_URL + "storage/photos/" + imagenes[3] || "/placeholder.svg"}
+            src={IMAGE_URL + imagenes[3] || "/placeholder.svg"}
             alt="Model wearing plain white basic tee."
             class="aspect-4/5 size-full object-cover sm:rounded-lg lg:aspect-auto"
           />

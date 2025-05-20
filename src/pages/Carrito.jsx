@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { API_URL } from '../utilities/apirest';
+import { API_URL,IMAGE_URL } from '../utilities/apirest';
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import axios from 'axios';
@@ -173,7 +173,7 @@ export default function Carrito({ cart, setCart }) {
               {carritoNormal.map((producto) => (
                 <div key={producto.id} className="flex items-center gap-6 border-b pb-6">
                   <img
-                    src={API_URL + "storage/photos/" + producto.imagen.split(";")[0]}
+                    src={IMAGE_URL + producto.imagen.split(";")[0]}
                     alt={producto.titulo}
                     className="h-24 w-24 rounded"
                   />
@@ -193,7 +193,7 @@ export default function Carrito({ cart, setCart }) {
               {carritoDesfase.map((producto) => (
                 <div key={producto.id} className="flex items-center gap-6 border-b pb-6">
                   <img
-                    src={API_URL + "storage/photos/" + producto.imagen.split(";")[0]}
+                    src={IMAGE_URL + producto.imagen.split(";")[0]}
                     alt={producto.titulo}
                     className="h-24 w-24 rounded"
                   />
