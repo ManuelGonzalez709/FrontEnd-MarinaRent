@@ -230,7 +230,13 @@ export default function Registro() {
         <p className="text-center text-sm text-gray-600 mt-6">
           ¿Ya tienes cuenta?{" "}
           <span className="underline cursor-pointer hover:text-blue-700">
-            <a href="/">Iniciar Sesión</a>
+           <span className="underline cursor-pointer hover:text-blue-700">
+            <span
+            onClick={() => navigate("/")}
+            className="underline cursor-pointer hover:text-blue-700"
+          >
+            Iniciar Sesión
+          </span></span>
           </span>
         </p>
       </div>
