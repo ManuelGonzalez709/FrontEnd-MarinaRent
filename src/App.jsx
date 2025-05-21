@@ -13,6 +13,7 @@ import Reservas from './pages/Reservas';
 import Perfil from './pages/Perfil';
 import Admin from './pages/Admin';
 import Registro from './pages/Register';
+import RecuperarPassword from './pages/ResetPass';
 import { API_URL } from './utilities/apirest';
 import axios from 'axios';
 
@@ -64,7 +65,7 @@ function AppContent() {
 
   return (
     <>
-      {location.pathname !== "/" && location.pathname !== "/registro" && <Navbar admin={admin} />}
+      {location.pathname !== "/" && location.pathname !== "/registro" && location.pathname !== "/recuperar" && <Navbar admin={admin} />}
 
       <Routes>
 
@@ -75,6 +76,10 @@ function AppContent() {
         <Route
           path="/registro"
           element={!isAuthenticated ? <Registro /> : <Navigate to="/home" replace />}
+        />
+        <Route
+          path="/recuperar"
+          element={!isAuthenticated ? <RecuperarPassword /> : <Navigate to="/home" replace />}
         />
 
         <Route
@@ -123,7 +128,7 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {location.pathname !== "/" && location.pathname !== "/registro" && <Footer />}
+      {location.pathname !== "/" && location.pathname !== "/registro" && location.pathname !== "/recuperar" && <Footer />}
     </>
   );
 }
