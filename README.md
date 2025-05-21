@@ -47,3 +47,21 @@ La base de datos del proyecto consta de 3 tablas principales:
 ```bash
 git clone https://github.com/tu-usuario/beachrent.git
 cd beachrent
+````
+2. **Instala las dependencias**:
+   
+```bash
+npm install
+````
+3. **Configura las variables de entorno**:
+
+```bash
+const URLSERVER = "https://manu.cicloflorenciopintado.es/laravel/";
+export const API_URL = URLSERVER+"public/"
+export const IMAGE_URL = URLSERVER+"storage/app/public/photos/";
+````
+4. **Ejecuta la Aplicacion**:
+   
+```bash
+npm run dev
+````
