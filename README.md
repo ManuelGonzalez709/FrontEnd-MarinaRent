@@ -1,12 +1,49 @@
-# React + Vite
+# 🏖️ Marina Rent - Plataforma de alquiler de objetos de playa
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+BeachRent es una aplicación web desarrollada en **React** que permite alquilar objetos relacionados con la playa por hora y según el número de personas. El sistema está conectado a una API REST desarrollada con **Laravel**, y permite tanto a usuarios comunes como a administradores gestionar publicaciones y reservas.
 
-Currently, two official plugins are available:
+## 🚀 Tecnologías utilizadas
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Frontend**: React (Vite)
+- **Backend**: Laravel API REST
+- **Autenticación**: JWT o tokens Laravel Sanctum (según implementación)
+- **Estilos**: TailwindCSS / CSS Modules / Styled Components (según tu stack)
+- **Routing**: React Router
+- **Manejo de estado**: React Context / Redux / Hooks personalizados (según tu stack)
 
-## Expanding the ESLint configuration
+## 🌐 API Base URL
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+La aplicación se comunica con el servidor a través de la siguiente URL base:
+
+https://manu.cicloflorenciopintado.es/laravel/public/api/
+
+
+## 📚 Estructura de la base de datos
+
+La base de datos del proyecto consta de 3 tablas principales:
+
+- **usuarios**: contiene la información de los usuarios registrados, incluyendo el rol (admin o usuario).
+- **publicaciones**: objetos disponibles para alquilar (sombrillas, hamacas, tablas, etc.).
+- **reservas**: registros de reservas con referencia al usuario, publicación, fecha, hora y número de personas.
+
+## 🔐 Roles del sistema
+
+- **Usuario común**:
+  - Puede registrarse e iniciar sesión.
+  - Puede ver las publicaciones disponibles.
+  - Puede realizar reservas por hora y por número de personas.
+  - Puede gestionar sus propias reservas.
+
+- **Administrador**:
+  - Accede a un panel de administración.
+  - Puede crear, editar y eliminar publicaciones.
+  - Puede ver todas las reservas.
+  - Puede gestionar usuarios si está habilitado.
+
+## 📦 Instalación
+
+1. **Clona el repositorio**:
+
+```bash
+git clone https://github.com/tu-usuario/beachrent.git
+cd beachrent
