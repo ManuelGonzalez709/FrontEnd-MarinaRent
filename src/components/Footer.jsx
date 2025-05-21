@@ -1,4 +1,11 @@
+"use client"
+
+import { Link, useNavigate } from "react-router-dom"
+import { Facebook, Instagram, Linkedin, Twitter, Mail, Phone } from "lucide-react"
+
 export default function Footer() {
+  const navigate = useNavigate()
+
   return (
     <footer className="bg-blue-700 text-white py-8">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -8,29 +15,29 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Enlaces rápidos</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/home" className="text-gray-300 hover:text-white">
+                <Link to="/home" className="text-gray-300 hover:text-white">
                   Inicio
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/informativos" className="text-gray-300 hover:text-white">
+                <Link to="/informativos" className="text-gray-300 hover:text-white">
                   Informativos
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/alquileres" className="text-gray-300 hover:text-white">
-                  Alquileres
-                </a>
+                <Link to="/alquilables" className="text-gray-300 hover:text-white">
+                  Reservables
+                </Link>
               </li>
               <li>
-                <a href="/reservas" className="text-gray-300 hover:text-white">
+                <Link to="/reservas" className="text-gray-300 hover:text-white">
                   Mis Reservas
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/carrito" className="text-gray-300 hover:text-white">
+                <Link to="/carrito" className="text-gray-300 hover:text-white">
                   Carrito
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -39,15 +46,14 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contacto</h3>
             <ul className="space-y-2">
-              <li>
-                <a
-                  href="mailto:contacto@empresa.com"
-                  className="text-gray-300 hover:text-white"
-                >
+              <li className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-gray-300" />
+                <a href="mailto:manuel5365@gmail.com" className="text-gray-300 hover:text-white">
                   manuel5365@gmail.com
                 </a>
               </li>
-              <li>
+              <li className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-gray-300" />
                 <p className="text-gray-300">Teléfono: +34 641 130 893</p>
               </li>
             </ul>
@@ -60,41 +66,46 @@ export default function Footer() {
               <a
                 href="https://www.instagram.com"
                 className="text-gray-300 hover:text-white"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <i className="fab fa-instagram h-6 w-6"></i>
+                <Instagram className="h-6 w-6" />
               </a>
 
               <a
                 href="https://www.facebook.com"
                 className="text-gray-300 hover:text-white"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <i className="fab fa-facebook-f h-6 w-6"></i>
+                <Facebook className="h-6 w-6" />
               </a>
 
               <a
                 href="https://x.com"
                 className="text-gray-300 hover:text-white"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <i className="fab fa-x h-6 w-6"></i> {/* X (anteriormente Twitter) */}
+                <Twitter className="h-6 w-6" />
               </a>
 
               <a
                 href="https://www.linkedin.com"
                 className="text-gray-300 hover:text-white"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <i className="fab fa-linkedin h-6 w-6"></i>
+                <Linkedin className="h-6 w-6" />
               </a>
             </div>
           </div>
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-400">
-          <p>
-            &copy; {new Date().getFullYear()} Marina Rent. Todos los derechos
-            reservados.
-          </p>
+          <p>&copy; {new Date().getFullYear()} Marina Rent. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>
-  );
+  )
 }
