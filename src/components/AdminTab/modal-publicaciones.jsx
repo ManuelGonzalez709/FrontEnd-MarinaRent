@@ -266,6 +266,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
 
       // Añadir las nuevas imágenes con el nombre "imagenes[]"
       newImageObjects.forEach((imgObj) => {
+        console.log("Añadiendo imagen:", imgObj.file)
         formDataToSend.append("imagenes[]", imgObj.file)
       })
 

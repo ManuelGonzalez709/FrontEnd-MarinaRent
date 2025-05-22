@@ -1,9 +1,41 @@
+"use client"
+
 import { useNavigate } from "react-router-dom"
 import { CheckCircleIcon } from "@heroicons/react/24/solid"
 import MarbellaMap from "../components/MarbellaMap"
+import { useEffect, useState } from "react"
+import { API_URL, IMAGE_URL } from "../utilities/apirest"
+import axios from "axios"
 
 export default function Home() {
   const navigate = useNavigate()
+  const [publicaciones, setPublicaciones] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const obtenerPublicaciones = async () => {
+      try {
+        const url = API_URL + "api/publicacionesAleatorias"
+        const token = localStorage.getItem("authToken")
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+        setLoading(true)
+        const response = await axios.get(url, { headers })
+        setPublicaciones(response.data)
+      } catch (error) {
+        console.error("Error al obtener publicaciones:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    obtenerPublicaciones()
+  }, [])
+
+  // Función para obtener la primera imagen de la cadena de imágenes
+  const obtenerPrimeraImagen = (imagenes) => {
+    if (!imagenes) return ""
+    const primeraImagen = imagenes.split(";")[0]
+    return `${IMAGE_URL}${primeraImagen}`
+  }
 
   return (
     <>
@@ -71,97 +103,49 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Segunda sección */}
+        {/* Segunda sección - Publicaciones Aleatorias */}
         <section className="py-8 md:py-16 bg-gray-50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-center text-blue-900">
-              Servicios que Ofrecemos
+              Publicaciones Destacadas
             </h2>
-            <div className="mt-6 md:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-              {/* Tarjeta 1 - Snorkel */}
-              <div className="flex flex-col items-center rounded-lg bg-white p-4 md:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <img
-                  src="snorker.jpg"
-                  alt="Snorkel"
-                  className="w-full h-48 sm:h-50 object-cover rounded mb-4 md:mb-6 hover:blur-sm scale-[1.01] transition duration-1000"
-                />
-                <h3 className="text-lg md:text-xl font-semibold text-blue-700">Snorkel</h3>
-                <p className="text-center text-sm md:text-base text-gray-600 mt-2">
-                  Vive una experiencia única explorando los arrecifes de coral y observando la vida marina desde la
-                  superficie.
-                </p>
-              </div>
 
-              {/* Tarjeta 2 - Viajes en Barco */}
-              <div className="flex flex-col items-center rounded-lg bg-white p-4 md:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <img
-                  src="viajesBarco.jpg"
-                  alt="Viajes en Barco"
-                  className="w-full h-48 sm:h-50 object-cover rounded mb-4 md:mb-6 hover:blur-sm scale-[1.01] transition duration-1000"
-                />
-                <h3 className="text-lg md:text-xl font-semibold text-blue-700">Viajes en Barco</h3>
-                <p className="text-center text-sm md:text-base text-gray-600 mt-2">
-                  Disfruta de un relajante paseo en barco por aguas cristalinas, descubriendo vistas panorámicas y
-                  playas escondidas.
-                </p>
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-700"></div>
               </div>
+            ) : (
+              <div className="mt-6 md:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+                {publicaciones.map((publicacion) => (
+                  <div
+                    key={publicacion.id}
+                    className="flex flex-col items-center rounded-lg bg-white p-4 md:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                    onClick={() => {navigate("/mostrador", { state: { elemento:publicacion } })}}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className="relative w-full">
+                      <img
+                        src={obtenerPrimeraImagen(publicacion.imagen) || "/placeholder.svg"}
+                        alt={publicacion.titulo}
+                        className="w-full h-48 sm:h-50 object-cover rounded mb-4 md:mb-6 hover:blur-sm scale-[1.01] transition duration-1000"
+                        onError={(e) => {
+                          // Imagen de respaldo si falla la carga
+                          e.target.src = "placeholder.jpg"
+                        }}
+                      />
 
-              {/* Tarjeta 3 - Excursiones */}
-              <div className="flex flex-col items-center rounded-lg bg-white p-4 md:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <img
-                  src="excursiones.jpg"
-                  alt="Excursiones"
-                  className="w-full h-48 sm:h-50 object-cover rounded mb-4 md:mb-6 hover:blur-sm scale-[1.01] transition duration-1000"
-                />
-                <h3 className="text-lg md:text-xl font-semibold text-blue-700">Excursiones</h3>
-                <p className="text-center text-sm md:text-base text-gray-600 mt-2">
-                  Disfruta de excursiones guiadas por paisajes impresionantes, explorando rincones ocultos y sitios
-                  naturales impresionantes.
-                </p>
-              </div>
+                    </div>
+                    <h3 className="text-lg md:text-xl font-semibold text-blue-700 line-clamp-1">
+                      {publicacion.titulo}
+                    </h3>
+                    <p className="text-center text-sm md:text-base text-gray-600 mt-2 line-clamp-3">
+                      {publicacion.descripcion}
+                    </p>
 
-              {/* Tarjeta 4 - Snorkel (repetida) */}
-              <div className="flex flex-col items-center rounded-lg bg-white p-4 md:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <img
-                  src="snorker.jpg"
-                  alt="Snorkel"
-                  className="w-full h-48 sm:h-50 object-cover rounded mb-4 md:mb-6 hover:blur-sm scale-[1.01] transition duration-1000"
-                />
-                <h3 className="text-lg md:text-xl font-semibold text-blue-700">Snorkel</h3>
-                <p className="text-center text-sm md:text-base text-gray-600 mt-2">
-                  Vive una experiencia única explorando los arrecifes de coral y observando la vida marina desde la
-                  superficie.
-                </p>
+                  </div>
+                ))}
               </div>
-
-              {/* Tarjeta 5 - Viajes en Barco (repetida) */}
-              <div className="flex flex-col items-center rounded-lg bg-white p-4 md:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <img
-                  src="viajesBarco.jpg"
-                  alt="Viajes en Barco"
-                  className="w-full h-48 sm:h-50 object-cover rounded mb-4 md:mb-6 hover:blur-sm scale-[1.01] transition duration-1000"
-                />
-                <h3 className="text-lg md:text-xl font-semibold text-blue-700">Viajes en Barco</h3>
-                <p className="text-center text-sm md:text-base text-gray-600 mt-2">
-                  Disfruta de un relajante paseo en barco por aguas cristalinas, descubriendo vistas panorámicas y
-                  playas escondidas.
-                </p>
-              </div>
-
-              {/* Tarjeta 6 - Excursiones (repetida) */}
-              <div className="flex flex-col items-center rounded-lg bg-white p-4 md:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <img
-                  src="excursiones.jpg"
-                  alt="Excursiones"
-                  className="w-full h-48 sm:h-50 object-cover rounded mb-4 md:mb-6 hover:blur-sm scale-[1.01] transition duration-1000"
-                />
-                <h3 className="text-lg md:text-xl font-semibold text-blue-700">Excursiones</h3>
-                <p className="text-center text-sm md:text-base text-gray-600 mt-2">
-                  Disfruta de excursiones guiadas por paisajes impresionantes, explorando rincones ocultos y sitios
-                  naturales impresionantes.
-                </p>
-              </div>
-            </div>
+            )}
           </div>
         </section>
 
