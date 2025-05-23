@@ -14,14 +14,6 @@ const CohereChat = () => {
     token: "bWXyUM9gislciEY3l0DhkZtPKJyGaX77cJC0qnWo",
   })
 
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
   const sendMessage = async (content) => {
     if (!content.trim()) return
 
