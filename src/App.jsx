@@ -13,6 +13,7 @@ import Reservas from './pages/Reservas';
 import Perfil from './pages/Perfil';
 import Admin from './pages/Admin';
 import Registro from './pages/Register';
+import CohereChat from './pages/ai';
 import RecuperarPassword from './pages/ResetPass';
 import { API_URL } from './utilities/apirest';
 import axios from 'axios';
@@ -81,7 +82,6 @@ function AppContent() {
           path="/recuperar"
           element={!isAuthenticated ? <RecuperarPassword /> : <Navigate to="/home" replace />}
         />
-
         <Route
           path="/home"
           element={isAuthenticated ? <Home /> : <Navigate to="/" replace />}
@@ -115,6 +115,10 @@ function AppContent() {
           element={isAuthenticated ? <Perfil /> : <Navigate to="/" replace />}
         />
         <Route
+          path="/iacohere"
+          element={isAuthenticated ? <CohereChat /> : <Navigate to="/" replace />}
+        />
+        <Route
           path="/admin"
           element={
             isAuthenticated
@@ -124,7 +128,6 @@ function AppContent() {
               : <Navigate to="/" replace />
           }
         />
-
         <Route path="*" element={<NotFound />} />
       </Routes>
 

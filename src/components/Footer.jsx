@@ -39,6 +39,11 @@ export default function Footer() {
                   Carrito
                 </Link>
               </li>
+               <li>
+                <Link to="/iacohere" className="text-gray-300 hover:text-white">
+                  IA Chatbox
+                </Link>
+              </li>
             </ul>
           </div>
 

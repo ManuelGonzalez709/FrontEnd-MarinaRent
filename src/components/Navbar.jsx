@@ -20,6 +20,7 @@ export default function Example({ admin }) {
     { name: "Reservables", href: "/alquilables" },
     { name: "Mis Reservas", href: "/reservas" },
     { name: "Carrito", href: "/carrito" },
+    { name: "IA Chatbox", href: "/iacohere" },
     { name: "Admin", href: "/admin" }, // Siempre incluido pero se ocultará con CSS
   ].map((item) => ({
     ...item,
