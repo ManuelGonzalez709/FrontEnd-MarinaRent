@@ -1,5 +1,3 @@
-🔗 https://manu.cicloflorenciopintado.es
-
 ![image](https://github.com/user-attachments/assets/6d9617ca-ef31-44ee-b358-b4e10f187250)
 
 # 🏖️ Marina Rent - Plataforma de alquiler de objetos de playa
@@ -15,12 +13,15 @@ BeachRent es una aplicación web desarrollada en **React** que permite alquilar 
 - **Routing**: React Router
 - **Manejo de estado**: React Context / Redux / Hooks personalizados (según tu stack)
 
-## 🌐 API Base URL
+## 🌐 Base URL`s
+
+La aplicación se encuentra desplegada en la siguiente URL:
+
+[https://manu.cicloflorenciopintado.es/](https://manu.cicloflorenciopintado.es/)
 
 La aplicación se comunica con el servidor a través de la siguiente URL base:
 
-https://manu.cicloflorenciopintado.es/laravel/public/api/
-
+[https://manu.cicloflorenciopintado.es/laravel/public/api/](https://manu.cicloflorenciopintado.es/laravel/public/api/)
 
 ## 📚 Estructura de la base de datos
 
