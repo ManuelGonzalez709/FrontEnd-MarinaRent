@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: time-slider.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: time-slider.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file time-slider.jsx
+ * @description Componente selector de hora con slider visual, iconos según el momento del día y control de disponibilidad.
+ * @module components/time-slider
+ */
+
+"use client"
+
+import { useState, useEffect } from "react"
+import { Slider } from "@/components/ui/slider"
+import { Clock, Sun, Sunrise, Sunset, Moon } from "lucide-react"
+
+/**
+ * Componente TimeSlider.
+ * Permite seleccionar una hora del día con un slider, mostrando iconos y estilos según el momento (amanecer, día, atardecer, noche).
+ *
+ * @param {Object} props
+ * @param {string|number} props.id - Identificador del slider.
+ * @param {number} props.hora - Hora inicial seleccionada.
+ * @param {function} props.setHora - Función para actualizar la hora seleccionada.
+ * @param {boolean} props.disponible - Indica si la hora está disponible.
+ * @param {boolean} props.horaPasada - Indica si la hora ya ha pasado.
+ * @returns {JSX.Element} El slider de selección de hora.
+ */
+export default function TimeSlider({ id, hora, setHora, disponible, horaPasada }) {
+  const [hour, setHour] = useState(hora)
+  const [minute, setMinute] = useState(0)
+  const [timeOfDay, setTimeOfDay] = useState("day")
+
+  /**
+   * Maneja el cambio del slider y actualiza la hora y minutos.
+   * @param {Array&lt;number>} value
+   */
+  const handleSliderChange = (value) => {
+    const totalHours = value[0]
+    const hours = Math.floor(totalHours)
+    const mins = Math.round((totalHours - hours) * 60)
+    setHour(hours)
+    setMinute(mins)
+  }
+
+  // Actualiza el momento del día según la hora seleccionada
+  useEffect(() => {
+    if (hour >= 5 &amp;&amp; hour &lt; 8) {
+      setTimeOfDay("dawn")
+    } else if (hour >= 8 &amp;&amp; hour &lt; 18) {
+      setTimeOfDay("day")
+    } else if (hour >= 18 &amp;&amp; hour &lt; 21) {
+      setTimeOfDay("dusk")
+    } else {
+      setTimeOfDay("night")
+    }
+  }, [hour])
+
+  /**
+   * Formatea la hora y minutos a string HH:mm.
+   * @returns {string}
+   */
+  const formatTime = () => {
+    const formattedHour = hour.toString().padStart(2, "0")
+    const formattedMinute = minute.toString().padStart(2, "0")
+    return `${formattedHour}:${formattedMinute}`
+  }
+
+  /**
+   * Devuelve el icono correspondiente al momento del día.
+   * @returns {JSX.Element}
+   */
+  const getTimeIcon = () => {
+    switch (timeOfDay) {
+      case "dawn":
+        return &lt;Sunrise className="h-8 w-8 text-amber-500" />
+      case "day":
+        return &lt;Sun className="h-8 w-8 text-yellow-500" />
+      case "dusk":
+        return &lt;Sunset className="h-8 w-8 text-orange-500" />
+      case "night":
+        return &lt;Moon className="h-8 w-8 text-white" />
+      default:
+        return &lt;Clock className="h-8 w-8 text-gray-700" />
+    }
+  }
+
+  /**
+   * Devuelve los estilos de fondo según el momento del día.
+   * @returns {string}
+   */
+  const getTimeStyles = () => {
+    switch (timeOfDay) {
+      case "dawn":
+        return "bg-gradient-to-br from-amber-100 to-rose-100 text-amber-900"
+      case "day":
+        return "bg-gradient-to-br from-sky-100 to-blue-100 text-sky-900"
+      case "dusk":
+        return "bg-gradient-to-br from-orange-100 to-rose-100 text-orange-900"
+      case "night":
+        return "bg-gradient-to-br from-indigo-900 to-purple-900 text-white"
+      default:
+        return "bg-gradient-to-br from-gray-100 to-gray-200 text-gray-900"
+    }
+  }
+
+  /**
+   * Muestra mensajes de disponibilidad según el estado.
+   * @returns {JSX.Element|undefined}
+   */
+  const comprobarDisponibilidad = () => {
+    if (disponible === false)
+      return &lt;div className="text-red-500 font-semibold">No Disponible&lt;/div>
+    else if (horaPasada === true)
+      return &lt;div className="text-red-500 font-semibold">Hora pasada&lt;/div>
+  }
+
+  return (
+    &lt;div className={`w-full max-w-md mt-6 mx-auto p-6 rounded-xl shadow-lg transition-colors duration-500 ${getTimeStyles()}`}>
+      &lt;div className="flex flex-col items-center space-y-6">
+        {/* Línea con icono, hora y AM/PM */}
+        &lt;div className="flex items-center gap-3">
+          {getTimeIcon()}
+          &lt;div className="text-3xl font-bold tracking-tight">{formatTime()}&lt;/div>
+          &lt;div className="text-sm font-medium opacity-80">{hour &lt; 12 ? "AM" : "PM"}&lt;/div>
+        &lt;/div>
+
+        {/* Mostrar disponibilidad */}
+        {comprobarDisponibilidad()}
+
+        {/* Slider */}
+        &lt;div className="w-full px-2">
+          &lt;Slider value={[hour]} max={22} step={1} onValueChange={handleSliderChange} onPointerUp={() => setHora(hour)} className="my-4" />
+          &lt;div className="flex justify-between text-xs font-medium opacity-70">
+            &lt;span>08:00&lt;/span>
+            &lt;span>15:00&lt;/span>
+            &lt;span>22:00&lt;/span>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  )
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-components_Calendar.html">components/Calendar</a></li><li><a href="module-components_MarbellaMap.html">components/MarbellaMap</a></li><li><a href="module-components_Navbar.html">components/Navbar</a></li><li><a href="module-components_buscador.html">components/buscador</a></li><li><a href="module-components_day-details-modal.html">components/day-details-modal</a></li><li><a href="module-components_person-chooser.html">components/person-chooser</a></li><li><a href="module-components_time-slider.html">components/time-slider</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed May 28 2025 12:38:35 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

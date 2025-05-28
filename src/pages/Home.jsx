@@ -7,11 +7,31 @@ import { useEffect, useState } from "react"
 import { API_URL, IMAGE_URL } from "../utilities/apirest"
 import axios from "axios"
 
+/**
+ * Página principal (Home) de la aplicación.
+ * Muestra un video de portada, razones para elegir MarinaRent, publicaciones destacadas y un mapa.
+ * @component
+ * @returns {JSX.Element}
+ */
 export default function Home() {
+  /**
+   * Hook de navegación de React Router.
+   */
   const navigate = useNavigate()
+  /**
+   * Lista de publicaciones destacadas obtenidas de la API.
+   *   {[Array, Function]}
+   */
   const [publicaciones, setPublicaciones] = useState([])
+  /**
+   * Estado de carga para mostrar loader mientras se obtienen las publicaciones.
+   *   {[boolean, Function]}
+   */
   const [loading, setLoading] = useState(true)
 
+  /**
+   * Efecto para obtener publicaciones aleatorias al montar el componente.
+   */
   useEffect(() => {
     const obtenerPublicaciones = async () => {
       try {
@@ -30,7 +50,11 @@ export default function Home() {
     obtenerPublicaciones()
   }, [])
 
-  // Función para obtener la primera imagen de la cadena de imágenes
+  /**
+   * Obtiene la primera imagen de la cadena de imágenes separadas por punto y coma.
+   * @param {string} imagenes - Cadena de imágenes separadas por ';'
+   * @returns {string} - URL de la primera imagen
+   */
   const obtenerPrimeraImagen = (imagenes) => {
     if (!imagenes) return ""
     const primeraImagen = imagenes.split(";")[0]
@@ -40,6 +64,7 @@ export default function Home() {
   return (
     <>
       <main>
+        {/* Sección de video de portada con texto superpuesto */}
         <div className="relative w-full aspect-video">
           {/* Texto encima del video */}
           <div className="absolute inset-0 flex flex-col justify-center items-center z-10 bg-black/20 px-4">
@@ -50,8 +75,7 @@ export default function Home() {
               Diversión desde el Principio
             </h2>
           </div>
-
-          {/* Iframe responsive */}
+          {/* Iframe de YouTube como fondo de video */}
           <iframe
             id="player"
             className="absolute inset-0 w-full h-full border-0"
@@ -63,11 +87,12 @@ export default function Home() {
           />
         </div>
 
+        {/* Banner de TripAdvisor */}
         <div className="w-full justify-center flex bg-green-400 py-2 md:py-0">
           <img src="tripadvaisor.png" alt="TripAdvisor" className="h-20 md:h-40" />
         </div>
 
-        {/* Sección 10 razones - Responsiva */}
+        {/* Sección de 10 razones para elegir MarinaRent */}
         <section className="flex flex-col md:flex-row">
           <div className="w-full md:w-1/2 flex flex-col items-start py-8 md:py-16 px-4 md:px-5">
             <h2 className="text-3xl sm:text-4xl md:text-5xl">
@@ -77,9 +102,9 @@ export default function Home() {
               Desde 1991, MarinaRent ha brindado una gama completa de buceo, snorkel, tours y deportes acuáticos para
               los mejores destinos de playa del mundo.
             </p>
-
+            {/* Lista de razones con icono */}
             <ul className="flex flex-row flex-wrap font-bold text-sm sm:text-base md:text-lg text-gray-700">
-              {[
+             {[
                 "Más de 30 años de experiencia",
                 "Embajadores ambientales",
                 "Expansión global",
@@ -98,23 +123,25 @@ export default function Home() {
               ))}
             </ul>
           </div>
+          {/* Imagen de barco a la derecha */}
           <div className="w-full md:w-1/2">
             <img src="barcoPortada.jpg" alt="Barco Marina Rent" className="w-full h-auto object-cover" />
           </div>
         </section>
 
-        {/* Segunda sección - Publicaciones Aleatorias */}
+        {/* Sección de publicaciones destacadas */}
         <section className="py-8 md:py-16 bg-gray-50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-center text-blue-900">
               Publicaciones Destacadas
             </h2>
-
+            {/* Loader mientras se cargan las publicaciones */}
             {loading ? (
               <div className="flex justify-center items-center py-20">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-700"></div>
               </div>
             ) : (
+              // Grid de publicaciones destacadas
               <div className="mt-6 md:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                 {publicaciones.map((publicacion) => (
                   <div
@@ -133,7 +160,6 @@ export default function Home() {
                           e.target.src = "placeholder.jpg"
                         }}
                       />
-
                     </div>
                     <h3 className="text-lg md:text-xl font-semibold text-blue-700 line-clamp-1">
                       {publicacion.titulo}
@@ -141,7 +167,6 @@ export default function Home() {
                     <p className="text-center text-sm md:text-base text-gray-600 mt-2 line-clamp-3">
                       {publicacion.descripcion}
                     </p>
-
                   </div>
                 ))}
               </div>
@@ -149,6 +174,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Mapa de Marbella */}
         <MarbellaMap />
       </main>
     </>

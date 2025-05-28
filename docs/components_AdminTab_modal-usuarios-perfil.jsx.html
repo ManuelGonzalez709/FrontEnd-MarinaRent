@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/AdminTab/modal-usuarios-perfil.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/AdminTab/modal-usuarios-perfil.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use client"
+
+/**
+ * @file modal-usuarios-perfil.jsx
+ * @description Modal para editar el perfil de usuario o crear usuarios desde el panel de administración.
+ * Permite modificar datos personales y restablecer la contraseña.
+ */
+
+import { useState, useEffect } from "react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import axios from "axios"
+import { API_URL } from "../../utilities/apirest"
+import { AlertCircle } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+
+/**
+ * Modal para editar el perfil de usuario o crear usuarios.
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Si el modal está abierto.
+ * @param {Function} props.setIsOpen - Función para abrir/cerrar el modal.
+ * @param {Object} [props.user] - Usuario a editar (si existe).
+ * @param {boolean} [props.isProfileEdit=false] - Si es edición de perfil.
+ * @returns {JSX.Element}
+ */
+export default function UsuariosModal({ isOpen, setIsOpen, user, isProfileEdit = false }) {
+  /**
+   * Estado de carga para el guardado.
+   *   {[boolean, Function]}
+   */
+  const [isLoading, setIsLoading] = useState(false)
+  /**
+   * Estado de carga para el restablecimiento de contraseña.
+   *   {[boolean, Function]}
+   */
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false)
+  /**
+   * Estado de éxito al restablecer contraseña.
+   *   {[boolean, Function]}
+   */
+  const [resetSuccess, setResetSuccess] = useState(false)
+  /**
+   * Estado de error al restablecer contraseña.
+   *   {[boolean, Function]}
+   */
+  const [resetError, setResetError] = useState(false)
+  /**
+   * Estado del formulario del usuario.
+   *   {[Object, Function]}
+   */
+  const [formData, setFormData] = useState({
+    Nombre: "",
+    Apellidos: "",
+    Fecha_nacimiento: "",
+  })
+
+  /**
+   * Efecto para cargar los datos del usuario al abrir el modal.
+   */
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        id_usuario: user.id,
+        Nombre: user.Nombre,
+        Apellidos: user.Apellidos,
+        Email: user.Email,
+        Tipo: user.Tipo,
+        Fecha_nacimiento: user.Fecha_nacimiento,
+      })
+    }
+  }, [user])
+
+  /**
+   * Maneja el cambio de los campos del formulario.
+   * @param {React.ChangeEvent&lt;HTMLInputElement>} e
+   */
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prevData) => ({ ...prevData, [name]: value }))
+  }
+
+  /**
+   * Guarda los cambios del usuario (actualiza o crea).
+   */
+  const handleSave = () => {
+    setIsLoading(true)
+    const token = localStorage.getItem("authToken")
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
+    if (user != null) {
+      axios
+        .post(`${API_URL}api/usuarios/actualizar`, formData, { headers })
+        .then((response) => {
+          setIsOpen(false) // Cerrar el modal
+        })
+        .catch((error) => {
+          console.error("Error al actualizar usuario", error)
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+    } else {
+      axios
+        .post(`${API_URL}api/usuarios`, formData, { headers })
+        .then((response) => {
+          setIsOpen(false) // Cerrar el modal
+        })
+        .catch((error) => {
+          console.error("Error al actualizar usuario", error)
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+    }
+  }
+
+  /**
+   * Envía un email para restablecer la contraseña del usuario.
+   */
+  const handleResetPassword = () => {
+    setResetPasswordLoading(true)
+    setResetSuccess(false)
+    setResetError(false)
+
+    const token = localStorage.getItem("authToken")
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
+    axios
+      .post(`${API_URL}api/enviar-restablecimiento`, { email: user.Email }, { headers })
+      .then((response) => {
+        setResetSuccess(true)
+      })
+      .catch((error) => {
+        setResetError(true)
+      })
+      .finally(() => {
+        setResetPasswordLoading(false)
+      })
+  }
+
+  return (
+    &lt;Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
+      &lt;DialogContent>
+        &lt;DialogHeader>
+          &lt;DialogTitle>Editar Perfil&lt;/DialogTitle>
+          &lt;DialogDescription>Modifica tu información personal.&lt;/DialogDescription>
+        &lt;/DialogHeader>
+        &lt;div className="space-y-4">
+          {/* Campo Nombre */}
+          &lt;label className="text-sm font-medium text-gray-700 mb-1 block">Nombre&lt;/label>
+          &lt;Input name="Nombre" value={formData.Nombre} onChange={handleChange} />
+          {/* Campo Apellidos */}
+          &lt;label className="text-sm font-medium text-gray-700 mb-1 block">Apellidos&lt;/label>
+          &lt;Input name="Apellidos" value={formData.Apellidos} onChange={handleChange} />
+          {/* Campo Fecha de Nacimiento */}
+          &lt;label className="text-sm font-medium text-gray-700 mb-1 block">Fecha de Nacimiento&lt;/label>
+          &lt;Input name="Fecha_nacimiento" type="date" value={formData.Fecha_nacimiento} onChange={handleChange} />
+
+          {/* Sección de seguridad para restablecer contraseña */}
+          {user &amp;&amp; (
+            &lt;div className="pt-4 border-t">
+              &lt;h3 className="text-sm font-medium text-gray-700 mb-2">Seguridad&lt;/h3>
+              {resetSuccess &amp;&amp; (
+                &lt;Alert className="mb-3 bg-green-50 border-green-200">
+                  &lt;AlertDescription className="text-green-700">
+                    Se ha enviado un correo para restablecer tu contraseña.
+                  &lt;/AlertDescription>
+                &lt;/Alert>
+              )}
+              {resetError &amp;&amp; (
+                &lt;Alert variant="destructive" className="mb-3">
+                  &lt;AlertCircle className="h-4 w-4" />
+                  &lt;AlertDescription>Error al enviar la solicitud. Inténtalo de nuevo.&lt;/AlertDescription>
+                &lt;/Alert>
+              )}
+              &lt;Button
+                variant="outline"
+                className="w-full"
+                onClick={handleResetPassword}
+                disabled={resetPasswordLoading}
+              >
+                {resetPasswordLoading ? "Enviando..." : "Restablecer contraseña"}
+              &lt;/Button>
+              &lt;p className="text-xs text-gray-500 mt-2">
+                Se enviará un enlace a tu correo electrónico para restablecer tu contraseña.
+              &lt;/p>
+            &lt;/div>
+          )}
+        &lt;/div>
+
+        &lt;DialogFooter>
+          {isLoading ? (
+            &lt;Button variant="outline">Guardando...&lt;/Button>
+          ) : (
+            &lt;>
+              &lt;Button variant="secondary" onClick={() => setIsOpen(false)}>
+                Cancelar
+              &lt;/Button>
+              &lt;Button onClick={handleSave}>Guardar cambios&lt;/Button>
+            &lt;/>
+          )}
+        &lt;/DialogFooter>
+      &lt;/DialogContent>
+    &lt;/Dialog>
+  )
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-components_Calendar.html">components/Calendar</a></li><li><a href="module-components_MarbellaMap.html">components/MarbellaMap</a></li><li><a href="module-components_Navbar.html">components/Navbar</a></li><li><a href="module-components_buscador.html">components/buscador</a></li><li><a href="module-components_day-details-modal.html">components/day-details-modal</a></li><li><a href="module-components_person-chooser.html">components/person-chooser</a></li><li><a href="module-components_time-slider.html">components/time-slider</a></li></ul><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#AppContent">AppContent</a></li><li><a href="global.html#CohereChat">CohereChat</a></li><li><a href="global.html#Login">Login</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed May 28 2025 13:30:18 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

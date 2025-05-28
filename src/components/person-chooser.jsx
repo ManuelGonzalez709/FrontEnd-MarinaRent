@@ -1,8 +1,28 @@
+/**
+ * @file person-chooser.jsx
+ * @description Selector visual para elegir el número de personas, deshabilitando opciones según disponibilidad.
+ * @module components/person-chooser
+ */
+
 import { useState } from 'react';
 
-const SelectorPersonas = ({ personasDisponibles ,setPersonas,selected}) => {
+/**
+ * SelectorPersonas
+ * Componente para seleccionar el número de personas, mostrando opciones deshabilitadas si exceden la disponibilidad.
+ *
+ * @param {Object} props
+ * @param {number} props.personasDisponibles - Número máximo de personas disponibles.
+ * @param {function} props.setPersonas - Función para actualizar el número de personas seleccionadas.
+ * @param {string|number} props.selected - Valor inicial seleccionado.
+ * @returns {JSX.Element} Selector visual de personas.
+ */
+const SelectorPersonas = ({ personasDisponibles, setPersonas, selected }) => {
   const [selectedPerson, setSelectedPerson] = useState(selected);
 
+  /**
+   * Maneja el cambio de selección de persona.
+   * @param {React.ChangeEvent<HTMLInputElement>} e
+   */
   const handleSelect = (e) => {
     setSelectedPerson(e.target.value);
     setPersonas(e.target.value);

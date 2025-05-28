@@ -1,7 +1,13 @@
 "use client"
 
+/**
+ * @file usuarios.jsx
+ * @description Vista de administración para listar, buscar, crear, editar y eliminar usuarios.
+ * Incluye paginación, búsqueda, restablecimiento de contraseña y modales para edición/creación.
+ */
+
 import { useEffect, useState } from "react"
-import { Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import axios from "axios"
@@ -11,23 +17,73 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import UsuariosModal from "./modal-usuarios"
 
 export default function Usuarios() {
+  /**
+   * Lista de usuarios cargados.
+   *   {[Array, Function]}
+   */
   const [usuarios, setUsuarios] = useState([])
+  /**
+   * Estado de carga.
+   *   {[boolean, Function]}
+   */
   const [loading, setLoading] = useState(true)
+  /**
+   * Estado para mostrar el modal de edición/creación.
+   *   {[boolean, Function]}
+   */
   const [isModalOpen, setIsModalOpen] = useState(false)
+  /**
+   * Usuario seleccionado para editar.
+   *   {[Object|null, Function]}
+   */
   const [selectedUser, setSelectedUser] = useState(null)
+  /**
+   * Estado para mostrar el diálogo de confirmación de borrado.
+   *   {[boolean, Function]}
+   */
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
+  /**
+   * Usuario seleccionado para eliminar.
+   *   {[Object|null, Function]}
+   */
   const [userToDelete, setUserToDelete] = useState(null)
+  /**
+   * Estado de carga para el borrado.
+   *   {[boolean, Function]}
+   */
   const [isDeleting, setIsDeleting] = useState(false)
+  /**
+   * Estado de búsqueda.
+   *   {(string|Function)[]}
+   */
   const [searchQuery, setSearchQuery] = useState("")
+  /**
+   * Mensaje de feedback tras acciones.
+   *   {(string|Function)[]}
+   */
+  const [feedbackMsg, setFeedbackMsg] = useState("")
 
   // Pagination states
+  /**
+   * Página actual.
+   *   {[number, Function]}
+   */
   const [currentPage, setCurrentPage] = useState(1)
+  /**
+   * Total de páginas.
+   *   {[number, Function]}
+   */
   const [totalPages, setTotalPages] = useState(1)
 
   useEffect(() => {
     fetchUsuarios(currentPage)
+    setFeedbackMsg("")
   }, [isModalOpen, confirmDialogOpen, currentPage])
 
+  /**
+   * Obtiene los usuarios paginados desde la API.
+   * @param {number} page
+   */
   const fetchUsuarios = (page = 1) => {
     setLoading(true)
     const token = localStorage.getItem("authToken")
@@ -52,24 +108,38 @@ export default function Usuarios() {
       })
   }
 
+  /**
+   * Abre el modal para editar o crear usuario.
+   * @param {Object|null} user
+   */
   const handleEditClick = (user) => {
     setSelectedUser(user)
     setIsModalOpen(true)
   }
 
+  /**
+   * Envía un correo de restablecimiento de contraseña.
+   * @param {Object} user
+   */
   const handleEnviarRestablecimientoClick = (user) => {
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
     axios
       .post(API_URL + "api/enviar-restablecimiento", { email: user.Email }, { headers })
-      .then((response) => {
-        console.log(response)
+      .then(() => {
+        setFeedbackMsg("Correo de restablecimiento enviado correctamente.")
+        setTimeout(() => setFeedbackMsg(""), 2000)
       })
       .catch((error) => {
+        setFeedbackMsg("Error al enviar el correo de restablecimiento.")
+        setTimeout(() => setFeedbackMsg(""), 2000)
         console.error("Error al enviar restablecimiento:", error)
       })
   }
 
+  /**
+   * Elimina el usuario seleccionado.
+   */
   const handleDelete = () => {
     if (!userToDelete) return
 
@@ -83,8 +153,12 @@ export default function Usuarios() {
         fetchUsuarios(currentPage)
         setConfirmDialogOpen(false)
         setUserToDelete(null)
+        setFeedbackMsg("Usuario eliminado correctamente.")
+        setTimeout(() => setFeedbackMsg(""), 2000)
       })
       .catch((error) => {
+        setFeedbackMsg("Error al eliminar usuario.")
+        setTimeout(() => setFeedbackMsg(""), 2000)
         console.error("Error al eliminar usuario:", error)
       })
       .finally(() => {
@@ -92,13 +166,17 @@ export default function Usuarios() {
       })
   }
 
+  /**
+   * Cambia la página actual de la paginación.
+   * @param {number} newPage
+   */
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage)
     }
   }
 
-  // Filter users based on search query
+  // Filtra usuarios según la búsqueda
   const filteredUsuarios = usuarios.filter(
     (user) =>
       user.Nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -129,6 +207,13 @@ export default function Usuarios() {
               Añadir Usuario
             </Button>
           </div>
+
+          {/* Mensaje de feedback */}
+          {feedbackMsg && (
+            <div className="mb-4 px-4 py-2 rounded bg-green-100 text-green-800 border border-green-200 text-center font-medium">
+              {feedbackMsg}
+            </div>
+          )}
 
           <div className="bg-white rounded-lg border overflow-sm-x-scroll overflow-y-hidden">
             <table className="min-w-full divide-y divide-gray-200">
@@ -250,14 +335,7 @@ export default function Usuarios() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M12 12v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+              <AlertTriangle className="h-5 w-5 text-red-500" />
               Confirmar eliminación
             </DialogTitle>
           </DialogHeader>

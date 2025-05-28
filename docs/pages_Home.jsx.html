@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/Home.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/Home.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use client"
+
+import { useNavigate } from "react-router-dom"
+import { CheckCircleIcon } from "@heroicons/react/24/solid"
+import MarbellaMap from "../components/MarbellaMap"
+import { useEffect, useState } from "react"
+import { API_URL, IMAGE_URL } from "../utilities/apirest"
+import axios from "axios"
+
+/**
+ * Página principal (Home) de la aplicación.
+ * Muestra un video de portada, razones para elegir MarinaRent, publicaciones destacadas y un mapa.
+ * @component
+ * @returns {JSX.Element}
+ */
+export default function Home() {
+  /**
+   * Hook de navegación de React Router.
+   */
+  const navigate = useNavigate()
+  /**
+   * Lista de publicaciones destacadas obtenidas de la API.
+   *   {[Array, Function]}
+   */
+  const [publicaciones, setPublicaciones] = useState([])
+  /**
+   * Estado de carga para mostrar loader mientras se obtienen las publicaciones.
+   *   {[boolean, Function]}
+   */
+  const [loading, setLoading] = useState(true)
+
+  /**
+   * Efecto para obtener publicaciones aleatorias al montar el componente.
+   */
+  useEffect(() => {
+    const obtenerPublicaciones = async () => {
+      try {
+        const url = API_URL + "api/publicacionesAleatorias"
+        const token = localStorage.getItem("authToken")
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+        setLoading(true)
+        const response = await axios.get(url, { headers })
+        setPublicaciones(response.data)
+      } catch (error) {
+        console.error("Error al obtener publicaciones:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    obtenerPublicaciones()
+  }, [])
+
+  /**
+   * Obtiene la primera imagen de la cadena de imágenes separadas por punto y coma.
+   * @param {string} imagenes - Cadena de imágenes separadas por ';'
+   * @returns {string} - URL de la primera imagen
+   */
+  const obtenerPrimeraImagen = (imagenes) => {
+    if (!imagenes) return ""
+    const primeraImagen = imagenes.split(";")[0]
+    return `${IMAGE_URL}${primeraImagen}`
+  }
+
+  return (
+    &lt;>
+      &lt;main>
+        {/* Sección de video de portada con texto superpuesto */}
+        &lt;div className="relative w-full aspect-video">
+          {/* Texto encima del video */}
+          &lt;div className="absolute inset-0 flex flex-col justify-center items-center z-10 bg-black/20 px-4">
+            &lt;h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white text-center">
+              Bienvenidos a Marina Rent
+            &lt;/h1>
+            &lt;h2 className="text-base sm:text-lg md:text-xl font-semibold text-white mt-2 md:mt-4 text-center">
+              Diversión desde el Principio
+            &lt;/h2>
+          &lt;/div>
+          {/* Iframe de YouTube como fondo de video */}
+          &lt;iframe
+            id="player"
+            className="absolute inset-0 w-full h-full border-0"
+            allowFullScreen
+            allow="autoplay; encrypted-media"
+            referrerPolicy="strict-origin-when-cross-origin"
+            title="ScubaCaribe"
+            src="https://www.youtube.com/embed/Hx785Tzm4UE?autoplay=1&amp;mute=1&amp;loop=1&amp;controls=0&amp;modestbranding=1&amp;rel=0&amp;disablekb=1&amp;iv_load_policy=3&amp;playlist=Hx785Tzm4UE"
+          />
+        &lt;/div>
+
+        {/* Banner de TripAdvisor */}
+        &lt;div className="w-full justify-center flex bg-green-400 py-2 md:py-0">
+          &lt;img src="tripadvaisor.png" alt="TripAdvisor" className="h-20 md:h-40" />
+        &lt;/div>
+
+        {/* Sección de 10 razones para elegir MarinaRent */}
+        &lt;section className="flex flex-col md:flex-row">
+          &lt;div className="w-full md:w-1/2 flex flex-col items-start py-8 md:py-16 px-4 md:px-5">
+            &lt;h2 className="text-3xl sm:text-4xl md:text-5xl">
+              &lt;span className="font-bold">10 RAZONES &lt;/span>POR QUÉ MARINARENT
+            &lt;/h2>
+            &lt;p className="py-3 md:py-5 text-base md:text-xl">
+              Desde 1991, MarinaRent ha brindado una gama completa de buceo, snorkel, tours y deportes acuáticos para
+              los mejores destinos de playa del mundo.
+            &lt;/p>
+            {/* Lista de razones con icono */}
+            &lt;ul className="flex flex-row flex-wrap font-bold text-sm sm:text-base md:text-lg text-gray-700">
+             {[
+                "Más de 30 años de experiencia",
+                "Embajadores ambientales",
+                "Expansión global",
+                "Familia y grupos",
+                "Altos estándares de seguridad",
+                "Amplia cartera de experiencias",
+                "Calidad y atención al cliente",
+                "Equipo de primera categoría",
+                "Flota totalmente equipada",
+                "Instructores plurilingües",
+              ].map((text, index) => (
+                &lt;li key={index} className="w-full sm:w-1/2 py-2 md:py-3 flex items-center gap-2">
+                  &lt;CheckCircleIcon className="h-5 w-5 md:h-6 md:w-6 text-blue-600 shrink-0" />
+                  {text}
+                &lt;/li>
+              ))}
+            &lt;/ul>
+          &lt;/div>
+          {/* Imagen de barco a la derecha */}
+          &lt;div className="w-full md:w-1/2">
+            &lt;img src="barcoPortada.jpg" alt="Barco Marina Rent" className="w-full h-auto object-cover" />
+          &lt;/div>
+        &lt;/section>
+
+        {/* Sección de publicaciones destacadas */}
+        &lt;section className="py-8 md:py-16 bg-gray-50">
+          &lt;div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            &lt;h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-center text-blue-900">
+              Publicaciones Destacadas
+            &lt;/h2>
+            {/* Loader mientras se cargan las publicaciones */}
+            {loading ? (
+              &lt;div className="flex justify-center items-center py-20">
+                &lt;div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-700">&lt;/div>
+              &lt;/div>
+            ) : (
+              // Grid de publicaciones destacadas
+              &lt;div className="mt-6 md:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+                {publicaciones.map((publicacion) => (
+                  &lt;div
+                    key={publicacion.id}
+                    className="flex flex-col items-center rounded-lg bg-white p-4 md:p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                    onClick={() => {navigate("/mostrador", { state: { elemento:publicacion } })}}
+                    style={{ cursor: "pointer" }}
+                  >
+                    &lt;div className="relative w-full">
+                      &lt;img
+                        src={obtenerPrimeraImagen(publicacion.imagen) || "/placeholder.svg"}
+                        alt={publicacion.titulo}
+                        className="w-full h-48 sm:h-50 object-cover rounded mb-4 md:mb-6 hover:blur-sm scale-[1.01] transition duration-1000"
+                        onError={(e) => {
+                          // Imagen de respaldo si falla la carga
+                          e.target.src = "placeholder.jpg"
+                        }}
+                      />
+                    &lt;/div>
+                    &lt;h3 className="text-lg md:text-xl font-semibold text-blue-700 line-clamp-1">
+                      {publicacion.titulo}
+                    &lt;/h3>
+                    &lt;p className="text-center text-sm md:text-base text-gray-600 mt-2 line-clamp-3">
+                      {publicacion.descripcion}
+                    &lt;/p>
+                  &lt;/div>
+                ))}
+              &lt;/div>
+            )}
+          &lt;/div>
+        &lt;/section>
+
+        {/* Mapa de Marbella */}
+        &lt;MarbellaMap />
+      &lt;/main>
+    &lt;/>
+  )
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-components_Calendar.html">components/Calendar</a></li><li><a href="module-components_MarbellaMap.html">components/MarbellaMap</a></li><li><a href="module-components_Navbar.html">components/Navbar</a></li><li><a href="module-components_buscador.html">components/buscador</a></li><li><a href="module-components_day-details-modal.html">components/day-details-modal</a></li><li><a href="module-components_person-chooser.html">components/person-chooser</a></li><li><a href="module-components_time-slider.html">components/time-slider</a></li></ul><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#AppContent">AppContent</a></li><li><a href="global.html#CohereChat">CohereChat</a></li><li><a href="global.html#Login">Login</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed May 28 2025 13:30:18 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

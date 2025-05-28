@@ -6,8 +6,26 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogD
 import axios from "axios";
 import { API_URL } from '../../utilities/apirest';
 
+/**
+ * Modal para crear o editar usuarios desde el panel de administración.
+ * Permite modificar datos personales y el rol del usuario.
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Si el modal está abierto.
+ * @param {Function} props.setIsOpen - Función para abrir/cerrar el modal.
+ * @param {Object|null} props.user - Usuario a editar (si existe) o null para crear.
+ * @returns {JSX.Element}
+ */
 export default function UsuariosModal({ isOpen, setIsOpen, user }) {
+    /**
+     * Estado de carga para el guardado.
+     *   {[boolean, Function]}
+     */
     const [isLoading, setIsLoading] = useState(false)
+    /**
+     * Estado del formulario del usuario.
+     *   {[Object, Function]}
+     */
     const [formData, setFormData] = useState({
         Nombre: '',
         Apellidos: '',
@@ -16,6 +34,9 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
         Tipo: ''
     });
 
+    /**
+     * Efecto para cargar los datos del usuario al abrir el modal.
+     */
     useEffect(() => {
         if (user) {
             setFormData({
@@ -29,11 +50,18 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
         }
     }, [user]);
 
+    /**
+     * Maneja el cambio de los campos del formulario.
+     * @param {React.ChangeEvent<HTMLInputElement>} e
+     */
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
 
+    /**
+     * Guarda los cambios del usuario (actualiza o crea).
+     */
     const handleSave = () => {
         setIsLoading(true)
         const token = localStorage.getItem("authToken");
@@ -61,7 +89,6 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
                     setIsLoading(false);
                 });
         }
-
     };
 
     return (
@@ -72,6 +99,7 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
                     <DialogDescription>Modifica la información del usuario seleccionado.</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
+                    {/* Campo Nombre */}
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Nombre</label>
                     <Input
                         label="Nombre"
@@ -79,6 +107,7 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
                         value={formData.Nombre}
                         onChange={handleChange}
                     />
+                    {/* Campo Apellidos */}
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Apellidos</label>
                     <Input
                         label="Apellidos"
@@ -86,6 +115,7 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
                         value={formData.Apellidos}
                         onChange={handleChange}
                     />
+                    {/* Campo Email */}
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Email</label>
                     <Input
                         label="Email"
@@ -93,6 +123,7 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
                         value={formData.Email}
                         onChange={handleChange}
                     />
+                    {/* Campo Fecha de Nacimiento */}
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Fecha de Nacimiento</label>
                     <Input
                         label="Fecha de Nacimiento"
@@ -101,6 +132,7 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
                         value={formData.Fecha_nacimiento}
                         onChange={handleChange}
                     />
+                    {/* Campo Contraseña solo al crear usuario */}
                     {user === null && (
                         <>
                             <label className="text-sm font-medium text-gray-700 mb-1 block">Contraseña</label>
@@ -111,8 +143,8 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
                                 onChange={handleChange}
                             />
                         </>
-
                     )}
+                    {/* Selector de rol */}
                     <div>
                         <label className="text-sm font-medium text-gray-700 mb-1 block">Rol</label>
                         <Select
@@ -130,7 +162,6 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
                             </SelectContent>
                         </Select>
                     </div>
-
                 </div>
 
                 <DialogFooter>
@@ -142,7 +173,6 @@ export default function UsuariosModal({ isOpen, setIsOpen, user }) {
                             <Button variant="outline" onClick={handleSave}>Guardar cambios</Button>
                         </>
                     )}
-
                 </DialogFooter>
             </DialogContent >
         </Dialog >

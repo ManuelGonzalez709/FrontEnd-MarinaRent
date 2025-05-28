@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/AdminTab/publicaciones.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/AdminTab/publicaciones.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use client"
+
+/**
+ * @file publicaciones.jsx
+ * @description Vista de administración para listar, buscar, crear, editar y eliminar publicaciones.
+ * Incluye paginación, búsqueda y modales para edición/creación.
+ */
+
+import { useEffect, useState } from "react"
+import { Search, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import axios from "axios"
+import { API_URL, IMAGE_URL } from "../../utilities/apirest"
+import ProductModal from "./modal-publicaciones"
+
+/**
+ * Componente principal para la gestión de publicaciones.
+ * Permite buscar, paginar, crear, editar y eliminar publicaciones.
+ * @component
+ * @returns {JSX.Element}
+ */
+export default function Publicaciones() {
+  /**
+   * Estado para la búsqueda de publicaciones.
+   *   {(string|Function)[]}
+   */
+  const [searchQuery, setSearchQuery] = useState("")
+  /**
+   * Lista de publicaciones cargadas.
+   *   {[Array, Function]}
+   */
+  const [publicaciones, setPublicaciones] = useState([])
+  /**
+   * Estado de carga.
+   *   {[boolean, Function]}
+   */
+  const [loading, setLoading] = useState(true)
+  /**
+   * Estado para mostrar el modal de edición.
+   *   {[boolean, Function]}
+   */
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  /**
+   * Publicación seleccionada para editar.
+   *   {[Object, Function]}
+   */
+  const [publication, setPublication] = useState()
+  /**
+   * Estado para mostrar el modal de añadir.
+   *   {[boolean, Function]}
+   */
+  const [addModalOpen, setAddModalOpen] = useState(false)
+
+  // Estados de paginación
+  /**
+   * Página actual.
+   *   {[number, Function]}
+   */
+  const [currentPage, setCurrentPage] = useState(1)
+  /**
+   * Total de páginas.
+   *   {[number, Function]}
+   */
+  const [totalPages, setTotalPages] = useState(1)
+
+  // Estados para eliminar con confirmación
+  /**
+   * Estado para mostrar el diálogo de confirmación de borrado.
+   *   {[boolean, Function]}
+   */
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
+  /**
+   * ID de la publicación seleccionada para eliminar.
+   *   {[number|null, Function]}
+   */
+  const [selectedPublicationId, setSelectedPublicationId] = useState(null)
+  /**
+   * Estado de carga para el borrado.
+   *   {[boolean, Function]}
+   */
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  /**
+   * Obtiene las publicaciones paginadas desde la API.
+   * @param {number} page
+   */
+  const fetchPublicaciones = (page = 1) => {
+    setLoading(true)
+    const token = localStorage.getItem("authToken")
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
+    axios
+      .post(`${API_URL}api/publicacionesPaginadas`, { pagina: page }, { headers })
+      .then((response) => {
+        if (response.data.success) {
+          console.log("Publicaciones cargadas:", response.data.data)
+          setPublicaciones(response.data.data)
+          setCurrentPage(response.data.page)
+          setTotalPages(response.data.totalPages)
+        } else {
+          console.error("Error en la respuesta:", response.data)
+        }
+      })
+      .catch((error) => {
+        console.error("Error al cargar las publicaciones:", error)
+      })
+      .finally(() => setLoading(false))
+  }
+
+  /**
+   * Efecto para cargar publicaciones al abrir/cerrar modales o eliminar.
+   */
+  useEffect(() => {
+    fetchPublicaciones(currentPage)
+  }, [isModalOpen, addModalOpen, isDeleting])
+
+  /**
+   * Callback al actualizar una publicación.
+   * @param {Object} updatedPublication
+   */
+  const handleUpdate = (updatedPublication) => {
+    setPublication(updatedPublication)
+  }
+
+  /**
+   * Callback al añadir un nuevo producto.
+   * @param {Object} newProduct
+   */
+  const handleProductAdded = (newProduct) => {
+    console.log("Producto añadido:", newProduct)
+    fetchPublicaciones(1) // Volver a la primera página después de añadir
+  }
+
+  /**
+   * Elimina una publicación seleccionada.
+   */
+  const handleDelete = async () => {
+    if (!selectedPublicationId) return
+    setIsDeleting(true)
+
+    try {
+      const token = localStorage.getItem("authToken")
+      const headers = token ? { Authorization: `Bearer ${token}` } : {}
+      await axios.delete(`${API_URL}api/publicaciones/${selectedPublicationId}`, { headers })
+
+      // Refetch data instead of manually filtering
+      fetchPublicaciones(currentPage)
+      setConfirmDialogOpen(false)
+      setSelectedPublicationId(null)
+    } catch (error) {
+      console.error("Error al eliminar la publicación:", error)
+      alert("Ocurrió un error al intentar eliminar la publicación.")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  /**
+   * Cambia la página actual de la paginación.
+   * @param {number} newPage
+   */
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 &amp;&amp; newPage &lt;= totalPages) {
+      setCurrentPage(newPage)
+      fetchPublicaciones(newPage)
+    }
+  }
+
+  /**
+   * Filtra las publicaciones según la búsqueda.
+   */
+  const filteredPublicaciones = publicaciones.filter((item) =>
+    item.titulo.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
+
+  return (
+    &lt;>
+      {/* Loader mientras se cargan los datos */}
+      {loading ? (
+        &lt;div className="flex justify-center items-center h-64">
+          &lt;div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin">&lt;/div>
+        &lt;/div>
+      ) : (
+        &lt;>
+          {/* Barra de búsqueda y botón para añadir */}
+          &lt;div className="flex justify-between items-center mb-6">
+            &lt;div className="relative w-full max-w-md">
+              &lt;Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              &lt;Input
+                type="search"
+                placeholder="Buscar publicaciones..."
+                className="pl-10 pr-4 py-2 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            &lt;/div>
+            &lt;Button onClick={() => setAddModalOpen(true)}>Añadir nuevo producto&lt;/Button>
+          &lt;/div>
+
+          {/* Grid de publicaciones */}
+          &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {filteredPublicaciones.map((item) => (
+              &lt;Card key={item.id} className="overflow-hidden">
+                &lt;div className="relative h-48 w-full">
+                  &lt;img
+                    src={IMAGE_URL + item.imagen.split(";")[0] || "/placeholder.svg"}
+                    alt="Imagen de alquiler"
+                    className="object-cover w-full h-full"
+                  />
+                &lt;/div>
+                &lt;CardContent className="p-4">
+                  &lt;h3 className="font-medium text-sm line-clamp-2 mb-1">{item.titulo}&lt;/h3>
+                  &lt;p className="text-sm text-gray-500">{item.fecha_evento}&lt;/p>
+                &lt;/CardContent>
+                &lt;CardFooter className="p-4 pt-0 flex justify-between items-center">
+                  &lt;span className="font-bold">{item.precio !== 0 ? "$" + item.precio : "Gratuito"}&lt;/span>
+                  &lt;div className="flex gap-2">
+                    &lt;Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setPublication(item)
+                        setIsModalOpen(true)
+                      }}
+                    >
+                      Editar
+                    &lt;/Button>
+                    &lt;Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedPublicationId(item.id)
+                        setConfirmDialogOpen(true)
+                      }}
+                    >
+                      Eliminar
+                    &lt;/Button>
+                  &lt;/div>
+                &lt;/CardFooter>
+              &lt;/Card>
+            ))}
+          &lt;/div>
+
+          {/* Controles de paginación */}
+          {!searchQuery &amp;&amp; (
+            &lt;div className="flex justify-center items-center mt-8 gap-2">
+              &lt;Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                &lt;ChevronLeft className="h-4 w-4" />
+              &lt;/Button>
+              &lt;span className="text-sm">
+                Página {currentPage} de {totalPages}
+              &lt;/span>
+              &lt;Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                &lt;ChevronRight className="h-4 w-4" />
+              &lt;/Button>
+            &lt;/div>
+          )}
+
+          {/* Modal para editar publicaciones existentes */}
+          &lt;ProductModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            product={publication}
+            onUpdate={handleUpdate}
+          />
+
+          {/* Modal para agregar un nuevo producto */}
+          &lt;ProductModal
+            isOpen={addModalOpen}
+            onClose={() => setAddModalOpen(false)}
+            onUpdate={handleProductAdded}
+            isAddMode={true}
+          />
+
+          {/* Diálogo de confirmación para eliminar */}
+          &lt;Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+            &lt;DialogContent className="sm:max-w-[425px]">
+              &lt;DialogHeader>
+                &lt;DialogTitle className="flex items-center gap-2">
+                  &lt;AlertTriangle className="h-5 w-5 text-red-500" />
+                  Confirmar eliminación
+                &lt;/DialogTitle>
+              &lt;/DialogHeader>
+              &lt;div className="py-4">
+                &lt;p className="text-gray-700">
+                  ¿Estás seguro que deseas eliminar esta publicación? Esta acción no se puede deshacer.
+                &lt;/p>
+              &lt;/div>
+              &lt;div className="flex justify-end gap-3">
+                &lt;Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
+                  Cancelar
+                &lt;/Button>
+                &lt;Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+                  {isDeleting ? "Eliminando..." : "Sí, eliminar"}
+                &lt;/Button>
+              &lt;/div>
+            &lt;/DialogContent>
+          &lt;/Dialog>
+        &lt;/>
+      )}
+    &lt;/>
+  )
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-components_Calendar.html">components/Calendar</a></li><li><a href="module-components_MarbellaMap.html">components/MarbellaMap</a></li><li><a href="module-components_Navbar.html">components/Navbar</a></li><li><a href="module-components_buscador.html">components/buscador</a></li><li><a href="module-components_day-details-modal.html">components/day-details-modal</a></li><li><a href="module-components_person-chooser.html">components/person-chooser</a></li><li><a href="module-components_time-slider.html">components/time-slider</a></li></ul><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#AppContent">AppContent</a></li><li><a href="global.html#CohereChat">CohereChat</a></li><li><a href="global.html#Login">Login</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed May 28 2025 13:30:18 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

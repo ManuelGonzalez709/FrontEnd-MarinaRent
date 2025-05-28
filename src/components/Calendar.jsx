@@ -1,3 +1,9 @@
+/**
+ * @file Calendar.jsx
+ * @description Componente de calendario que muestra las reservas del usuario y permite ver detalles diarios y cancelar reservas.
+ * @module components/Calendar
+ */
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -7,13 +13,27 @@ import axios from "axios"
 import { API_URL } from "../utilities/apirest"
 import DayDetailsModal from "./day-details-modal"
 
+/**
+ * Componente Calendar.
+ * Muestra un calendario mensual con las reservas del usuario, permite navegar entre meses,
+ * ver detalles de un día y cancelar reservas.
+ *
+ * @function
+ * @returns {JSX.Element} El calendario de reservas.
+ */
 export default function Calendar() {
+  // Estado para el mes actual mostrado
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  // Estado de carga de datos
   const [loading, setLoading] = useState(true)
+  // Lista de eventos/reservas
   const [events, setEvents] = useState([])
+  // Día seleccionado para mostrar detalles
   const [selectedDay, setSelectedDay] = useState(null)
+  // Estado para mostrar/ocultar el modal de detalles
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  // Carga las reservas del usuario al montar el componente
   useEffect(() => {
     const url = API_URL + "api/obtenerReservasUsuario"
     const token = localStorage.getItem("authToken")
@@ -22,6 +42,7 @@ export default function Calendar() {
     axios
       .get(url, { headers })
       .then((response) => {
+        // Colores para los eventos
         const colores = [
           "bg-red-200",
           "bg-green-200",
@@ -31,6 +52,7 @@ export default function Calendar() {
           "bg-pink-200",
         ]
 
+        // Transforma las reservas en eventos para el calendario
         const eventosTransformados = response.data.map((reserva, index) => ({
           id: reserva.id.toString(),
           title: reserva.publicacion.titulo,
@@ -40,6 +62,7 @@ export default function Calendar() {
 
         setEvents(eventosTransformados)
 
+        // Si hay eventos, muestra el mes del primer evento
         if (eventosTransformados.length > 0) {
           setCurrentMonth(eventosTransformados[0].date)
         }
@@ -52,8 +75,14 @@ export default function Calendar() {
       })
   }, [])
 
+  // Días de la semana
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
+  /**
+   * Genera la estructura de semanas y días para el mes actual.
+   * @param {Date} date
+   * @returns {Array} Array de semanas, cada una con 7 días.
+   */
   const getMonthData = (date) => {
     const year = date.getFullYear()
     const month = date.getMonth()
@@ -69,6 +98,7 @@ export default function Calendar() {
     const prevMonth = new Date(year, month - 1)
     const prevMonthLastDay = new Date(year, month, 0).getDate()
 
+    // Días del mes anterior
     for (let i = prevMonthLastDay - daysFromPrevMonth + 1; i <= prevMonthLastDay; i++) {
       calendarDays.push({
         date: new Date(prevMonth.getFullYear(), prevMonth.getMonth(), i),
@@ -76,6 +106,7 @@ export default function Calendar() {
       })
     }
 
+    // Días del mes actual
     for (let i = 1; i <= lastDay.getDate(); i++) {
       calendarDays.push({
         date: new Date(year, month, i),
@@ -83,6 +114,7 @@ export default function Calendar() {
       })
     }
 
+    // Días del mes siguiente
     const nextMonth = new Date(year, month + 1)
     const remainingDays = totalDays - calendarDays.length
 
@@ -93,6 +125,7 @@ export default function Calendar() {
       })
     }
 
+    // Agrupa los días en semanas
     const weeks = []
     for (let i = 0; i < calendarDays.length; i += 7) {
       weeks.push(calendarDays.slice(i, i + 7))
@@ -101,24 +134,37 @@ export default function Calendar() {
     return weeks
   }
 
+  // Semanas del mes actual
   const weeks = getMonthData(currentMonth)
 
+  /**
+   * Formatea el mes y año para mostrar en el encabezado.
+   * @param {Date} date
+   * @returns {string}
+   */
   const formatMonth = (date) => {
     return date.toLocaleDateString("es-ES", { month: "long", year: "numeric" })
   }
 
+  // Navega al mes anterior
   const handlePrevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
   }
 
+  // Navega al mes siguiente
   const handleNextMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
   }
 
+  // Vuelve al mes actual
   const handleToday = () => {
     setCurrentMonth(new Date())
   }
 
+  /**
+   * Cancela una reserva (elimina el evento del calendario).
+   * @param {string} eventId
+   */
   const handleCancelReserva = (eventId) => {
     const updatedEvents = events.filter((event) => event.id !== eventId)
     setEvents(updatedEvents)
@@ -129,6 +175,11 @@ export default function Calendar() {
     }
   }
 
+  /**
+   * Obtiene los eventos para una fecha específica.
+   * @param {Date} date
+   * @returns {Array}
+   */
   const getEventsForDate = (date) => {
     return events.filter(
       (event) =>
@@ -138,6 +189,11 @@ export default function Calendar() {
     )
   }
 
+  /**
+   * Determina si una fecha es hoy.
+   * @param {Date} date
+   * @returns {boolean}
+   */
   const isToday = (date) => {
     const today = new Date()
     return (
@@ -147,6 +203,11 @@ export default function Calendar() {
     )
   }
 
+  /**
+   * Maneja el click en un día del calendario, abre el modal de detalles.
+   * @param {Object} day
+   * @param {Array} events
+   */
   const handleDayClick = (day, events) => {
     setSelectedDay({
       date: day.date,

@@ -1,3 +1,9 @@
+/**
+ * @file modal-publicaciones.jsx
+ * @description Modal para crear o editar publicaciones (informativas o alquilables) en el panel de administración.
+ * Permite gestionar imágenes, validar campos y actualizar la información.
+ */
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -10,9 +16,24 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import axios from "axios"
-import { API_URL,IMAGE_URL } from "../../utilities/apirest"
+import { API_URL, IMAGE_URL } from "../../utilities/apirest"
 
+/**
+ * Modal para crear o editar una publicación.
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Si el modal está abierto.
+ * @param {Function} props.onClose - Función para cerrar el modal.
+ * @param {Object} [props.product] - Publicación a editar (si existe).
+ * @param {Function} props.onUpdate - Callback al actualizar.
+ * @param {boolean} [props.isAddMode=false] - Si es modo añadir.
+ * @returns {JSX.Element}
+ */
 export default function ProductModal({ isOpen, onClose, product, onUpdate, isAddMode = false }) {
+  /**
+   * Estado del formulario de la publicación.
+   *   {[Object, Function]}
+   */
   const [formData, setFormData] = useState({
     titulo: "",
     descripcion: "",
@@ -21,24 +42,51 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
     precio: 0,
     aforo_maximo: 1,
   })
+  /**
+   * Estado de carga para el botón de guardar.
+   *   {[boolean, Function]}
+   */
   const [isLoading, setIsLoading] = useState(false)
+  /**
+   * Estado de errores de validación.
+   *   {[Object, Function]}
+   */
   const [errors, setErrors] = useState({})
+  /**
+   * Estado para previsualización de imágenes (existentes y nuevas).
+   *   {[Array, Function]}
+   */
   const [imagePreviews, setImagePreviews] = useState([])
+  /**
+   * Estado para las nuevas imágenes seleccionadas.
+   *   {[Array, Function]}
+   */
   const [newImages, setNewImages] = useState([])
+  /**
+   * Número de imágenes existentes.
+   *   {[number, Function]}
+   */
   const [existingImageCount, setExistingImageCount] = useState(0)
+  /**
+   * Número requerido de imágenes.
+   *   {number}
+   */
   const REQUIRED_IMAGES = 4
-  // Add a state to track if we're in the process of closing the modal
+  /**
+   * Estado para controlar el cierre seguro del modal.
+   *   {[boolean, Function]}
+   */
   const [isClosing, setIsClosing] = useState(false)
 
+  /**
+   * Efecto para inicializar el formulario y las imágenes al abrir el modal.
+   */
   useEffect(() => {
     if (product && !isAddMode) {
       // Formatear la fecha para el input de tipo date
-      // Fix timezone issue by ensuring we don't lose a day when formatting
       let fechaEvento = ""
       if (product.fecha_evento) {
-        // Parse the date and adjust for timezone to prevent day shift
         const date = new Date(product.fecha_evento)
-        // Format as YYYY-MM-DD without timezone conversion
         const year = date.getFullYear()
         const month = String(date.getMonth() + 1).padStart(2, "0")
         const day = String(date.getDate()).padStart(2, "0")
@@ -80,37 +128,33 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
       setExistingImageCount(0)
     }
 
-    // Resetear nuevas imágenes y errores al abrir el modal
     setNewImages([])
     setErrors({})
-    // Reset the closing state when the modal opens
     setIsClosing(false)
   }, [product, isOpen, isAddMode])
 
+  /**
+   * Valida los campos del formulario y las imágenes.
+   * @returns {boolean}
+   */
   const validateForm = () => {
     const newErrors = {}
 
     if (!formData.titulo?.trim()) {
       newErrors.titulo = "El título es obligatorio"
     }
-
     if (!formData.descripcion?.trim()) {
       newErrors.descripcion = "La descripción es obligatoria"
     }
-
     if (!formData.fecha_evento) {
       newErrors.fecha_evento = "La fecha del evento es obligatoria"
     }
-
     if (formData.tipo === "alquilable" && (!formData.precio || formData.precio <= 0)) {
       newErrors.precio = "El precio debe ser mayor que 0 para eventos alquilables"
     }
-
     if (!formData.aforo_maximo || formData.aforo_maximo <= 0) {
       newErrors.aforo_maximo = "El aforo máximo debe ser mayor que 0"
     }
-
-    // Validar que haya exactamente 4 imágenes
     if (imagePreviews.length !== REQUIRED_IMAGES) {
       newErrors.images = `Debe tener exactamente ${REQUIRED_IMAGES} imágenes (actualmente tiene ${imagePreviews.length})`
     }
@@ -119,6 +163,10 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
     return Object.keys(newErrors).length === 0
   }
 
+  /**
+   * Maneja el cambio de los campos del formulario.
+   * @param {React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>} e
+   */
   const handleInputChange = (e) => {
     const { name, value, type } = e.target
 
@@ -134,7 +182,6 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
       })
     }
 
-    // Limpiar error cuando el usuario corrige el campo
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -143,18 +190,24 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
     }
   }
 
+  /**
+   * Cambia el tipo de publicación.
+   * @param {string} value
+   */
   const handleTipoChange = (value) => {
     setFormData({
       ...formData,
       tipo: value,
-      // Si cambia a informativo, el precio es 0
       precio: value === "informativo" ? 0 : formData.precio,
     })
   }
 
+  /**
+   * Maneja la selección de imágenes nuevas.
+   * @param {React.ChangeEvent<HTMLInputElement>} e
+   */
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      // Verificar si se excede el límite de 4 imágenes
       const totalImages = imagePreviews.length + e.target.files.length
 
       if (totalImages > REQUIRED_IMAGES) {
@@ -169,7 +222,6 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
       const newFilesArray = [...newImages, ...filesArray]
       setNewImages(newFilesArray)
 
-      // Crear objetos para las nuevas imágenes
       const newImageObjects = filesArray.map((file) => ({
         url: URL.createObjectURL(file),
         isExisting: false,
@@ -178,7 +230,6 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
 
       setImagePreviews([...imagePreviews, ...newImageObjects])
 
-      // Limpiar error de imágenes si ahora hay exactamente 4
       if (imagePreviews.length + newImageObjects.length === REQUIRED_IMAGES) {
         setErrors({
           ...errors,
@@ -193,21 +244,22 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
     }
   }
 
+  /**
+   * Elimina una imagen del array de previsualización.
+   * @param {number} index
+   */
   const removeImage = (index) => {
     const updatedPreviews = [...imagePreviews]
     const removedImage = updatedPreviews[index]
     updatedPreviews.splice(index, 1)
     setImagePreviews(updatedPreviews)
 
-    // Si es una imagen nueva (no existente), actualizar el array de nuevas imágenes
     if (!removedImage.isExisting) {
-      // Encontrar el índice correspondiente en newImages
       const fileToRemove = removedImage.file
       const newImagesUpdated = newImages.filter((file) => file !== fileToRemove)
       setNewImages(newImagesUpdated)
     }
 
-    // Actualizar mensaje de error si no hay exactamente 4 imágenes
     if (updatedPreviews.length !== REQUIRED_IMAGES) {
       setErrors({
         ...errors,
@@ -221,18 +273,23 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
     }
   }
 
-  // Create a safe close function that sets the closing state first
+  /**
+   * Cierra el modal de forma segura.
+   */
   const handleClose = () => {
     setIsClosing(true)
     onClose()
   }
 
+  /**
+   * Envía el formulario para crear o actualizar la publicación.
+   * @param {React.FormEvent<HTMLFormElement>} e
+   */
   const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!validateForm()) return
 
-    // Verificar que haya exactamente 4 imágenes
     if (imagePreviews.length !== REQUIRED_IMAGES) {
       setErrors({
         ...errors,
@@ -243,11 +300,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
 
     try {
       setIsLoading(true)
-
-      // Preparar FormData para enviar archivos
       const formDataToSend = new FormData()
-
-      // Añadir todos los campos del formulario
       Object.entries(formData).forEach(([key, value]) => {
         if (key !== "imagen" && value !== undefined) {
           const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1)
@@ -255,37 +308,26 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
         }
       })
 
-      // Si estamos en modo edición, añadir el ID
       if (!isAddMode && product?.id) {
         formDataToSend.append("id_publicacion", product.id)
       }
 
-      // Separar las imágenes existentes y nuevas
       const existingImages = imagePreviews.filter((img) => img.isExisting)
       const newImageObjects = imagePreviews.filter((img) => !img.isExisting)
 
-      // Añadir las nuevas imágenes con el nombre "imagenes[]"
       newImageObjects.forEach((imgObj) => {
-        console.log("Añadiendo imagen:", imgObj.file)
         formDataToSend.append("imagenes[]", imgObj.file)
       })
 
-      // Añadir las imágenes existentes como array con el nombre "imagenes_existentes[]"
       existingImages.forEach((img) => {
         formDataToSend.append("imagenes_existentes[]", img.filename)
       })
 
-      // Configurar la petición
       const token = localStorage.getItem("authToken")
       const headers = token ? { Authorization: `Bearer ${token}` } : {}
-
-      // Determinar la URL de la API según el modo (añadir o editar)
       const apiEndpoint = isAddMode ? API_URL + "api/publicaciones" : API_URL + "api/actualizar"
 
-      // Realizar la petición POST a la API
       const response = await axios.post(apiEndpoint, formDataToSend, { headers })
-
-      
 
       // Si estamos en modo edición y la fecha ha cambiado, actualizar la fecha en las reservas
       if (!isAddMode && product?.id && formData.fecha_evento !== product.fecha_evento) {
@@ -298,24 +340,19 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
             },
             { headers },
           )
-          console.log("Fecha de evento actualizada correctamente")
         } catch (error) {
-          console.error("Error al actualizar la fecha del evento:", error)
           setErrors({
             ...errors,
             general: "Ha ocurrido un error al actualizar la fecha del evento",
           })
           setIsLoading(false)
-          return // No cerrar el modal si hay error
+          return
         }
       }
 
-      // Mark as closing before actually closing
       setIsClosing(true)
-      // Solo cerrar el modal después de que todas las operaciones se completen
       onClose()
     } catch (error) {
-      console.error(`Error al ${isAddMode ? "crear" : "actualizar"} la publicación:`, error)
       setErrors({
         ...errors,
         general: `Ha ocurrido un error al ${isAddMode ? "crear" : "actualizar"} la publicación`,
@@ -325,13 +362,23 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
     }
   }
 
-  // Verificar si se ha alcanzado el límite de imágenes
+  /**
+   * Indica si se puede mostrar el botón para añadir imagen.
+   *   {boolean}
+   */
   const showAddImageButton = imagePreviews.length < REQUIRED_IMAGES
 
-  // Contar imágenes existentes y nuevas para depuración
+  /**
+   * Número de imágenes existentes.
+   *   {number}
+   */
   const existingImagesCount = imagePreviews.filter((img) => img.isExisting).length
+  /**
+   * Número de imágenes nuevas.
+   *   {number}
+   */
   const newImagesCount = imagePreviews.filter((img) => !img.isExisting).length
-  console.log(product)
+
   return (
     <Dialog open={isOpen} onOpenChange={isClosing ? onClose : handleClose}>
       <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden flex flex-col max-h-[90vh]">
@@ -348,6 +395,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
             <div className="space-y-4 pb-4">
               {errors.general && <div className="bg-red-50 p-3 rounded-md text-red-600 text-sm">{errors.general}</div>}
 
+              {/* Campo título */}
               <div className="space-y-2">
                 <Label htmlFor="titulo">Título</Label>
                 <Input
@@ -360,6 +408,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
                 {errors.titulo && <p className="text-red-500 text-xs">{errors.titulo}</p>}
               </div>
 
+              {/* Campo descripción */}
               <div className="space-y-2">
                 <Label htmlFor="descripcion">Descripción</Label>
                 <Textarea
@@ -373,6 +422,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
                 {errors.descripcion && <p className="text-red-500 text-xs">{errors.descripcion}</p>}
               </div>
 
+              {/* Campo fecha del evento */}
               <div className="space-y-2">
                 <Label htmlFor="fecha_evento">Fecha del Evento</Label>
                 <Input
@@ -386,6 +436,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
                 {errors.fecha_evento && <p className="text-red-500 text-xs">{errors.fecha_evento}</p>}
               </div>
 
+              {/* Selector de tipo de publicación */}
               <div className="space-y-2">
                 <Label>Tipo de Publicación</Label>
                 <RadioGroup
@@ -404,6 +455,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
                 </RadioGroup>
               </div>
 
+              {/* Campo precio solo si es alquilable */}
               {formData.tipo === "alquilable" && (
                 <div className="space-y-2">
                   <Label htmlFor="precio">Precio</Label>
@@ -421,6 +473,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
                 </div>
               )}
 
+              {/* Campo aforo máximo */}
               <div className="space-y-2">
                 <Label htmlFor="aforo_maximo">Aforo Máximo</Label>
                 <Input
@@ -435,6 +488,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
                 {errors.aforo_maximo && <p className="text-red-500 text-xs">{errors.aforo_maximo}</p>}
               </div>
 
+              {/* Gestión de imágenes */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>
@@ -484,6 +538,7 @@ export default function ProductModal({ isOpen, onClose, product, onUpdate, isAdd
             </div>
           </ScrollArea>
 
+          {/* Botones de acción */}
           <div className="flex justify-end gap-3 p-4 border-t mt-auto bg-white">
             <Button variant="outline" type="button" onClick={handleClose}>
               Cancelar

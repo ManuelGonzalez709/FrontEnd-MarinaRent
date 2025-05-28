@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * @file reservas.jsx
+ * @description Vista de administración para listar, buscar, editar y cancelar reservas.
+ * Incluye paginación, búsqueda y modales para edición/cancelación.
+ */
+
 import { useEffect, useState } from "react"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -18,24 +24,73 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
+/**
+ * Componente principal para la gestión de reservas.
+ * Permite buscar, paginar, editar y cancelar reservas.
+ * @component
+ * @returns {JSX.Element}
+ */
 export default function Reservas() {
+  /**
+   * Lista de reservas cargadas.
+   *   {[Array, Function]}
+   */
   const [reservas, setReservas] = useState([])
+  /**
+   * Estado de carga.
+   *   {[boolean, Function]}
+   */
   const [loading, setLoading] = useState(true)
+  /**
+   * Estado para mostrar el modal de edición.
+   *   {[boolean, Function]}
+   */
   const [isModalOpen, setIsModalOpen] = useState(false)
+  /**
+   * Reserva seleccionada para editar.
+   *   {[Object|null, Function]}
+   */
   const [selectedReserva, setSelectedReserva] = useState(null)
+  /**
+   * Estado para mostrar el diálogo de confirmación de cancelación.
+   *   {[boolean, Function]}
+   */
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false)
+  /**
+   * ID de la reserva seleccionada para cancelar.
+   *   {[number|null, Function]}
+   */
   const [reservaToCancel, setReservaToCancel] = useState(null)
+  /**
+   * Estado de búsqueda.
+   *   {(string|Function)[]}
+   */
   const [searchQuery, setSearchQuery] = useState("")
 
-  // Pagination states
+  // Estados de paginación
+  /**
+   * Página actual.
+   *   {[number, Function]}
+   */
   const [currentPage, setCurrentPage] = useState(1)
+  /**
+   * Total de páginas.
+   *   {[number, Function]}
+   */
   const [totalPages, setTotalPages] = useState(1)
 
+  /**
+   * Efecto para cargar reservas al cambiar de página o cerrar el modal.
+   */
   useEffect(() => {
-    if(!isModalOpen)
-    fetchReservas(currentPage)
-  }, [currentPage,isModalOpen])
+    if (!isModalOpen)
+      fetchReservas(currentPage)
+  }, [currentPage, isModalOpen])
 
+  /**
+   * Obtiene las reservas paginadas desde la API.
+   * @param {number} page
+   */
   const fetchReservas = (page = 1) => {
     setLoading(true)
     const token = localStorage.getItem("authToken")
@@ -60,8 +115,12 @@ export default function Reservas() {
       })
   }
 
+  /**
+   * Maneja el click en el botón de editar reserva.
+   * @param {Object} reservation
+   */
   const handleEditClick = (reservation) => {
-    // Get the complete reservation data if needed
+    // Obtener los datos completos de la reserva si es necesario
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
@@ -73,27 +132,37 @@ export default function Reservas() {
       })
       .catch((error) => {
         console.error("Error al obtener detalles de la reserva:", error)
-        // Fallback to using the data we already have
+        // Fallback a los datos que ya tenemos
         setSelectedReserva(reservation)
         setIsModalOpen(true)
       })
   }
 
+  /**
+   * Cierra el modal de edición y refresca la lista si es necesario.
+   * @param {boolean} refresh
+   */
   const handleModalClose = (refresh = false) => {
     setIsModalOpen(false)
     setSelectedReserva(null)
-
-    // Refresh the reservations list if needed
+    // Refresca la lista si se indica
     if (refresh) {
       fetchReservas(currentPage)
     }
   }
 
+  /**
+   * Abre el diálogo de confirmación para cancelar una reserva.
+   * @param {number} reservaId
+   */
   const handleCancelReservation = (reservaId) => {
     setReservaToCancel(reservaId)
     setIsAlertDialogOpen(true)
   }
 
+  /**
+   * Confirma la cancelación de la reserva seleccionada.
+   */
   const confirmCancelReservation = () => {
     if (!reservaToCancel) return
 
@@ -118,13 +187,19 @@ export default function Reservas() {
       })
   }
 
+  /**
+   * Cambia la página actual de la paginación.
+   * @param {number} newPage
+   */
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage)
     }
   }
 
-  // Filter reservations based on search query
+  /**
+   * Filtra las reservas según la búsqueda.
+   */
   const filteredReservas = reservas.filter(
     (reservation) =>
       reservation.nombre_usuario.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -133,12 +208,14 @@ export default function Reservas() {
 
   return (
     <>
+      {/* Loader mientras se cargan los datos */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
         </div>
       ) : (
         <>
+          {/* Barra de búsqueda */}
           <div className="flex justify-between items-center mb-6">
             <div className="relative w-full max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -152,6 +229,7 @@ export default function Reservas() {
             </div>
           </div>
 
+          {/* Tabla de reservas */}
           <div className="bg-white rounded-lg border overflow-sm-x-scroll overflow-y-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -244,7 +322,7 @@ export default function Reservas() {
             </table>
           </div>
 
-          {/* Pagination Controls - Similar to publicaciones component */}
+          {/* Controles de paginación */}
           {!searchQuery && (
             <div className="flex justify-center items-center mt-8 gap-2">
               <Button
@@ -269,7 +347,7 @@ export default function Reservas() {
             </div>
           )}
 
-          {/* Reservation Modal */}
+          {/* Modal para editar reservas */}
           <ReservasModal
             isOpen={isModalOpen}
             setIsOpen={(open) => {
@@ -280,7 +358,7 @@ export default function Reservas() {
             onCancelReservation={handleCancelReservation}
           />
 
-          {/* Confirmation Dialog for Cancellation */}
+          {/* Diálogo de confirmación para cancelar */}
           <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>

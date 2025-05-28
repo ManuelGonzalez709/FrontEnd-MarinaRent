@@ -1,31 +1,65 @@
 "use client"
 
+/**
+ * @file ResetPass.jsx
+ * @description Página para recuperación de contraseña. Permite al usuario solicitar el envío de un correo para restablecer su contraseña.
+ */
+
 import { useState } from "react"
 import { ArrowLeft, Send } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { API_URL } from "../utilities/apirest"
 
-
+/**
+ * Componente de recuperación de contraseña.
+ * Permite al usuario solicitar instrucciones para restablecer su contraseña.
+ * @component
+ * @returns {JSX.Element}
+ */
 export default function RecuperarPassword() {
+    /**
+     * Hook de navegación de React Router.
+     */
     const navigate = useNavigate()
+    /**
+     * Email introducido por el usuario.
+     *   {(string|Function)[]}
+     */
     const [email, setEmail] = useState("")
-    const [step, setStep] = useState(1) 
+    /**
+     * Paso actual del proceso (1: formulario, 2: mensaje de éxito).
+     *   {[number, Function]}
+     */
+    const [step, setStep] = useState(1)
+    /**
+     * Mensaje de error a mostrar.
+     *   {[string|null, Function]}
+     */
     const [errorMessage, setErrorMessage] = useState(null)
+    /**
+     * Estado de carga mientras se realiza la petición.
+     *   {[boolean, Function]}
+     */
     const [isLoading, setIsLoading] = useState(false)
 
+    /**
+     * Envía la solicitud de recuperación de contraseña a la API.
+     * Si es exitosa, muestra mensaje de éxito. Si falla, muestra error.
+     * @param {React.FormEvent} event
+     */
     async function enviarSolicitud(event) {
         event.preventDefault()
         setIsLoading(true)
 
         const url = API_URL + "api/enviar-restablecimiento"
-        const token = localStorage.getItem("authToken")
+        // No es necesario el token para recuperación
         axios
-            .post(url,{email: email})
+            .post(url, { email: email })
             .then((response) => {
                 setStep(2)
                 setErrorMessage(null)
-                setDisponibilidadHora(response.data.disponible)
+                // setDisponibilidadHora(response.data.disponible) // No es necesario aquí
             })
             .catch((error) => {
                 console.log(error)
@@ -33,10 +67,12 @@ export default function RecuperarPassword() {
             }).finally(() => {
                 setIsLoading(false)
             })
-
-
     }
 
+    /**
+     * Navega a la página de login.
+     * @param {React.MouseEvent} e
+     */
     const handleNavigateToLogin = (e) => {
         e.preventDefault()
         navigate("/")
@@ -45,10 +81,12 @@ export default function RecuperarPassword() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
             <div className="w-full max-w-md p-10 my-3 bg-white rounded-xl shadow-lg border border-gray-200">
+                {/* Logo de la aplicación */}
                 <div className="flex justify-center mb-6">
                     <img src="logo3PNG.png" alt="Logo" className="w-32 h-auto" />
                 </div>
 
+                {/* Paso 1: Formulario para introducir el email */}
                 {step === 1 ? (
                     <>
                         <h2 className="text-center text-3xl font-semibold text-gray-800 mb-6">Recuperar Contraseña</h2>
@@ -57,10 +95,12 @@ export default function RecuperarPassword() {
                             Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
                         </p>
 
+                        {/* Mensaje de error si existe */}
                         {errorMessage && (
                             <div className="text-sm text-center text-red-700 bg-red-100 rounded py-2 mb-4">{errorMessage}</div>
                         )}
 
+                        {/* Formulario de recuperación */}
                         <form onSubmit={enviarSolicitud} className="space-y-5">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -92,6 +132,7 @@ export default function RecuperarPassword() {
                         </form>
                     </>
                 ) : (
+                    // Paso 2: Mensaje de éxito tras enviar el correo
                     <>
                         <div className="text-center">
                             <div className="flex justify-center mb-4">
@@ -126,6 +167,7 @@ export default function RecuperarPassword() {
                     </>
                 )}
 
+                {/* Enlace para volver al login */}
                 <p className="text-center text-sm text-gray-600 mt-6">
                     ¿Ya recordaste tu contraseña?{" "}
                     <button

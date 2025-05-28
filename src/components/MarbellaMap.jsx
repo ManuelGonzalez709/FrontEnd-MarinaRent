@@ -1,15 +1,28 @@
+/**
+ * @file MarbellaMap.jsx
+ * @description Muestra un mapa interactivo centrado en Marbella con un marcador y popup usando react-leaflet.
+ * @module components/MarbellaMap
+ */
+
 import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { LatLngExpression } from "leaflet"; // Para definir la posición
 import "leaflet/dist/leaflet.css"; // Estilo de Leaflet
 
+/**
+ * Componente MarbellaMap.
+ * Muestra un mapa de Marbella con un marcador y popup.
+ *
+ * @function
+ * @returns {JSX.Element} El mapa interactivo de Marbella.
+ */
 const MarbellaMap = () => {
     // Coordenadas de Marbella
     const position = [36.507, -4.882]; // Marbella
 
     return (
         <div className="my-16">
-             <h2 className="text-5xl font-semibold text-center text-blue-900">
+            <h2 className="text-5xl font-semibold text-center text-blue-900">
                 ¿Dónde nos situamos?
             </h2>
             <div className="mt-8">

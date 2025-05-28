@@ -1,29 +1,70 @@
 "use client"
 
+/**
+ * @file Perfil.jsx
+ * @description Página de perfil de usuario. Permite ver y editar información personal, así como consultar la actividad reciente (reservas).
+ */
+
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
-import { API_URL,IMAGE_URL } from "../utilities/apirest"
+import { API_URL, IMAGE_URL } from "../utilities/apirest"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CalendarDays, MapPin, Mail, Phone, Shield, Clock, Anchor, Ship, Compass } from 'lucide-react'
 import UsuariosModal from "../components/AdminTab/modal-usuarios-perfil" // Importamos el modal de usuarios
 
+/**
+ * Componente de perfil de usuario.
+ * Permite ver y editar datos personales y consultar la actividad reciente.
+ * @component
+ * @returns {JSX.Element}
+ */
 export default function PerfilPage() {
+    /**
+     * Estado con los datos del perfil del usuario.
+     *   {[Object|null, Function]}
+     */
     const [profile, setProfile] = useState(null);
+    /**
+     * Estado de carga de la página.
+     *   {[boolean, Function]}
+     */
     const [loading, setLoading] = useState(true);
+    /**
+     * Pestaña activa en el perfil.
+     *   {(string|Function)[]}
+     */
     const [activeTab, setActiveTab] = useState("perfil");
+    /**
+     * Reservas del usuario.
+     *   {[Array, Function]}
+     */
     const [reservas, setReservas] = useState([]);
+    /**
+     * Imágenes asociadas a las reservas.
+     *   {[Array, Function]}
+     */
     const [imagenes, setImagenes] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar la apertura del modal
+    /**
+     * Estado para controlar la apertura del modal de edición de usuario.
+     *   {[boolean, Function]}
+     */
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
+    /**
+     * Efecto para cargar perfil y reservas al montar el componente o al cerrar el modal.
+     */
     useEffect(() => {
         fetchProfile();
         fetchReservas();
-    }, [isModalOpen]); // Actualizamos cuando se cierre el modal
+    }, [isModalOpen]); // Actualiza cuando se cierra el modal
 
+    /**
+     * Obtiene los datos del perfil del usuario desde la API.
+     */
     const fetchProfile = async () => {
         const token = localStorage.getItem("authToken");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -36,6 +77,10 @@ export default function PerfilPage() {
             setLoading(false);
         }
     };
+
+    /**
+     * Obtiene las reservas del usuario desde la API.
+     */
     const fetchReservas = async () => {
         const token = localStorage.getItem("authToken");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -49,7 +94,11 @@ export default function PerfilPage() {
         }
     };
 
-    // Calcular edad a partir de la fecha de nacimiento
+    /**
+     * Calcula la edad a partir de la fecha de nacimiento.
+     * @param {string} fechaNacimiento
+     * @returns {number}
+     */
     const calcularEdad = (fechaNacimiento) => {
         const fechaNac = new Date(fechaNacimiento);
         const hoy = new Date();
@@ -61,17 +110,24 @@ export default function PerfilPage() {
         return edad;
     };
 
-    // Formatear fecha
+    /**
+     * Formatea una fecha a formato legible en español.
+     * @param {string} fecha
+     * @returns {string}
+     */
     const formatearFecha = (fecha) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(fecha).toLocaleDateString('es-ES', options);
     };
 
-    // Función para abrir el modal de edición
+    /**
+     * Abre el modal de edición de perfil.
+     */
     const handleEditProfile = () => {
         setIsModalOpen(true);
     };
 
+    // Loader mientras se cargan los datos
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -80,6 +136,7 @@ export default function PerfilPage() {
         );
     }
 
+    // Si no hay perfil, muestra mensaje de error
     if (!profile) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen">
@@ -91,9 +148,13 @@ export default function PerfilPage() {
             </div>
         );
     }
+
+    // Formatea la fecha de última actualización del perfil
     const updated_at = profile.updated_at.split("T")[0] + " " + profile.updated_at.split("T")[1].split(".")[0];
+
     return (
         <div className="container mx-auto px-4 py-8">
+            {/* Banner de portada con nombre y año de registro */}
             <div className="mb-8">
                 <div className="relative h-48 w-full rounded-xl overflow-hidden mb-4">
                     <img
@@ -114,6 +175,7 @@ export default function PerfilPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Tarjeta de información personal */}
                 <div className="md:col-span-1">
                     <Card>
                         <CardHeader className="pb-2">
@@ -133,6 +195,7 @@ export default function PerfilPage() {
                             </div>
 
                             <div className="space-y-4">
+                                {/* Email */}
                                 <div className="flex items-center gap-3">
                                     <Mail className="h-5 w-5 text-muted-foreground" />
                                     <div>
@@ -140,6 +203,7 @@ export default function PerfilPage() {
                                         <p className="text-sm text-muted-foreground">{profile.Email}</p>
                                     </div>
                                 </div>
+                                {/* Fecha de nacimiento y edad */}
                                 <div className="flex items-center gap-3">
                                     <CalendarDays className="h-5 w-5 text-muted-foreground" />
                                     <div>
@@ -147,6 +211,7 @@ export default function PerfilPage() {
                                         <p className="text-sm text-muted-foreground">{formatearFecha(profile.Fecha_nacimiento)} ({calcularEdad(profile.Fecha_nacimiento)} años)</p>
                                     </div>
                                 </div>
+                                {/* Tipo de cuenta */}
                                 <div className="flex items-center gap-3">
                                     <Shield className="h-5 w-5 text-muted-foreground" />
                                     <div>
@@ -154,6 +219,7 @@ export default function PerfilPage() {
                                         <p className="text-sm text-muted-foreground capitalize">{profile.Tipo}</p>
                                     </div>
                                 </div>
+                                {/* Última modificación */}
                                 <div className="flex items-center gap-3">
                                     <Clock className="h-5 w-5 text-muted-foreground" />
                                     <div>
@@ -164,6 +230,7 @@ export default function PerfilPage() {
                             </div>
                         </CardContent>
                         <CardFooter>
+                            {/* Botón para abrir el modal de edición */}
                             <Button variant="outline" className="w-full" onClick={handleEditProfile}>
                                 Editar perfil
                             </Button>
@@ -171,6 +238,7 @@ export default function PerfilPage() {
                     </Card>
                 </div>
 
+                {/* Sección de actividad reciente (reservas) */}
                 <div className="md:col-span-2">
                     <Tabs defaultValue="actividad" className="w-full">
                         <TabsList className="grid grid-cols-1 mb-6">
@@ -185,6 +253,7 @@ export default function PerfilPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-6">
+                                        {/* Lista de reservas del usuario */}
                                         {reservas.map((item) => {
                                             const publicacion = item.publicacion;
                                             const imagenes = publicacion?.imagen?.split(";") || [];

@@ -1,14 +1,36 @@
+/**
+ * @file time-slider.jsx
+ * @description Componente selector de hora con slider visual, iconos según el momento del día y control de disponibilidad.
+ * @module components/time-slider
+ */
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { Slider } from "@/components/ui/slider"
 import { Clock, Sun, Sunrise, Sunset, Moon } from "lucide-react"
 
+/**
+ * Componente TimeSlider.
+ * Permite seleccionar una hora del día con un slider, mostrando iconos y estilos según el momento (amanecer, día, atardecer, noche).
+ *
+ * @param {Object} props
+ * @param {string|number} props.id - Identificador del slider.
+ * @param {number} props.hora - Hora inicial seleccionada.
+ * @param {function} props.setHora - Función para actualizar la hora seleccionada.
+ * @param {boolean} props.disponible - Indica si la hora está disponible.
+ * @param {boolean} props.horaPasada - Indica si la hora ya ha pasado.
+ * @returns {JSX.Element} El slider de selección de hora.
+ */
 export default function TimeSlider({ id, hora, setHora, disponible, horaPasada }) {
   const [hour, setHour] = useState(hora)
   const [minute, setMinute] = useState(0)
   const [timeOfDay, setTimeOfDay] = useState("day")
 
+  /**
+   * Maneja el cambio del slider y actualiza la hora y minutos.
+   * @param {Array<number>} value
+   */
   const handleSliderChange = (value) => {
     const totalHours = value[0]
     const hours = Math.floor(totalHours)
@@ -17,6 +39,7 @@ export default function TimeSlider({ id, hora, setHora, disponible, horaPasada }
     setMinute(mins)
   }
 
+  // Actualiza el momento del día según la hora seleccionada
   useEffect(() => {
     if (hour >= 5 && hour < 8) {
       setTimeOfDay("dawn")
@@ -29,12 +52,20 @@ export default function TimeSlider({ id, hora, setHora, disponible, horaPasada }
     }
   }, [hour])
 
+  /**
+   * Formatea la hora y minutos a string HH:mm.
+   * @returns {string}
+   */
   const formatTime = () => {
     const formattedHour = hour.toString().padStart(2, "0")
     const formattedMinute = minute.toString().padStart(2, "0")
     return `${formattedHour}:${formattedMinute}`
   }
 
+  /**
+   * Devuelve el icono correspondiente al momento del día.
+   * @returns {JSX.Element}
+   */
   const getTimeIcon = () => {
     switch (timeOfDay) {
       case "dawn":
@@ -50,6 +81,10 @@ export default function TimeSlider({ id, hora, setHora, disponible, horaPasada }
     }
   }
 
+  /**
+   * Devuelve los estilos de fondo según el momento del día.
+   * @returns {string}
+   */
   const getTimeStyles = () => {
     switch (timeOfDay) {
       case "dawn":
@@ -65,6 +100,10 @@ export default function TimeSlider({ id, hora, setHora, disponible, horaPasada }
     }
   }
 
+  /**
+   * Muestra mensajes de disponibilidad según el estado.
+   * @returns {JSX.Element|undefined}
+   */
   const comprobarDisponibilidad = () => {
     if (disponible === false)
       return <div className="text-red-500 font-semibold">No Disponible</div>

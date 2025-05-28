@@ -1,26 +1,78 @@
 "use client"
 
+/**
+ * @file Register.jsx
+ * @description Página de registro de usuario para Marina Rent.
+ * Permite crear una cuenta nueva, valida la seguridad de la contraseña y muestra mensajes de error.
+ */
+
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { API_URL } from "../utilities/apirest"
 
+/**
+ * Componente de formulario de registro.
+ * Gestiona el estado del usuario, validaciones, errores y navegación.
+ * @component
+ * @returns {JSX.Element}
+ */
 export default function Registro() {
+  /**
+   * Nombre del usuario.
+   *   {(string|Function)[]}
+   */
   const [nombre, setNombre] = useState("")
+  /**
+   * Apellidos del usuario.
+   *   {(string|Function)[]}
+   */
   const [apellidos, setApellidos] = useState("")
+  /**
+   * Email del usuario.
+   *   {(string|Function)[]}
+   */
   const [email, setEmail] = useState("")
+  /**
+   * Fecha de nacimiento del usuario.
+   *   {(string|Function)[]}
+   */
   const [fecha_nacimiento, setFechaNacimiento] = useState("")
+  /**
+   * Contraseña introducida por el usuario.
+   *   {(string|Function)[]}
+   */
   const [password, setPassword] = useState("")
+  /**
+   * Confirmación de la contraseña.
+   *   {(string|Function)[]}
+   */
   const [password_confirmation, setPasswordConfirmation] = useState("")
+  /**
+   * Mensaje de error a mostrar.
+   *   {[string|null, Function]}
+   */
   const [errorMessage, setErrorMessage] = useState(null)
-  const [isLoading, setIsLoading] = useState(false);
+  /**
+   * Estado de carga mientras se realiza la petición.
+   *   {[boolean, Function]}
+   */
+  const [isLoading, setIsLoading] = useState(false)
+  /**
+   * Hook de navegación de React Router.
+   */
   const navigate = useNavigate();
 
+  /**
+   * Maneja el envío del formulario de registro.
+   * Realiza validaciones de contraseña y envía los datos a la API.
+   * @param {React.FormEvent} event
+   */
   function realizarRegistro(event) {
     setIsLoading(true);
     event.preventDefault()
 
-    // Validación de contraseña
+    // Validación de coincidencia de contraseñas
     if (password !== password_confirmation) {
       setIsLoading(false);
       setErrorMessage("Las contraseñas no coinciden. Inténtalo de nuevo.")
@@ -46,6 +98,7 @@ export default function Registro() {
       return
     }
 
+    // Enviar datos a la API de registro
     const url = API_URL + "api/register"
     axios
       .post(url, {
@@ -58,13 +111,13 @@ export default function Registro() {
       })
       .then((response) => {
         if (response.status === 201 || response.status === 200) {
-          // Si el registro es exitoso, podemos guardar el token si la API lo devuelve
+          // Si el registro es exitoso, guarda el token si la API lo devuelve
           if (response.data.token) {
             const token = response.data.token.split("|")[1]
             localStorage.setItem("authToken", token)
           }
           setErrorMessage(null)
-          navigate("/home"); // Redirigir al login después del registro exitoso
+          navigate("/home"); // Redirigir al home después del registro exitoso
         }
       })
       .catch((error) => {
@@ -84,6 +137,11 @@ export default function Registro() {
       });
   }
 
+  /**
+   * Calcula la fortaleza de la contraseña para mostrar feedback visual.
+   * @param {string} password
+   * @returns {{text: string, color: string}}
+   */
   function getPasswordStrength(password) {
     let strength = 0
 
@@ -102,16 +160,19 @@ export default function Registro() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md p-10 my-3 bg-white rounded-xl shadow-lg border border-gray-200">
+        {/* Logo de la aplicación */}
         <div className="flex justify-center mb-6">
           <img src="logo3PNG.png" alt="Logo" className="w-32 h-auto" />
         </div>
 
         <h2 className="text-center text-3xl font-semibold text-gray-800 mb-6">Regístrate en Marina Rent</h2>
 
+        {/* Mensaje de error si existe */}
         {errorMessage && (
           <div className="text-sm text-center text-red-700 bg-red-100 rounded py-2 mb-4">{errorMessage}</div>
         )}
 
+        {/* Formulario de registro */}
         <form onSubmit={realizarRegistro} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
@@ -170,6 +231,7 @@ export default function Registro() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            {/* Indicador visual de fortaleza de contraseña */}
             {password && (
               <div className="mt-2">
                 <div className="flex items-center space-x-2">
@@ -220,23 +282,24 @@ export default function Registro() {
                   <span className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                 </div>
               </>
-
             ) : (
               <span>Registrate</span>
             )}
           </button>
         </form>
 
+        {/* Enlace para usuarios ya registrados */}
         <p className="text-center text-sm text-gray-600 mt-6">
           ¿Ya tienes cuenta?{" "}
           <span className="underline cursor-pointer hover:text-blue-700">
-           <span className="underline cursor-pointer hover:text-blue-700">
-            <span
-            onClick={() => navigate("/")}
-            className="underline cursor-pointer hover:text-blue-700"
-          >
-            Iniciar Sesión
-          </span></span>
+            <span className="underline cursor-pointer hover:text-blue-700">
+              <span
+                onClick={() => navigate("/")}
+                className="underline cursor-pointer hover:text-blue-700"
+              >
+                Iniciar Sesión
+              </span>
+            </span>
           </span>
         </p>
       </div>

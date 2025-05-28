@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: buscador.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: buscador.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file buscador.jsx
+ * @description Componente de buscador con filtro de fecha para publicaciones. Permite buscar por texto y filtrar por rango temporal.
+ * @module components/buscador
+ */
+
+"use client"
+
+import { useState } from "react"
+import { Search, Calendar, X } from "lucide-react"
+
+/**
+ * Componente Buscador.
+ *
+ * @param {Object} props
+ * @param {function} props.onSearch - Callback para búsqueda por texto.
+ * @param {function} props.onFilter - Callback para filtrar por fecha.
+ * @param {function} props.onReset - Callback para limpiar filtros y búsqueda.
+ * @returns {JSX.Element} El componente de buscador con filtros.
+ */
+export default function Buscador({ onSearch, onFilter, onReset }) {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterDate, setFilterDate] = useState("")
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+
+  /**
+   * Maneja el cambio en el input de búsqueda.
+   * @param {React.ChangeEvent&lt;HTMLInputElement>} e
+   */
+  const handleSearchChange = (e) => {
+    const value = e.target.value
+    setSearchTerm(value)
+    onSearch(value)
+  }
+
+  /**
+   * Maneja el cambio en el filtro de fecha.
+   * @param {React.ChangeEvent&lt;HTMLInputElement>} e
+   */
+  const handleFilterChange = (e) => {
+    const value = e.target.value
+    setFilterDate(value)
+    onFilter(value)
+  }
+
+  /**
+   * Resetea los filtros y la búsqueda.
+   */
+  const handleReset = () => {
+    setSearchTerm("")
+    setFilterDate("")
+    onReset()
+  }
+
+  return (
+    &lt;div className="w-full mb-8 transition-all duration-300">
+      &lt;div className="flex items-center gap-3">
+        {/* Buscador minimalista */}
+        &lt;div className="relative flex-grow">
+          &lt;div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            &lt;Search className="w-4 h-4 text-gray-400" />
+          &lt;/div>
+          &lt;input
+            type="text"
+            className="w-full py-2 pl-10 pr-10 text-sm bg-white border-b border-gray-200 focus:border-gray-400 focus:outline-none transition-all duration-200"
+            placeholder="Buscar publicaciones..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+          {searchTerm &amp;&amp; (
+            &lt;button
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+              onClick={() => {
+                setSearchTerm("")
+                onSearch("")
+              }}
+            >
+              &lt;X className="w-4 h-4" />
+            &lt;/button>
+          )}
+        &lt;/div>
+
+        {/* Filtro de fecha minimalista */}
+        &lt;div className="relative">
+          &lt;button
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className={`p-2 rounded-full transition-all duration-200 ${
+              filterDate ? "bg-gray-100 text-gray-800" : "text-gray-400 hover:bg-gray-50"
+            }`}
+            title="Filtrar por fecha"
+          >
+            &lt;Calendar className="w-5 h-5" />
+          &lt;/button>
+
+          {isFilterOpen &amp;&amp; (
+            &lt;div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-10 border border-gray-100">
+              &lt;div className="py-1">
+                &lt;button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    filterDate === "" ? "bg-gray-50 text-gray-800" : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                  onClick={() => {
+                    setFilterDate("")
+                    onFilter("")
+                    setIsFilterOpen(false)
+                  }}
+                >
+                  Todas las fechas
+                &lt;/button>
+                &lt;button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    filterDate === "today" ? "bg-gray-50 text-gray-800" : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                  onClick={() => {
+                    setFilterDate("today")
+                    onFilter("today")
+                    setIsFilterOpen(false)
+                  }}
+                >
+                  Hoy
+                &lt;/button>
+                &lt;button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    filterDate === "week" ? "bg-gray-50 text-gray-800" : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                  onClick={() => {
+                    setFilterDate("week")
+                    onFilter("week")
+                    setIsFilterOpen(false)
+                  }}
+                >
+                  Esta semana
+                &lt;/button>
+                &lt;button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    filterDate === "month" ? "bg-gray-50 text-gray-800" : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                  onClick={() => {
+                    setFilterDate("month")
+                    onFilter("month")
+                    setIsFilterOpen(false)
+                  }}
+                >
+                  Este mes
+                &lt;/button>
+                &lt;button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    filterDate === "year" ? "bg-gray-50 text-gray-800" : "text-gray-600 hover:bg-gray-50"
+                  }`}
+                  onClick={() => {
+                    setFilterDate("year")
+                    onFilter("year")
+                    setIsFilterOpen(false)
+                  }}
+                >
+                  Este año
+                &lt;/button>
+              &lt;/div>
+            &lt;/div>
+          )}
+        &lt;/div>
+
+        {/* Botón de reset minimalista, solo visible cuando hay filtros activos */}
+        {(searchTerm || filterDate) &amp;&amp; (
+          &lt;button className="text-sm text-gray-500 hover:text-gray-700 transition-colors" onClick={handleReset}>
+            Limpiar
+          &lt;/button>
+        )}
+      &lt;/div>
+
+      {/* Indicador de filtros activos */}
+      {filterDate &amp;&amp; (
+        &lt;div className="mt-3 flex items-center">
+          &lt;span className="text-xs text-gray-500 mr-2">Filtrado por:&lt;/span>
+          &lt;span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            {filterDate === "today"
+              ? "Hoy"
+              : filterDate === "week"
+                ? "Esta semana"
+                : filterDate === "month"
+                  ? "Este mes"
+                  : "Este año"}
+            &lt;button
+              className="ml-1 text-gray-500 hover:text-gray-700"
+              onClick={() => {
+                setFilterDate("")
+                onFilter("")
+              }}
+            >
+              &lt;X className="w-3 h-3" />
+            &lt;/button>
+          &lt;/span>
+        &lt;/div>
+      )}
+    &lt;/div>
+  )
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-components_Calendar.html">components/Calendar</a></li><li><a href="module-components_MarbellaMap.html">components/MarbellaMap</a></li><li><a href="module-components_Navbar.html">components/Navbar</a></li><li><a href="module-components_buscador.html">components/buscador</a></li><li><a href="module-components_day-details-modal.html">components/day-details-modal</a></li><li><a href="module-components_person-chooser.html">components/person-chooser</a></li><li><a href="module-components_time-slider.html">components/time-slider</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed May 28 2025 12:38:35 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

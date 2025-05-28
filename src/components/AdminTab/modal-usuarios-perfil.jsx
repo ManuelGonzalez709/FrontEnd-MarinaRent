@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * @file modal-usuarios-perfil.jsx
+ * @description Modal para editar el perfil de usuario o crear usuarios desde el panel de administración.
+ * Permite modificar datos personales y restablecer la contraseña.
+ */
+
 import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -16,20 +22,52 @@ import { API_URL } from "../../utilities/apirest"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
+/**
+ * Modal para editar el perfil de usuario o crear usuarios.
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Si el modal está abierto.
+ * @param {Function} props.setIsOpen - Función para abrir/cerrar el modal.
+ * @param {Object} [props.user] - Usuario a editar (si existe).
+ * @param {boolean} [props.isProfileEdit=false] - Si es edición de perfil.
+ * @returns {JSX.Element}
+ */
 export default function UsuariosModal({ isOpen, setIsOpen, user, isProfileEdit = false }) {
+  /**
+   * Estado de carga para el guardado.
+   *   {[boolean, Function]}
+   */
   const [isLoading, setIsLoading] = useState(false)
+  /**
+   * Estado de carga para el restablecimiento de contraseña.
+   *   {[boolean, Function]}
+   */
   const [resetPasswordLoading, setResetPasswordLoading] = useState(false)
+  /**
+   * Estado de éxito al restablecer contraseña.
+   *   {[boolean, Function]}
+   */
   const [resetSuccess, setResetSuccess] = useState(false)
+  /**
+   * Estado de error al restablecer contraseña.
+   *   {[boolean, Function]}
+   */
   const [resetError, setResetError] = useState(false)
+  /**
+   * Estado del formulario del usuario.
+   *   {[Object, Function]}
+   */
   const [formData, setFormData] = useState({
     Nombre: "",
     Apellidos: "",
     Fecha_nacimiento: "",
   })
 
+  /**
+   * Efecto para cargar los datos del usuario al abrir el modal.
+   */
   useEffect(() => {
     if (user) {
-        console.log("user", user)
       setFormData({
         id_usuario: user.id,
         Nombre: user.Nombre,
@@ -41,11 +79,18 @@ export default function UsuariosModal({ isOpen, setIsOpen, user, isProfileEdit =
     }
   }, [user])
 
+  /**
+   * Maneja el cambio de los campos del formulario.
+   * @param {React.ChangeEvent<HTMLInputElement>} e
+   */
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prevData) => ({ ...prevData, [name]: value }))
   }
 
+  /**
+   * Guarda los cambios del usuario (actualiza o crea).
+   */
   const handleSave = () => {
     setIsLoading(true)
     const token = localStorage.getItem("authToken")
@@ -55,7 +100,6 @@ export default function UsuariosModal({ isOpen, setIsOpen, user, isProfileEdit =
       axios
         .post(`${API_URL}api/usuarios/actualizar`, formData, { headers })
         .then((response) => {
-          console.log("Usuario actualizado", response.data)
           setIsOpen(false) // Cerrar el modal
         })
         .catch((error) => {
@@ -68,7 +112,6 @@ export default function UsuariosModal({ isOpen, setIsOpen, user, isProfileEdit =
       axios
         .post(`${API_URL}api/usuarios`, formData, { headers })
         .then((response) => {
-          console.log("Usuario guardado", response.data)
           setIsOpen(false) // Cerrar el modal
         })
         .catch((error) => {
@@ -80,6 +123,9 @@ export default function UsuariosModal({ isOpen, setIsOpen, user, isProfileEdit =
     }
   }
 
+  /**
+   * Envía un email para restablecer la contraseña del usuario.
+   */
   const handleResetPassword = () => {
     setResetPasswordLoading(true)
     setResetSuccess(false)
@@ -91,11 +137,9 @@ export default function UsuariosModal({ isOpen, setIsOpen, user, isProfileEdit =
     axios
       .post(`${API_URL}api/enviar-restablecimiento`, { email: user.Email }, { headers })
       .then((response) => {
-        console.log("Solicitud de restablecimiento enviada", response.data)
         setResetSuccess(true)
       })
       .catch((error) => {
-        console.error("Error al solicitar restablecimiento", error)
         setResetError(true)
       })
       .finally(() => {
@@ -111,13 +155,17 @@ export default function UsuariosModal({ isOpen, setIsOpen, user, isProfileEdit =
           <DialogDescription>Modifica tu información personal.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
+          {/* Campo Nombre */}
           <label className="text-sm font-medium text-gray-700 mb-1 block">Nombre</label>
           <Input name="Nombre" value={formData.Nombre} onChange={handleChange} />
+          {/* Campo Apellidos */}
           <label className="text-sm font-medium text-gray-700 mb-1 block">Apellidos</label>
           <Input name="Apellidos" value={formData.Apellidos} onChange={handleChange} />
+          {/* Campo Fecha de Nacimiento */}
           <label className="text-sm font-medium text-gray-700 mb-1 block">Fecha de Nacimiento</label>
           <Input name="Fecha_nacimiento" type="date" value={formData.Fecha_nacimiento} onChange={handleChange} />
 
+          {/* Sección de seguridad para restablecer contraseña */}
           {user && (
             <div className="pt-4 border-t">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Seguridad</h3>

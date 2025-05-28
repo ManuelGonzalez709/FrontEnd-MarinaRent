@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * @file modal-reservas.jsx
+ * @description Modal para crear o editar reservas en el panel de administración.
+ * Permite modificar datos de la reserva, comprobar disponibilidad, aforo y notificar cambios al usuario.
+ */
+
 import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -20,8 +26,26 @@ import SelectorPersonas from "../person-chooser"
 import { Label } from "@/components/ui/label"
 import { AlertCircle, Mail, BookOpen, Calendar, AlertTriangle } from "lucide-react"
 
+/**
+ * Modal para crear o editar una reserva.
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Si el modal está abierto.
+ * @param {Function} props.setIsOpen - Función para abrir/cerrar el modal.
+ * @param {Object|number} props.reserva - Reserva a editar o ID de la reserva.
+ * @param {Function} props.onCancelReservation - Callback para cancelar la reserva.
+ * @returns {JSX.Element}
+ */
 export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelReservation }) {
+  /**
+   * Estado de carga para el guardado.
+   *   {[boolean, Function]}
+   */
   const [isLoading, setIsLoading] = useState(false)
+  /**
+   * Estado del formulario de la reserva.
+   *   {[Object, Function]}
+   */
   const [formData, setFormData] = useState({
     usuario_id: "",
     publicacion_id: "",
@@ -29,24 +53,66 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     total_pagar: "",
     personas: "",
   })
+  /**
+   * Hora inicial de la reserva.
+   *   {[number, Function]}
+   */
   const [horaInicio, setHoraInicio] = useState(0)
+  /**
+   * Hora seleccionada.
+   *   {[number, Function]}
+   */
   const [hora, setHora] = useState(15)
+  /**
+   * Disponibilidad de la hora seleccionada.
+   *   {[boolean, Function]}
+   */
   const [disponibilidadHora, setDisponibilidadHora] = useState(true)
+  /**
+   * Indica si la hora ya ha pasado.
+   *   {[boolean, Function]}
+   */
   const [horaPasada, setHoraPasada] = useState(false)
+  /**
+   * Personas disponibles para reservar.
+   *   {[number, Function]}
+   */
   const [personasDisponibles, setPersonasDisponibles] = useState(4)
+  /**
+   * Si se debe notificar al usuario del cambio.
+   *   {[boolean, Function]}
+   */
   const [notificarCambio, setNotificarCambio] = useState(true)
+  /**
+   * Email del usuario de la reserva.
+   *   {(string|Function)[]}
+   */
   const [emailUsuario, setEmailUsuario] = useState("")
+  /**
+   * Título de la publicación reservada.
+   *   {(string|Function)[]}
+   */
   const [publicacionTitulo, setPublicacionTitulo] = useState("")
+  /**
+   * Mensaje informativo.
+   *   {(string|Function)[]}
+   */
   const [mensaje, setMensaje] = useState("")
+  /**
+   * Estado para mostrar el diálogo de confirmación de guardado.
+   *   {[boolean, Function]}
+   */
   const [confirmSaveDialogOpen, setConfirmSaveDialogOpen] = useState(false)
 
+  /**
+   * Efecto para cargar los datos de la reserva al abrir el modal.
+   */
   useEffect(() => {
     if (!reserva || !isOpen) return
 
     const fetchData = async () => {
       try {
         let currentReserva = reserva
-        console.log("Reserva recibida:", reserva)
         // Si sólo tenemos un ID y no todos los datos de reserva
         if (typeof reserva === "number") {
           const res = await axios.get(`${API_URL}api/reservas/${reserva}`)
@@ -95,6 +161,9 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     fetchData()
   }, [reserva, isOpen])
 
+  /**
+   * Efecto para comprobar si la hora seleccionada está disponible y si ya ha pasado.
+   */
   useEffect(() => {
     if (!formData.fecha_reserva || !formData.publicacion_id) return
     const checkHora = async () => {
@@ -107,7 +176,6 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
         } else {
           setHoraPasada(false)
         }
-        console.log("Hora actual:", hora, "Hora Inicio:", horaInicio)
         if (hora != horaInicio) checkTimeAvailability(formData.publicacion_id, hora)
         else setDisponibilidadHora(true)
       } catch (error) {
@@ -118,8 +186,12 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     checkHora()
   }, [hora, formData.fecha_reserva, formData.publicacion_id])
 
+  /**
+   * Comprueba la disponibilidad de la hora seleccionada para la publicación.
+   * @param {string|number} publicacionId
+   * @param {number} hora
+   */
   const checkTimeAvailability = (publicacionId, hora) => {
-    console.log("Comprobando disponibilidad de hora:", publicacionId, hora)
     if (!publicacionId) return
     const url = API_URL + "api/disponibilidadReserva"
     const token = localStorage.getItem("authToken")
@@ -128,7 +200,6 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     axios
       .post(url, { idPublicacion: publicacionId, horaReserva: hora + ":00" }, { headers })
       .then((response) => {
-        console.log("Disponibilidad de hora:", response.data)
         setDisponibilidadHora(response.data.disponible)
       })
       .catch((error) => {
@@ -136,6 +207,10 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
       })
   }
 
+  /**
+   * Consulta la capacidad máxima disponible para la publicación.
+   * @param {string|number} publicacionId
+   */
   const checkCapacity = (publicacionId) => {
     if (!publicacionId) return
 
@@ -146,7 +221,6 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     axios
       .post(url, { idPublicacion: publicacionId }, { headers })
       .then((response) => {
-        console.log("Capacidad disponible:", response.data)
         setPersonasDisponibles(response.data.max_reservables)
       })
       .catch((error) => {
@@ -154,6 +228,10 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
       })
   }
 
+  /**
+   * Obtiene el email del usuario por su ID.
+   * @param {string|number} userId
+   */
   const fetchUserEmail = (userId) => {
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
@@ -161,7 +239,6 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     axios
       .get(`${API_URL}api/usuarios/${userId}`, { headers })
       .then((response) => {
-        console.log(response)
         if (response.data && response.data.Email) {
           setEmailUsuario(response.data.Email)
         }
@@ -171,6 +248,10 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
       })
   }
 
+  /**
+   * Obtiene el título de la publicación por su ID.
+   * @param {string|number} publicationId
+   */
   const fetchPublicationTitle = (publicationId) => {
     axios
       .get(`${API_URL}api/publicaciones/${publicationId}`)
@@ -184,37 +265,56 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
       })
   }
 
+  /**
+   * Maneja el cambio de los campos del formulario.
+   * @param {React.ChangeEvent<HTMLInputElement>} e
+   */
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prevData) => ({ ...prevData, [name]: value }))
   }
 
+  /**
+   * Cambia el número de personas seleccionadas.
+   * @param {number|string} value
+   */
   const handlePersonasChange = (value) => {
     setFormData((prevData) => ({ ...prevData, personas: value }))
   }
 
+  /**
+   * Abre el diálogo de confirmación para guardar cambios.
+   */
   const handleSave = () => {
     setConfirmSaveDialogOpen(true)
   }
 
+  /**
+   * Intercambia fechas de reserva si la hora no está disponible.
+   * @param {string|number} publicationId
+   * @param {string} fecha
+   */
   const intercambiarFechas = (publicationId, fecha) => {
-    console.log("Intercambio de Fechas "+publicationId, fecha+" "+notificarCambio)
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
-      axios.post(
-        `${API_URL}api/intercambiarFechas`,
-        { id: publicationId, nueva_fecha_reserva: fecha, correo: notificarCambio },
-        { headers },
-      )
-      .then((response) => {
-        console.log("Fechas intercambiadas", response.data)
-        if (response.status == 200) return
-      })
-      .catch((error) => {
-        console.error("Error al obtener título de publicación:", error)
-      })
+    axios.post(
+      `${API_URL}api/intercambiarFechas`,
+      { id: publicationId, nueva_fecha_reserva: fecha, correo: notificarCambio },
+      { headers },
+    )
+    .then((response) => {
+      // Manejo de respuesta si es necesario
+    })
+    .catch((error) => {
+      console.error("Error al intercambiar fechas:", error)
+    })
   }
 
+  /**
+   * Envía un email al usuario notificando el cambio de hora.
+   * @param {string} email
+   * @param {string} nuevaHora
+   */
   function enviarEmailCambioHora(email, nuevaHora) {
     if (!email || !notificarCambio) return
 
@@ -230,13 +330,16 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     axios
       .post(`${API_URL}api/mailTo`, { email: email, mensaje: mensaje }, { headers })
       .then((response) => {
-        console.log("Email enviado correctamente", response.data)
+        // Email enviado correctamente
       })
       .catch((error) => {
         console.error("Error al enviar email:", error)
       })
   }
 
+  /**
+   * Confirma y guarda los cambios de la reserva.
+   */
   const confirmSave = () => {
     setIsLoading(true)
     const token = localStorage.getItem("authToken")
@@ -262,7 +365,6 @@ export default function ReservasModal({ isOpen, setIsOpen, reserva, onCancelRese
     }
     // Si la hora ha cambiado y el usuario quiere ser notificado, enviar email
     else if (horaHaCambiado && notificarCambio) {
-      // Usar el endpoint específico para enviar emails
       enviarEmailCambioHora(emailUsuario, dataToSubmit.fecha_reserva)
     }
 

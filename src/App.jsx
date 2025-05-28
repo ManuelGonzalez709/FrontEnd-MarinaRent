@@ -18,6 +18,11 @@ import RecuperarPassword from './pages/ResetPass';
 import { API_URL } from './utilities/apirest';
 import axios from 'axios';
 
+/**
+ * Componente principal de la aplicación.
+ * Configura el router, la autenticación, el carrito y la lógica de rutas protegidas.
+ * @returns {JSX.Element}
+ */
 function App() {
   return (
     <Router>
@@ -26,12 +31,23 @@ function App() {
   );
 }
 
+/**
+ * Componente que contiene la lógica de rutas y estado global.
+ * Maneja autenticación, rutas protegidas, estado de admin y carrito.
+ * @returns {JSX.Element}
+ */
 function AppContent() {
   const location = useLocation();
+  // Determina si el usuario está autenticado
   const isAuthenticated = localStorage.getItem("authToken");
+  // Estado del carrito de compras
   const [cart, setCart] = useState([]);
+  // Estado para saber si el usuario es admin
   const [admin, setAdmin] = useState();
 
+  /**
+   * Carga el carrito desde localStorage al montar el componente.
+   */
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
@@ -39,6 +55,9 @@ function AppContent() {
     }
   }, []);
 
+  /**
+   * Guarda el carrito en localStorage cada vez que cambia.
+   */
   useEffect(() => {
     if (cart.length > 0) {
       localStorage.setItem("cart", JSON.stringify(cart));
@@ -46,6 +65,10 @@ function AppContent() {
     }
   }, [cart]); // Se activa cada vez que el carrito cambia
 
+  /**
+   * Comprueba si el usuario autenticado es admin.
+   * Actualiza el estado 'admin' según la respuesta de la API.
+   */
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token != null) {
@@ -66,58 +89,71 @@ function AppContent() {
 
   return (
     <>
+      {/* Navbar solo si no estamos en login, registro o recuperar */}
       {location.pathname !== "/" && location.pathname !== "/registro" && location.pathname !== "/recuperar" && <Navbar admin={admin} />}
 
       <Routes>
-
+        {/* Ruta de login */}
         <Route
           path="/"
           element={!isAuthenticated ? <Login /> : <Navigate to="/home" replace />}
         />
+        {/* Ruta de registro */}
         <Route
           path="/registro"
           element={!isAuthenticated ? <Registro /> : <Navigate to="/home" replace />}
         />
+        {/* Ruta de recuperación de contraseña */}
         <Route
           path="/recuperar"
           element={!isAuthenticated ? <RecuperarPassword /> : <Navigate to="/home" replace />}
         />
+        {/* Ruta principal (home) */}
         <Route
           path="/home"
           element={isAuthenticated ? <Home /> : <Navigate to="/" replace />}
         />
+        {/* Ruta de página no encontrada */}
         <Route
           path="/notFound"
           element={isAuthenticated ? <NotFound /> : <Navigate to="/" replace />}
         />
+        {/* Ruta de informativos */}
         <Route
           path="/informativos"
           element={isAuthenticated ? <Informativos /> : <Navigate to="/" replace />}
         />
+        {/* Ruta de productos alquilables */}
         <Route
           path="/alquilables"
           element={isAuthenticated ? <Alquilables /> : <Navigate to="/" replace />}
         />
+        {/* Ruta de mostrador, requiere autenticación y pasa el carrito */}
         <Route
           path="/mostrador"
           element={isAuthenticated ? <Mostrador cart={cart} setCart={setCart} /> : <Navigate to="/" replace />}
         />
+        {/* Ruta del carrito */}
         <Route
           path="/carrito"
           element={isAuthenticated ? <Carrito cart={cart} setCart={setCart} /> : <Navigate to="/" replace />}
         />
+        {/* Ruta de reservas */}
         <Route
           path="/reservas"
           element={isAuthenticated ? <Reservas cart={cart} setCart={setCart} /> : <Navigate to="/" replace />}
         />
+        {/* Ruta de perfil */}
         <Route
           path="/perfil"
           element={isAuthenticated ? <Perfil /> : <Navigate to="/" replace />}
         />
+        {/* Ruta de chat IA */}
         <Route
           path="/iacohere"
           element={isAuthenticated ? <CohereChat /> : <Navigate to="/" replace />}
         />
+        {/* Ruta de administración, solo para admins */}
         <Route
           path="/admin"
           element={
@@ -128,9 +164,11 @@ function AppContent() {
               : <Navigate to="/" replace />
           }
         />
+        {/* Ruta para cualquier otra url no encontrada */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
+      {/* Footer solo si no estamos en login, registro o recuperar */}
       {location.pathname !== "/" && location.pathname !== "/registro" && location.pathname !== "/recuperar" && <Footer />}
     </>
   );

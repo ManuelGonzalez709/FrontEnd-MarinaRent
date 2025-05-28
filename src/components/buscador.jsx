@@ -1,25 +1,51 @@
+/**
+ * @file buscador.jsx
+ * @description Componente de buscador con filtro de fecha para publicaciones. Permite buscar por texto y filtrar por rango temporal.
+ * @module components/buscador
+ */
+
 "use client"
 
 import { useState } from "react"
 import { Search, Calendar, X } from "lucide-react"
 
+/**
+ * Componente Buscador.
+ *
+ * @param {Object} props
+ * @param {function} props.onSearch - Callback para búsqueda por texto.
+ * @param {function} props.onFilter - Callback para filtrar por fecha.
+ * @param {function} props.onReset - Callback para limpiar filtros y búsqueda.
+ * @returns {JSX.Element} El componente de buscador con filtros.
+ */
 export default function Buscador({ onSearch, onFilter, onReset }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterDate, setFilterDate] = useState("")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
+  /**
+   * Maneja el cambio en el input de búsqueda.
+   * @param {React.ChangeEvent<HTMLInputElement>} e
+   */
   const handleSearchChange = (e) => {
     const value = e.target.value
     setSearchTerm(value)
     onSearch(value)
   }
 
+  /**
+   * Maneja el cambio en el filtro de fecha.
+   * @param {React.ChangeEvent<HTMLInputElement>} e
+   */
   const handleFilterChange = (e) => {
     const value = e.target.value
     setFilterDate(value)
     onFilter(value)
   }
 
+  /**
+   * Resetea los filtros y la búsqueda.
+   */
   const handleReset = () => {
     setSearchTerm("")
     setFilterDate("")

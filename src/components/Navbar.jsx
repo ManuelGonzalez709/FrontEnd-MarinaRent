@@ -1,3 +1,9 @@
+/**
+ * @file Navbar.jsx
+ * @description Barra de navegación principal del sitio. Incluye enlaces a las páginas principales, menú de usuario y control de visibilidad para el enlace de administración.
+ * @module components/Navbar
+ */
+
 "use client"
 
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react"
@@ -5,10 +11,23 @@ import LogoutButton from "../utilities/auth"
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
+/**
+ * Devuelve una cadena de clases CSS unidas por espacio, ignorando valores falsy.
+ * @param  {...string} classes
+ * @returns {string}
+ */
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ")
 }
 
+/**
+ * Componente Navbar.
+ * Muestra la barra de navegación superior con enlaces, menú de usuario y control de visibilidad para Admin.
+ *
+ * @param {Object} props
+ * @param {boolean} props.admin - Indica si el usuario es administrador.
+ * @returns {JSX.Element} La barra de navegación.
+ */
 export default function Example({ admin }) {
   const location = useLocation()
   const navigate = useNavigate()

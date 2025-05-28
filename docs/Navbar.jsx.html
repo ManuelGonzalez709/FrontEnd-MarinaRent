@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Navbar.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Navbar.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Navbar.jsx
+ * @description Barra de navegación principal del sitio. Incluye enlaces a las páginas principales, menú de usuario y control de visibilidad para el enlace de administración.
+ * @module components/Navbar
+ */
+
+"use client"
+
+import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react"
+import LogoutButton from "../utilities/auth"
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+
+/**
+ * Devuelve una cadena de clases CSS unidas por espacio, ignorando valores falsy.
+ * @param  {...string} classes
+ * @returns {string}
+ */
+function classNames(...classes) {
+  return classes.filter(Boolean).join(" ")
+}
+
+/**
+ * Componente Navbar.
+ * Muestra la barra de navegación superior con enlaces, menú de usuario y control de visibilidad para Admin.
+ *
+ * @param {Object} props
+ * @param {boolean} props.admin - Indica si el usuario es administrador.
+ * @returns {JSX.Element} La barra de navegación.
+ */
+export default function Example({ admin }) {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  // Incluir siempre todos los elementos de navegación, incluyendo Admin
+  const navigation = [
+    { name: "Inicio", href: "/home" },
+    { name: "Informativos", href: "/informativos" },
+    { name: "Reservables", href: "/alquilables" },
+    { name: "Mis Reservas", href: "/reservas" },
+    { name: "Carrito", href: "/carrito" },
+    { name: "IA Chatbox", href: "/iacohere" },
+    { name: "Admin", href: "/admin" }, // Siempre incluido pero se ocultará con CSS
+  ].map((item) => ({
+    ...item,
+    current: location.pathname === item.href,
+  }))
+
+  return (
+    &lt;Disclosure as="nav" className="bg-white">
+      {({ close }) => (
+        &lt;>
+          &lt;div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+            &lt;div className="relative flex h-16 items-center justify-between">
+              &lt;div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+                &lt;DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-hidden focus:ring-inset">
+                  &lt;span className="absolute -inset-0.5" />
+                  &lt;span className="sr-only">Open main menu&lt;/span>
+                  &lt;Bars3Icon aria-hidden="true" className="block size-6 group-data-open:hidden" />
+                  &lt;XMarkIcon aria-hidden="true" className="hidden size-6 group-data-open:block" />
+                &lt;/DisclosureButton>
+              &lt;/div>
+              &lt;div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+                &lt;div className="flex shrink-0 items-center">
+                  &lt;img alt="Your Company" src="logo3PNG.png" className="h-12 w-auto" />
+                &lt;/div>
+                &lt;div className="hidden sm:flex sm:items-center sm:justify-center flex-1">
+                  &lt;div className="flex space-x-4">
+                    {navigation.map((item) => (
+                      // Ocultar el elemento Admin si admin es false
+                      &lt;Link
+                        key={item.name}
+                        to={item.href}
+                        className={classNames(
+                          item.current ? "bg-blue-900 text-white" : "text-black hover:bg-blue-900 hover:text-white",
+                          "rounded-md px-3 py-2 text-sm font-medium transition-opacity duration-300",
+                          // Ocultar Admin si no es admin
+                          item.name === "Admin" &amp;&amp; !admin ? "opacity-0 invisible absolute" : "opacity-100 visible",
+                        )}
+                        aria-hidden={item.name === "Admin" &amp;&amp; !admin ? "true" : "false"}
+                        tabIndex={item.name === "Admin" &amp;&amp; !admin ? -1 : 0}
+                      >
+                        {item.name}
+                      &lt;/Link>
+                    ))}
+                  &lt;/div>
+                &lt;/div>
+              &lt;/div>
+
+              &lt;div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                &lt;Menu as="div" className="relative ml-3">
+                  &lt;div>
+                    &lt;MenuButton className="relative flex rounded-full bg-gray-800 text-sm focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
+                      &lt;span className="absolute -inset-1.5" />
+                      &lt;span className="sr-only">Open user menu&lt;/span>
+                      &lt;img
+                        alt=""
+                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80"
+                        className="size-8 rounded-full"
+                      />
+                    &lt;/MenuButton>
+                  &lt;/div>
+                  &lt;MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 transition focus:outline-hidden">
+                    &lt;MenuItem>
+                      {({ active }) => (
+                        &lt;button
+                          onClick={() => navigate("/perfil")}
+                          className={classNames(
+                            active ? "bg-blue-200" : "",
+                            "w-full text-left px-4 py-2 text-sm text-black",
+                          )}
+                        >
+                          Mi Perfil
+                        &lt;/button>
+                      )}
+                    &lt;/MenuItem>
+
+                    &lt;MenuItem>
+                      &lt;LogoutButton />
+                    &lt;/MenuItem>
+                  &lt;/MenuItems>
+                &lt;/Menu>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+
+          &lt;DisclosurePanel className="sm:hidden">
+            &lt;div className="space-y-1 px-2 pt-2 pb-3">
+              {navigation.map((item) => (
+                // Changed to use navigate instead of href for mobile menu
+                &lt;DisclosureButton
+                  key={item.name}
+                  as="button" // Changed from "a" to "button"
+                  onClick={() => {
+                    navigate(item.href)
+                    close() // Close the mobile menu after navigation
+                  }}
+                  aria-current={item.current ? "page" : undefined}
+                  className={classNames(
+                    item.current ? "bg-blue-900 text-white" : "text-black hover:bg-blue-900 hover:text-white",
+                    "block w-full text-left rounded-md px-3 py-2 text-base font-medium transition-opacity duration-300",
+                    // Ocultar Admin si no es admin
+                    item.name === "Admin" &amp;&amp; !admin ? "hidden" : "block",
+                  )}
+                  aria-hidden={item.name === "Admin" &amp;&amp; !admin ? "true" : "false"}
+                  tabIndex={item.name === "Admin" &amp;&amp; !admin ? -1 : 0}
+                >
+                  {item.name}
+                &lt;/DisclosureButton>
+              ))}
+            &lt;/div>
+          &lt;/DisclosurePanel>
+        &lt;/>
+      )}
+    &lt;/Disclosure>
+  )
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-components_Calendar.html">components/Calendar</a></li><li><a href="module-components_MarbellaMap.html">components/MarbellaMap</a></li><li><a href="module-components_Navbar.html">components/Navbar</a></li><li><a href="module-components_buscador.html">components/buscador</a></li><li><a href="module-components_day-details-modal.html">components/day-details-modal</a></li><li><a href="module-components_person-chooser.html">components/person-chooser</a></li><li><a href="module-components_time-slider.html">components/time-slider</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed May 28 2025 12:38:35 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

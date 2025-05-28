@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/Perfil.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/Perfil.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use client"
+
+/**
+ * @file Perfil.jsx
+ * @description Página de perfil de usuario. Permite ver y editar información personal, así como consultar la actividad reciente (reservas).
+ */
+
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import axios from "axios"
+import { API_URL, IMAGE_URL } from "../utilities/apirest"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CalendarDays, MapPin, Mail, Phone, Shield, Clock, Anchor, Ship, Compass } from 'lucide-react'
+import UsuariosModal from "../components/AdminTab/modal-usuarios-perfil" // Importamos el modal de usuarios
+
+/**
+ * Componente de perfil de usuario.
+ * Permite ver y editar datos personales y consultar la actividad reciente.
+ * @component
+ * @returns {JSX.Element}
+ */
+export default function PerfilPage() {
+    /**
+     * Estado con los datos del perfil del usuario.
+     *   {[Object|null, Function]}
+     */
+    const [profile, setProfile] = useState(null);
+    /**
+     * Estado de carga de la página.
+     *   {[boolean, Function]}
+     */
+    const [loading, setLoading] = useState(true);
+    /**
+     * Pestaña activa en el perfil.
+     *   {(string|Function)[]}
+     */
+    const [activeTab, setActiveTab] = useState("perfil");
+    /**
+     * Reservas del usuario.
+     *   {[Array, Function]}
+     */
+    const [reservas, setReservas] = useState([]);
+    /**
+     * Imágenes asociadas a las reservas.
+     *   {[Array, Function]}
+     */
+    const [imagenes, setImagenes] = useState([]);
+    /**
+     * Estado para controlar la apertura del modal de edición de usuario.
+     *   {[boolean, Function]}
+     */
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    /**
+     * Efecto para cargar perfil y reservas al montar el componente o al cerrar el modal.
+     */
+    useEffect(() => {
+        fetchProfile();
+        fetchReservas();
+    }, [isModalOpen]); // Actualiza cuando se cierra el modal
+
+    /**
+     * Obtiene los datos del perfil del usuario desde la API.
+     */
+    const fetchProfile = async () => {
+        const token = localStorage.getItem("authToken");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        try {
+            const response = await axios.get(API_URL + "api/getData", { headers });
+            setProfile(response.data);
+        } catch (error) {
+            console.error("Error al cargar los datos del perfil:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    /**
+     * Obtiene las reservas del usuario desde la API.
+     */
+    const fetchReservas = async () => {
+        const token = localStorage.getItem("authToken");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        try {
+            const response = await axios.get(API_URL + "api/obtenerReservasUsuario", { headers });
+            setReservas(response.data);
+        } catch (error) {
+            console.error("Error al cargar los datos del perfil:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    /**
+     * Calcula la edad a partir de la fecha de nacimiento.
+     * @param {string} fechaNacimiento
+     * @returns {number}
+     */
+    const calcularEdad = (fechaNacimiento) => {
+        const fechaNac = new Date(fechaNacimiento);
+        const hoy = new Date();
+        let edad = hoy.getFullYear() - fechaNac.getFullYear();
+        const mes = hoy.getMonth() - fechaNac.getMonth();
+        if (mes &lt; 0 || (mes === 0 &amp;&amp; hoy.getDate() &lt; fechaNac.getDate())) {
+            edad--;
+        }
+        return edad;
+    };
+
+    /**
+     * Formatea una fecha a formato legible en español.
+     * @param {string} fecha
+     * @returns {string}
+     */
+    const formatearFecha = (fecha) => {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(fecha).toLocaleDateString('es-ES', options);
+    };
+
+    /**
+     * Abre el modal de edición de perfil.
+     */
+    const handleEditProfile = () => {
+        setIsModalOpen(true);
+    };
+
+    // Loader mientras se cargan los datos
+    if (loading) {
+        return (
+            &lt;div className="flex justify-center items-center h-64">
+                &lt;div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin">&lt;/div>
+            &lt;/div>
+        );
+    }
+
+    // Si no hay perfil, muestra mensaje de error
+    if (!profile) {
+        return (
+            &lt;div className="flex flex-col items-center justify-center min-h-screen">
+                &lt;h1 className="text-2xl font-bold text-red-500">Error al cargar el perfil&lt;/h1>
+                &lt;p className="text-gray-600 mt-2">No se pudieron obtener los datos del usuario&lt;/p>
+                &lt;Button className="mt-4" onClick={() => window.location.reload()}>
+                    Intentar de nuevo
+                &lt;/Button>
+            &lt;/div>
+        );
+    }
+
+    // Formatea la fecha de última actualización del perfil
+    const updated_at = profile.updated_at.split("T")[0] + " " + profile.updated_at.split("T")[1].split(".")[0];
+
+    return (
+        &lt;div className="container mx-auto px-4 py-8">
+            {/* Banner de portada con nombre y año de registro */}
+            &lt;div className="mb-8">
+                &lt;div className="relative h-48 w-full rounded-xl overflow-hidden mb-4">
+                    &lt;img
+                        src="banner.jpg"
+                        alt="Portada de perfil"
+                        width={1200}
+                        height={400}
+                        className="object-cover w-full h-full"
+                    />
+                    &lt;div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">&lt;/div>
+                    &lt;div className="absolute bottom-4 left-4 text-white">
+                        &lt;h1 className="text-3xl font-bold">{profile.Nombre} {profile.Apellidos}&lt;/h1>
+                        &lt;p className="text-sm opacity-90">
+                            Miembro desde {new Date(profile.created_at).getFullYear()}
+                        &lt;/p>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+
+            &lt;div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Tarjeta de información personal */}
+                &lt;div className="md:col-span-1">
+                    &lt;Card>
+                        &lt;CardHeader className="pb-2">
+                            &lt;CardTitle>Información Personal&lt;/CardTitle>
+                            &lt;CardDescription>Detalles de tu cuenta&lt;/CardDescription>
+                        &lt;/CardHeader>
+                        &lt;CardContent>
+                            &lt;div className="flex flex-col items-center mb-6">
+                                &lt;Avatar className="h-24 w-24 mb-4">
+                                    &lt;AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${profile.Nombre} ${profile.Apellidos}`} alt={profile.Nombre} />
+                                    &lt;AvatarFallback>{profile.Nombre.charAt(0)}{profile.Apellidos.charAt(0)}&lt;/AvatarFallback>
+                                &lt;/Avatar>
+                                &lt;h2 className="text-xl font-semibold">{profile.Nombre} {profile.Apellidos}&lt;/h2>
+                                &lt;Badge className="mt-2" variant={profile.Tipo === "admin" ? "destructive" : "default"}>
+                                    {profile.Tipo === "admin" ? "Administrador" : "Usuario"}
+                                &lt;/Badge>
+                            &lt;/div>
+
+                            &lt;div className="space-y-4">
+                                {/* Email */}
+                                &lt;div className="flex items-center gap-3">
+                                    &lt;Mail className="h-5 w-5 text-muted-foreground" />
+                                    &lt;div>
+                                        &lt;p className="text-sm font-medium">Email&lt;/p>
+                                        &lt;p className="text-sm text-muted-foreground">{profile.Email}&lt;/p>
+                                    &lt;/div>
+                                &lt;/div>
+                                {/* Fecha de nacimiento y edad */}
+                                &lt;div className="flex items-center gap-3">
+                                    &lt;CalendarDays className="h-5 w-5 text-muted-foreground" />
+                                    &lt;div>
+                                        &lt;p className="text-sm font-medium">Fecha de nacimiento&lt;/p>
+                                        &lt;p className="text-sm text-muted-foreground">{formatearFecha(profile.Fecha_nacimiento)} ({calcularEdad(profile.Fecha_nacimiento)} años)&lt;/p>
+                                    &lt;/div>
+                                &lt;/div>
+                                {/* Tipo de cuenta */}
+                                &lt;div className="flex items-center gap-3">
+                                    &lt;Shield className="h-5 w-5 text-muted-foreground" />
+                                    &lt;div>
+                                        &lt;p className="text-sm font-medium">Tipo de cuenta&lt;/p>
+                                        &lt;p className="text-sm text-muted-foreground capitalize">{profile.Tipo}&lt;/p>
+                                    &lt;/div>
+                                &lt;/div>
+                                {/* Última modificación */}
+                                &lt;div className="flex items-center gap-3">
+                                    &lt;Clock className="h-5 w-5 text-muted-foreground" />
+                                    &lt;div>
+                                        &lt;p className="text-sm font-medium">Última modificación del perfil&lt;/p>
+                                        &lt;p className="text-sm text-muted-foreground">{updated_at}&lt;/p>
+                                    &lt;/div>
+                                &lt;/div>
+                            &lt;/div>
+                        &lt;/CardContent>
+                        &lt;CardFooter>
+                            {/* Botón para abrir el modal de edición */}
+                            &lt;Button variant="outline" className="w-full" onClick={handleEditProfile}>
+                                Editar perfil
+                            &lt;/Button>
+                        &lt;/CardFooter>
+                    &lt;/Card>
+                &lt;/div>
+
+                {/* Sección de actividad reciente (reservas) */}
+                &lt;div className="md:col-span-2">
+                    &lt;Tabs defaultValue="actividad" className="w-full">
+                        &lt;TabsList className="grid grid-cols-1 mb-6">
+                            &lt;TabsTrigger value="actividad">Actividad Reciente&lt;/TabsTrigger>
+                        &lt;/TabsList>
+
+                        &lt;TabsContent value="actividad">
+                            &lt;Card>
+                                &lt;CardHeader>
+                                    &lt;CardTitle>Actividad Reciente&lt;/CardTitle>
+                                    &lt;CardDescription>Historial de tus últimas actividades&lt;/CardDescription>
+                                &lt;/CardHeader>
+                                &lt;CardContent>
+                                    &lt;div className="space-y-6">
+                                        {/* Lista de reservas del usuario */}
+                                        {reservas.map((item) => {
+                                            const publicacion = item.publicacion;
+                                            const imagenes = publicacion?.imagen?.split(";") || [];
+
+                                            return (
+                                                &lt;div key={item.id} className="flex items-start gap-4 pb-4 border-b last:border-0">
+                                                    &lt;div className="rounded-md overflow-hidden w-16 h-16 flex-shrink-0">
+                                                        &lt;img
+                                                            src={imagenes[0] ? IMAGE_URL + imagenes[0] : "/placeholder.svg"}
+                                                            alt={publicacion?.titulo || "Sin título"}
+                                                            width={100}
+                                                            height={100}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                    &lt;/div>
+                                                    &lt;div className="flex-1">
+                                                        &lt;h3 className="font-medium">Reserva: {publicacion?.titulo}&lt;/h3>
+                                                        &lt;p className="text-sm text-muted-foreground">
+                                                            Total pagado: {item.total_pagar} € | Personas: {item.personas}
+                                                        &lt;/p>
+                                                        &lt;div className="flex items-center gap-2 mt-1">
+                                                            &lt;CalendarDays className="h-3 w-3 text-muted-foreground" />
+                                                            &lt;span className="text-xs text-muted-foreground">
+                                                                Fecha: {new Date(item.fecha_reserva).toLocaleDateString()}
+                                                            &lt;/span>
+                                                        &lt;/div>
+                                                    &lt;/div>
+                                                &lt;/div>
+                                            );
+                                        })}
+                                    &lt;/div>
+                                &lt;/CardContent>
+                            &lt;/Card>
+                        &lt;/TabsContent>
+                    &lt;/Tabs>
+                &lt;/div>
+            &lt;/div>
+
+            {/* Modal de edición de usuario */}
+            {isModalOpen &amp;&amp; (
+                &lt;UsuariosModal
+                    isOpen={isModalOpen}
+                    setIsOpen={setIsModalOpen}
+                    user={profile}
+                    isProfileEdit={true} // Indicamos que es una edición desde el perfil
+                />
+            )}
+        &lt;/div>
+    );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-components_Calendar.html">components/Calendar</a></li><li><a href="module-components_MarbellaMap.html">components/MarbellaMap</a></li><li><a href="module-components_Navbar.html">components/Navbar</a></li><li><a href="module-components_buscador.html">components/buscador</a></li><li><a href="module-components_day-details-modal.html">components/day-details-modal</a></li><li><a href="module-components_person-chooser.html">components/person-chooser</a></li><li><a href="module-components_time-slider.html">components/time-slider</a></li></ul><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#AppContent">AppContent</a></li><li><a href="global.html#CohereChat">CohereChat</a></li><li><a href="global.html#Login">Login</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed May 28 2025 13:30:18 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

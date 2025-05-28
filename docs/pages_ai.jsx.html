@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/ai.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/ai.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use client"
+
+/**
+ * @file ai.jsx
+ * @description Página de chat con IA usando Cohere. Permite enviar mensajes y recibir respuestas de la IA.
+ */
+
+import { useEffect, useState, useRef } from "react"
+import { CohereClientV2 } from "cohere-ai"
+import { Send } from "lucide-react"
+
+/**
+ * Componente de chat con IA Cohere.
+ * Permite enviar mensajes y recibir respuestas en tiempo real.
+ * @component
+ * @returns {JSX.Element}
+ */
+const CohereChat = () => {
+  /**
+   * Lista de mensajes del chat.
+   *   {[Array, Function]}
+   */
+  const [messages, setMessages] = useState([])
+  /**
+   * Mensaje de entrada del usuario.
+   *   {(string|Function)[]}
+   */
+  const [inputMessage, setInputMessage] = useState("")
+  /**
+   * Estado de carga mientras se espera la respuesta de la IA.
+   *   {[boolean, Function]}
+   */
+  const [isLoading, setIsLoading] = useState(false)
+  /**
+   * Referencia al final de la lista de mensajes para hacer scroll automático.
+   *   {React.RefObject}
+   */
+  const messagesEndRef = useRef(null)
+
+  // Instancia del cliente Cohere
+  const cohere = new CohereClientV2({
+    token: "bWXyUM9gislciEY3l0DhkZtPKJyGaX77cJC0qnWo",
+  })
+
+  /**
+   * Envía un mensaje al modelo Cohere y actualiza el chat.
+   * @param {string} content - Mensaje del usuario.
+   */
+  const sendMessage = async (content) => {
+    if (!content.trim()) return
+
+    // Añade el mensaje del usuario al chat
+    const userMessage = { role: "user", content }
+    setMessages((prev) => [...prev, userMessage])
+
+    setIsLoading(true)
+
+    try {
+      // Llama a la API de Cohere con el historial de mensajes
+      const res = await cohere.chat({
+        model: "command-a-03-2025",
+        messages: [...messages.map((msg) => ({ role: msg.role, content: msg.content })), { role: "user", content }],
+      })
+
+      // Añade la respuesta de la IA al chat
+      if (res.message) {
+        const assistantMessage = {
+          role: "assistant",
+          content: res.message.content[0]?.text || "No response content",
+        }
+        setMessages((prev) => [...prev, assistantMessage])
+      }
+    } catch (error) {
+      console.error("Error calling Cohere API:", error)
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Sorry, I encountered an error processing your request.",
+        },
+      ])
+    } finally {
+      setIsLoading(false)
+      setInputMessage("")
+    }
+  }
+
+  /**
+   * Maneja el envío del formulario (mensaje).
+   * @param {React.FormEvent} e
+   */
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    sendMessage(inputMessage)
+  }
+
+  
+
+  return (
+    &lt;div className="flex flex-col h-[600px] mx-auto border rounded-lg shadow-lg bg-white ">
+      {/* Chat header */}
+      &lt;div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg">
+        &lt;h1 className="text-xl font-bold">Chat con IA&lt;/h1>
+      &lt;/div>
+
+      {/* Contenedor de mensajes */}
+      &lt;div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+        {messages.length === 0 ? (
+          &lt;div className="flex items-center justify-center h-full text-gray-400">Empieza a conversar...&lt;/div>
+        ) : (
+          messages.map((message, index) => (
+            &lt;div key={index} className={`mb-4 flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+              &lt;div
+                className={`max-w-[80%] p-3 rounded-lg ${
+                  message.role === "user"
+                    ? "bg-indigo-600 text-white rounded-tr-none"
+                    : "bg-white border border-gray-200 text-gray-800 rounded-tl-none"
+                }`}
+              >
+                {message.content}
+              &lt;/div>
+            &lt;/div>
+          ))
+        )}
+        {/* Loader de la IA */}
+        {isLoading &amp;&amp; (
+          &lt;div className="flex justify-start mb-4">
+            &lt;div className="bg-white border border-gray-200 p-3 rounded-lg rounded-tl-none text-gray-800">
+              &lt;div className="flex space-x-2">
+                &lt;div
+                  className="w-2 h-2 rounded-full bg-gray-300 animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                >&lt;/div>
+                &lt;div
+                  className="w-2 h-2 rounded-full bg-gray-300 animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                >&lt;/div>
+                &lt;div
+                  className="w-2 h-2 rounded-full bg-gray-300 animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                >&lt;/div>
+              &lt;/div>
+            &lt;/div>
+          &lt;/div>
+        )}
+        &lt;div ref={messagesEndRef} />
+      &lt;/div>
+
+      {/* Área de entrada de texto */}
+      &lt;form onSubmit={handleSubmit} className="p-3 border-t border-gray-200 bg-white rounded-b-lg">
+        &lt;div className="flex items-center">
+          &lt;input
+            type="text"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            placeholder="Escribe tu mensaje..."
+            className="flex-1 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            disabled={isLoading}
+          />
+          &lt;button
+            type="submit"
+            className="p-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+            disabled={isLoading || !inputMessage.trim()}
+          >
+            &lt;Send size={28} />
+          &lt;/button>
+        &lt;/div>
+      &lt;/form>
+    &lt;/div>
+  )
+}
+
+export default CohereChat
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-components_Calendar.html">components/Calendar</a></li><li><a href="module-components_MarbellaMap.html">components/MarbellaMap</a></li><li><a href="module-components_Navbar.html">components/Navbar</a></li><li><a href="module-components_buscador.html">components/buscador</a></li><li><a href="module-components_day-details-modal.html">components/day-details-modal</a></li><li><a href="module-components_person-chooser.html">components/person-chooser</a></li><li><a href="module-components_time-slider.html">components/time-slider</a></li></ul><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#AppContent">AppContent</a></li><li><a href="global.html#CohereChat">CohereChat</a></li><li><a href="global.html#Login">Login</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed May 28 2025 13:30:18 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: App.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: App.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Informativos from './pages/Informativos';
+import Alquilables from './pages/Alquilables';
+import Mostrador from './pages/Mostrador';
+import Carrito from './pages/Carrito';
+import NotFound from './pages/NotFound';
+import Reservas from './pages/Reservas';
+import Perfil from './pages/Perfil';
+import Admin from './pages/Admin';
+import Registro from './pages/Register';
+import CohereChat from './pages/ai';
+import RecuperarPassword from './pages/ResetPass';
+import { API_URL } from './utilities/apirest';
+import axios from 'axios';
+
+/**
+ * Componente principal de la aplicación.
+ * Configura el router, la autenticación, el carrito y la lógica de rutas protegidas.
+ * @returns {JSX.Element}
+ */
+function App() {
+  return (
+    &lt;Router>
+      &lt;AppContent />
+    &lt;/Router>
+  );
+}
+
+/**
+ * Componente que contiene la lógica de rutas y estado global.
+ * Maneja autenticación, rutas protegidas, estado de admin y carrito.
+ * @returns {JSX.Element}
+ */
+function AppContent() {
+  const location = useLocation();
+  // Determina si el usuario está autenticado
+  const isAuthenticated = localStorage.getItem("authToken");
+  // Estado del carrito de compras
+  const [cart, setCart] = useState([]);
+  // Estado para saber si el usuario es admin
+  const [admin, setAdmin] = useState();
+
+  /**
+   * Carga el carrito desde localStorage al montar el componente.
+   */
+  useEffect(() => {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    }
+  }, []);
+
+  /**
+   * Guarda el carrito en localStorage cada vez que cambia.
+   */
+  useEffect(() => {
+    if (cart.length > 0) {
+      localStorage.setItem("cart", JSON.stringify(cart));
+      console.log("Carrito actualizado:", cart);
+    }
+  }, [cart]); // Se activa cada vez que el carrito cambia
+
+  /**
+   * Comprueba si el usuario autenticado es admin.
+   * Actualiza el estado 'admin' según la respuesta de la API.
+   */
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token != null) {
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      axios.get(API_URL + "api/isAdmin", { headers })
+        .then((response) => {
+          console.log(response)
+          if (response.status === 200)
+            setAdmin(response.data.is_admin)
+          else setAdmin(false)
+        })
+        .catch((error) => {
+          console.error("Error al cargar los informativos:", error);
+          setAdmin(false)
+        })
+    }
+  }, [isAuthenticated])
+
+  return (
+    &lt;>
+      {/* Navbar solo si no estamos en login, registro o recuperar */}
+      {location.pathname !== "/" &amp;&amp; location.pathname !== "/registro" &amp;&amp; location.pathname !== "/recuperar" &amp;&amp; &lt;Navbar admin={admin} />}
+
+      &lt;Routes>
+        {/* Ruta de login */}
+        &lt;Route
+          path="/"
+          element={!isAuthenticated ? &lt;Login /> : &lt;Navigate to="/home" replace />}
+        />
+        {/* Ruta de registro */}
+        &lt;Route
+          path="/registro"
+          element={!isAuthenticated ? &lt;Registro /> : &lt;Navigate to="/home" replace />}
+        />
+        {/* Ruta de recuperación de contraseña */}
+        &lt;Route
+          path="/recuperar"
+          element={!isAuthenticated ? &lt;RecuperarPassword /> : &lt;Navigate to="/home" replace />}
+        />
+        {/* Ruta principal (home) */}
+        &lt;Route
+          path="/home"
+          element={isAuthenticated ? &lt;Home /> : &lt;Navigate to="/" replace />}
+        />
+        {/* Ruta de página no encontrada */}
+        &lt;Route
+          path="/notFound"
+          element={isAuthenticated ? &lt;NotFound /> : &lt;Navigate to="/" replace />}
+        />
+        {/* Ruta de informativos */}
+        &lt;Route
+          path="/informativos"
+          element={isAuthenticated ? &lt;Informativos /> : &lt;Navigate to="/" replace />}
+        />
+        {/* Ruta de productos alquilables */}
+        &lt;Route
+          path="/alquilables"
+          element={isAuthenticated ? &lt;Alquilables /> : &lt;Navigate to="/" replace />}
+        />
+        {/* Ruta de mostrador, requiere autenticación y pasa el carrito */}
+        &lt;Route
+          path="/mostrador"
+          element={isAuthenticated ? &lt;Mostrador cart={cart} setCart={setCart} /> : &lt;Navigate to="/" replace />}
+        />
+        {/* Ruta del carrito */}
+        &lt;Route
+          path="/carrito"
+          element={isAuthenticated ? &lt;Carrito cart={cart} setCart={setCart} /> : &lt;Navigate to="/" replace />}
+        />
+        {/* Ruta de reservas */}
+        &lt;Route
+          path="/reservas"
+          element={isAuthenticated ? &lt;Reservas cart={cart} setCart={setCart} /> : &lt;Navigate to="/" replace />}
+        />
+        {/* Ruta de perfil */}
+        &lt;Route
+          path="/perfil"
+          element={isAuthenticated ? &lt;Perfil /> : &lt;Navigate to="/" replace />}
+        />
+        {/* Ruta de chat IA */}
+        &lt;Route
+          path="/iacohere"
+          element={isAuthenticated ? &lt;CohereChat /> : &lt;Navigate to="/" replace />}
+        />
+        {/* Ruta de administración, solo para admins */}
+        &lt;Route
+          path="/admin"
+          element={
+            isAuthenticated
+              ? admin === undefined
+                ? &lt;div className="flex justify-center items-center">&lt;div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin">&lt;/div>&lt;/div>
+                : admin ? &lt;Admin /> : &lt;Navigate to="/" replace />
+              : &lt;Navigate to="/" replace />
+          }
+        />
+        {/* Ruta para cualquier otra url no encontrada */}
+        &lt;Route path="*" element={&lt;NotFound />} />
+      &lt;/Routes>
+
+      {/* Footer solo si no estamos en login, registro o recuperar */}
+      {location.pathname !== "/" &amp;&amp; location.pathname !== "/registro" &amp;&amp; location.pathname !== "/recuperar" &amp;&amp; &lt;Footer />}
+    &lt;/>
+  );
+}
+
+export default App;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-components_Calendar.html">components/Calendar</a></li><li><a href="module-components_MarbellaMap.html">components/MarbellaMap</a></li><li><a href="module-components_Navbar.html">components/Navbar</a></li><li><a href="module-components_buscador.html">components/buscador</a></li><li><a href="module-components_day-details-modal.html">components/day-details-modal</a></li><li><a href="module-components_person-chooser.html">components/person-chooser</a></li><li><a href="module-components_time-slider.html">components/time-slider</a></li></ul><h3>Global</h3><ul><li><a href="global.html#App">App</a></li><li><a href="global.html#AppContent">AppContent</a></li><li><a href="global.html#CohereChat">CohereChat</a></li><li><a href="global.html#Login">Login</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed May 28 2025 13:30:18 GMT+0200 (hora de verano de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,3 +1,9 @@
+/**
+ * @file day-details-modal.jsx
+ * @description Modal que muestra los detalles de los eventos/reservas de un día concreto y permite cancelar reservas.
+ * @module components/day-details-modal
+ */
+
 "use client"
 import { useState } from "react"
 import { Calendar, Clock, AlertTriangle } from "lucide-react"
@@ -8,6 +14,16 @@ import { Button } from "@/components/ui/button"
 import axios from "axios"
 import { API_URL } from "../utilities/apirest"
 
+/**
+ * Modal de detalles de un día con eventos/reservas.
+ *
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Si el modal está abierto.
+ * @param {function} props.onClose - Función para cerrar el modal.
+ * @param {Object} props.day - Objeto con la fecha y los eventos de ese día.
+ * @param {function} props.onCancel - Callback al cancelar una reserva.
+ * @returns {JSX.Element|null} El modal de detalles del día.
+ */
 export default function DayDetailsModal({ isOpen, onClose, day, onCancel }) {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
   const [selectedEventId, setSelectedEventId] = useState(null)
@@ -15,6 +31,11 @@ export default function DayDetailsModal({ isOpen, onClose, day, onCancel }) {
 
   if (!day) return null
 
+  /**
+   * Formatea la fecha a un string legible en español.
+   * @param {Date} date
+   * @returns {string}
+   */
   const formatDate = (date) => {
     return date.toLocaleDateString("es-ES", {
       weekday: "long",
@@ -24,6 +45,11 @@ export default function DayDetailsModal({ isOpen, onClose, day, onCancel }) {
     })
   }
 
+  /**
+   * Formatea la hora a un string legible en español.
+   * @param {Date} date
+   * @returns {string}
+   */
   const formatTime = (date) => {
     return date.toLocaleTimeString("es-ES", {
       hour: "2-digit",
@@ -31,13 +57,17 @@ export default function DayDetailsModal({ isOpen, onClose, day, onCancel }) {
     })
   }
 
+  /**
+   * Cancela la reserva llamando a la API y ejecuta el callback onCancel.
+   * @param {string} eventId
+   */
   const handleCancelarReserva = async (eventId) => {
     console.log("Cancelando reserva con ID:", eventId)
     try {
       setIsLoading(true)
-      const url = API_URL + "api/reservas/"+eventId;
-      const token = localStorage.getItem("authToken");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const url = API_URL + "api/reservas/" + eventId
+      const token = localStorage.getItem("authToken")
+      const headers = token ? { Authorization: `Bearer ${token}` } : {}
       await axios.delete(url, { headers })
       if (onCancel) onCancel(eventId)
       setConfirmDialogOpen(false)
@@ -48,6 +78,10 @@ export default function DayDetailsModal({ isOpen, onClose, day, onCancel }) {
     }
   }
 
+  /**
+   * Abre el diálogo de confirmación para cancelar una reserva.
+   * @param {string} eventId
+   */
   const openConfirmDialog = (eventId) => {
     setSelectedEventId(eventId)
     setConfirmDialogOpen(true)
@@ -55,6 +89,7 @@ export default function DayDetailsModal({ isOpen, onClose, day, onCancel }) {
 
   return (
     <>
+      {/* Modal principal con detalles del día */}
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
           <DialogHeader className="p-6 pb-2">
@@ -107,7 +142,7 @@ export default function DayDetailsModal({ isOpen, onClose, day, onCancel }) {
         </DialogContent>
       </Dialog>
 
-      {/* Diálogo de confirmación */}
+      {/* Diálogo de confirmación para cancelar reserva */}
       <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * @file publicaciones.jsx
+ * @description Vista de administración para listar, buscar, crear, editar y eliminar publicaciones.
+ * Incluye paginación, búsqueda y modales para edición/creación.
+ */
+
 import { useEffect, useState } from "react"
 import { Search, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -7,39 +13,93 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import axios from "axios"
-import { API_URL,IMAGE_URL } from "../../utilities/apirest"
+import { API_URL, IMAGE_URL } from "../../utilities/apirest"
 import ProductModal from "./modal-publicaciones"
 
+/**
+ * Componente principal para la gestión de publicaciones.
+ * Permite buscar, paginar, crear, editar y eliminar publicaciones.
+ * @component
+ * @returns {JSX.Element}
+ */
 export default function Publicaciones() {
+  /**
+   * Estado para la búsqueda de publicaciones.
+   *   {(string|Function)[]}
+   */
   const [searchQuery, setSearchQuery] = useState("")
+  /**
+   * Lista de publicaciones cargadas.
+   *   {[Array, Function]}
+   */
   const [publicaciones, setPublicaciones] = useState([])
+  /**
+   * Estado de carga.
+   *   {[boolean, Function]}
+   */
   const [loading, setLoading] = useState(true)
+  /**
+   * Estado para mostrar el modal de edición.
+   *   {[boolean, Function]}
+   */
   const [isModalOpen, setIsModalOpen] = useState(false)
+  /**
+   * Publicación seleccionada para editar.
+   *   {[Object, Function]}
+   */
   const [publication, setPublication] = useState()
+  /**
+   * Estado para mostrar el modal de añadir.
+   *   {[boolean, Function]}
+   */
   const [addModalOpen, setAddModalOpen] = useState(false)
 
-  // Pagination states
+  // Estados de paginación
+  /**
+   * Página actual.
+   *   {[number, Function]}
+   */
   const [currentPage, setCurrentPage] = useState(1)
+  /**
+   * Total de páginas.
+   *   {[number, Function]}
+   */
   const [totalPages, setTotalPages] = useState(1)
 
   // Estados para eliminar con confirmación
+  /**
+   * Estado para mostrar el diálogo de confirmación de borrado.
+   *   {[boolean, Function]}
+   */
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
+  /**
+   * ID de la publicación seleccionada para eliminar.
+   *   {[number|null, Function]}
+   */
   const [selectedPublicationId, setSelectedPublicationId] = useState(null)
+  /**
+   * Estado de carga para el borrado.
+   *   {[boolean, Function]}
+   */
   const [isDeleting, setIsDeleting] = useState(false)
 
+  /**
+   * Obtiene las publicaciones paginadas desde la API.
+   * @param {number} page
+   */
   const fetchPublicaciones = (page = 1) => {
     setLoading(true)
     const token = localStorage.getItem("authToken")
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
     axios
-      .post(`${API_URL}api/publicacionesPaginadas`, {pagina:page}, { headers })
+      .post(`${API_URL}api/publicacionesPaginadas`, { pagina: page }, { headers })
       .then((response) => {
         if (response.data.success) {
-            console.log("Publicaciones cargadas:", response.data.data)
-            setPublicaciones(response.data.data)
-            setCurrentPage(response.data.page)
-            setTotalPages(response.data.totalPages)
+          console.log("Publicaciones cargadas:", response.data.data)
+          setPublicaciones(response.data.data)
+          setCurrentPage(response.data.page)
+          setTotalPages(response.data.totalPages)
         } else {
           console.error("Error en la respuesta:", response.data)
         }
@@ -50,19 +110,33 @@ export default function Publicaciones() {
       .finally(() => setLoading(false))
   }
 
+  /**
+   * Efecto para cargar publicaciones al abrir/cerrar modales o eliminar.
+   */
   useEffect(() => {
     fetchPublicaciones(currentPage)
   }, [isModalOpen, addModalOpen, isDeleting])
 
+  /**
+   * Callback al actualizar una publicación.
+   * @param {Object} updatedPublication
+   */
   const handleUpdate = (updatedPublication) => {
     setPublication(updatedPublication)
   }
 
+  /**
+   * Callback al añadir un nuevo producto.
+   * @param {Object} newProduct
+   */
   const handleProductAdded = (newProduct) => {
     console.log("Producto añadido:", newProduct)
     fetchPublicaciones(1) // Volver a la primera página después de añadir
   }
 
+  /**
+   * Elimina una publicación seleccionada.
+   */
   const handleDelete = async () => {
     if (!selectedPublicationId) return
     setIsDeleting(true)
@@ -84,6 +158,10 @@ export default function Publicaciones() {
     }
   }
 
+  /**
+   * Cambia la página actual de la paginación.
+   * @param {number} newPage
+   */
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage)
@@ -91,19 +169,23 @@ export default function Publicaciones() {
     }
   }
 
-  // Filter publications based on search query
+  /**
+   * Filtra las publicaciones según la búsqueda.
+   */
   const filteredPublicaciones = publicaciones.filter((item) =>
     item.titulo.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
   return (
     <>
+      {/* Loader mientras se cargan los datos */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
         </div>
       ) : (
         <>
+          {/* Barra de búsqueda y botón para añadir */}
           <div className="flex justify-between items-center mb-6">
             <div className="relative w-full max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -118,6 +200,7 @@ export default function Publicaciones() {
             <Button onClick={() => setAddModalOpen(true)}>Añadir nuevo producto</Button>
           </div>
 
+          {/* Grid de publicaciones */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredPublicaciones.map((item) => (
               <Card key={item.id} className="overflow-hidden">
@@ -161,7 +244,7 @@ export default function Publicaciones() {
             ))}
           </div>
 
-          {/* Pagination Controls */}
+          {/* Controles de paginación */}
           {!searchQuery && (
             <div className="flex justify-center items-center mt-8 gap-2">
               <Button
@@ -202,7 +285,7 @@ export default function Publicaciones() {
             isAddMode={true}
           />
 
-          {/* Diálogo de confirmación */}
+          {/* Diálogo de confirmación para eliminar */}
           <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>

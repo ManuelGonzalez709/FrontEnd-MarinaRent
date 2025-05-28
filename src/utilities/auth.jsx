@@ -5,16 +5,18 @@ const LogoutButton = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); 
-    navigate('/'); // Navega al inicio después de hacer logout
+    localStorage.removeItem('authToken');
+    sessionStorage.clear();
+    // Puedes limpiar otros datos si es necesario
+    navigate('/login'); // Redirige a la página de login tras cerrar sesión
   };
 
   return (
     <button
       onClick={handleLogout}
-      className="block px-4 py-2 text-sm text-black focus:bg-blue-200 focus:outline-none"
+      className="block px-4 py-2 text-sm text-black hover:bg-blue-100 focus:bg-blue-200 focus:outline-none transition-colors"
     >
-      Logout
+      Cerrar sesión
     </button>
   );
 };

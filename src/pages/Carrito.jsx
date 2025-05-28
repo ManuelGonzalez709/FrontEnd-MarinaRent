@@ -1,17 +1,48 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { API_URL,IMAGE_URL } from '../utilities/apirest';
+import { API_URL, IMAGE_URL } from '../utilities/apirest';
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Componente de carrito de reservas.
+ * Permite ver, verificar disponibilidad y realizar reservas de productos seleccionados.
+ * @component
+ * @param {Object} props
+ * @param {Array} props.cart - Array de productos en el carrito.
+ * @param {Function} props.setCart - Función para actualizar el carrito.
+ * @returns {JSX.Element}
+ */
 export default function Carrito({ cart, setCart }) {
+  /**
+   * Elementos del carrito que están disponibles.
+   *   {[Array, Function]}
+   */
   const [carritoDesfase, setCarritoDesfase] = useState([]);
+  /**
+   * Elementos del carrito que no están disponibles o tienen problemas.
+   *   {[Array, Function]}
+   */
   const [carritoNormal, setCarritoNormal] = useState([]);
+  /**
+   * Estado de carga.
+   *   {[boolean, Function]}
+   */
   const [loading, setLoading] = useState(true);
+  /**
+   * Indica si todos los productos del carrito están disponibles para reservar.
+   *   {[boolean, Function]}
+   */
   const [alquilerDisponible, setAlquilerDisponible] = useState(true);
+  /**
+   * Hook de navegación de React Router.
+   */
   const navigate = useNavigate();
 
+  /**
+   * Efecto para verificar disponibilidad cada vez que cambia el carrito.
+   */
   useEffect(() => {
     if (cart.length > 0) {
       verificarDisponibilidad();
@@ -23,6 +54,10 @@ export default function Carrito({ cart, setCart }) {
     }
   }, [cart]);
 
+  /**
+   * Verifica la disponibilidad de cada producto del carrito.
+   * Clasifica los productos en disponibles y desfasados.
+   */
   const verificarDisponibilidad = async () => {
     setLoading(true);
     const token = localStorage.getItem("authToken");
@@ -35,32 +70,32 @@ export default function Carrito({ cart, setCart }) {
     await Promise.all(
       cart.map(async (item) => {
         try {
+          // Verifica disponibilidad de hora
           const response1 = await axios.post(API_URL + "api/disponibilidadReserva", {
             idPublicacion: item.id,
             horaReserva: item.horaReserva + ":00"
           }, { headers });
-        
+
+          // Verifica capacidad disponible
           const response2 = await axios.post(API_URL + "api/capacidadDisponible", {
             idPublicacion: item.id
           }, { headers });
-        
+
+          // Obtiene fecha y hora actual del servidor
           const response3 = await axios.get(API_URL + "api/horaFecha", {}, { headers });
-        
+
           const disponibilidad = response1.data.disponible;
           const maxReservables = response2.data.personas_disponibles;
           const mismaFecha = response3.data.fecha === item.fecha_evento.split(" ")[0];
           let horaFecha = true;
-        
+
           if (mismaFecha) {
             const horaServ = parseInt(response3.data.hora.split(":")[0], 10);
             const horaItem = item.horaReserva;
             horaFecha = horaServ < horaItem;
           }
-        
-          console.log(mismaFecha + " " + horaFecha);
-          console.log("Fecha Server -> " + response3.data.fecha + " = " + item.fecha_evento.split(" ")[0] + " <- Fecha Evento");
-          console.log("Hora Server -> " + parseInt(response3.data.hora.split(":")[0], 10) + " = " + item.horaReserva + " <- Hora Evento");
-          
+
+          // Clasifica el producto según disponibilidad y restricciones
           if (maxReservables >= item.personas && disponibilidad && horaFecha) {
             nuevosCarritoNormal.push(item);
           } else {
@@ -84,19 +119,27 @@ export default function Carrito({ cart, setCart }) {
     setLoading(false);
   };
 
+  /**
+   * Elimina un producto del carrito.
+   * @param {number} id - ID del producto a eliminar.
+   */
   const handleEliminarProducto = (id) => {
     const nuevoCart = cart.filter(item => item.id !== id);
     setCart(nuevoCart);
     localStorage.setItem("cart", JSON.stringify(nuevoCart));
   };
 
+  /**
+   * Realiza el pedido de todos los productos del carrito.
+   * Envía las reservas a la API y limpia el carrito si tiene éxito.
+   */
   const handleRealizarPedido = async () => {
     const url = API_URL + "api/reservas";
     const token = localStorage.getItem("authToken");
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
     setLoading(true);
-    
+
     const peticiones = cart.map((elemento) => {
       return axios.post(url, {
         publicacion_id: elemento.id,
@@ -120,11 +163,11 @@ export default function Carrito({ cart, setCart }) {
     } finally {
       setLoading(false);
     }
-
   };
 
   return (
     <div className="max-w-7xl mx-auto p-10">
+      {/* Si el carrito está vacío, muestra mensaje y botón para ir a alquilables */}
       {carritoDesfase.length == 0 && carritoNormal.length == 0 && !loading ? (
         <div className="max-w-4xl mx-auto px-4 py-12">
           <motion.div
@@ -165,11 +208,13 @@ export default function Carrito({ cart, setCart }) {
       ) : (
         <>
 
+          {/* Título y contenedor principal */}
           <h1 className="text-4xl font-semibold mb-6">Carrito</h1>
           <div className="flex flex-col md:flex-row gap-8">
 
-            {/* Contenedor scrollable para productos */}
+            {/* Lista de productos disponibles y desfasados */}
             <div className="flex-1 max-h-[600px] overflow-y-auto pr-2 space-y-6">
+              {/* Productos disponibles */}
               {carritoNormal.map((producto) => (
                 <div key={producto.id} className="flex items-center gap-6 border-b pb-6">
                   <img
@@ -190,6 +235,7 @@ export default function Carrito({ cart, setCart }) {
                   </button>
                 </div>
               ))}
+              {/* Productos desfasados (no disponibles) */}
               {carritoDesfase.map((producto) => (
                 <div key={producto.id} className="flex items-center gap-6 border-b pb-6">
                   <img
@@ -212,7 +258,7 @@ export default function Carrito({ cart, setCart }) {
                 </div>
               ))}
             </div>
-            {/* Resumen u loading */}
+            {/* Resumen del pedido o loader */}
             {loading ? (
               <div className="flex justify-center items-center w-full md:w-1/3">
                 <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
@@ -244,7 +290,6 @@ export default function Carrito({ cart, setCart }) {
               </div>
             )}
           </div>
-
         </>
 
       )}
