@@ -1,6 +1,6 @@
-🔗 URL del proyecto en producción: https://manu.cicloflorenciopintado.es
+🔗 https://manu.cicloflorenciopintado.es
 
-![image](https://github.com/user-attachments/assets/12a88737-6fe5-49f0-8c50-292e43561cf0)
+![image](https://github.com/user-attachments/assets/6d9617ca-ef31-44ee-b358-b4e10f187250)
 
 # 🏖️ Marina Rent - Plataforma de alquiler de objetos de playa
 
