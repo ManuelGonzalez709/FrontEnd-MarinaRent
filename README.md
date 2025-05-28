@@ -1,3 +1,7 @@
+🔗 URL del proyecto en producción: https://manu.cicloflorenciopintado.es
+
+![image](https://github.com/user-attachments/assets/12a88737-6fe5-49f0-8c50-292e43561cf0)
+
 # 🏖️ Marina Rent - Plataforma de alquiler de objetos de playa
 
 BeachRent es una aplicación web desarrollada en **React** que permite alquilar objetos relacionados con la playa por hora y según el número de personas. El sistema está conectado a una API REST desarrollada con **Laravel**, y permite tanto a usuarios comunes como a administradores gestionar publicaciones y reservas.
