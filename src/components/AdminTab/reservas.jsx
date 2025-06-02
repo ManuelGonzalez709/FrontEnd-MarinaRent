@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file reservas.jsx
  * @description Vista de administración para listar, buscar, editar y cancelar reservas.

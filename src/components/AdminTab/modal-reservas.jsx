@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file modal-reservas.jsx
  * @description Modal para crear o editar reservas en el panel de administración.

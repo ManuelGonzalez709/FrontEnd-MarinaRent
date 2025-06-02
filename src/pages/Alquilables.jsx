@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file Alquilables.jsx
  * @description Página para mostrar publicaciones de tipo reservable (alquilables) con búsqueda, filtrado y paginación.

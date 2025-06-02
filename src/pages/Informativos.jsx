@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file Informativos.jsx
  * @description Página para mostrar publicaciones de tipo informativo con búsqueda, filtrado y paginación.

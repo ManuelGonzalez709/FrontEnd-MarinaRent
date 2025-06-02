@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file ai.jsx
  * @description Página de chat con IA usando Cohere. Permite enviar mensajes y recibir respuestas de la IA.

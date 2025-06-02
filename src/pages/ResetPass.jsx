@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file ResetPass.jsx
  * @description Página para recuperación de contraseña. Permite al usuario solicitar el envío de un correo para restablecer su contraseña.

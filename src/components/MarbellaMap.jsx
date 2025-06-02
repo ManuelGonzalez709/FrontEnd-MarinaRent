@@ -4,7 +4,6 @@
  * @module components/MarbellaMap
  */
 
-import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { LatLngExpression } from "leaflet"; // Para definir la posición
 import "leaflet/dist/leaflet.css"; // Estilo de Leaflet

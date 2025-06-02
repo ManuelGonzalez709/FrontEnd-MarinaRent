@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file modal-usuarios-perfil.jsx
  * @description Modal para editar el perfil de usuario o crear usuarios desde el panel de administración.

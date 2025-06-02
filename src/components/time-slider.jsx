@@ -4,7 +4,6 @@
  * @module components/time-slider
  */
 
-"use client"
 
 import { useState, useEffect } from "react"
 import { Slider } from "@/components/ui/slider"

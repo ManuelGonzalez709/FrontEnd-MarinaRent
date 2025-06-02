@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file usuarios.jsx
  * @description Vista de administración para listar, buscar, crear, editar y eliminar usuarios.

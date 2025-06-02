@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file Login.jsx
  * @description Página de inicio de sesión para usuarios de Marina Rent.

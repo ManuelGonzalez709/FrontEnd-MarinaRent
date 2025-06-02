@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file Register.jsx
  * @description Página de registro de usuario para Marina Rent.

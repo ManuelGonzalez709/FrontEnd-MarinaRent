@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file Perfil.jsx
  * @description Página de perfil de usuario. Permite ver y editar información personal, así como consultar la actividad reciente (reservas).

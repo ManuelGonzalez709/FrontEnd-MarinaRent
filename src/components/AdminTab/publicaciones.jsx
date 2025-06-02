@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file publicaciones.jsx
  * @description Vista de administración para listar, buscar, crear, editar y eliminar publicaciones.

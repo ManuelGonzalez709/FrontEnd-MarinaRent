@@ -4,8 +4,6 @@
  * Permite gestionar imágenes, validar campos y actualizar la información.
  */
 
-"use client"
-
 import { useState, useEffect } from "react"
 import { ImageIcon, Save, X, Plus } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"

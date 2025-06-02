@@ -3,7 +3,6 @@
  * @description Página de detalle de una publicación seleccionada. Permite ver información, imágenes, seleccionar hora y personas, y añadir al carrito si es reservable.
  */
 
-"use client"
 
 import { useState, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"

@@ -1,5 +1,3 @@
-"use client"
-
 import { useNavigate } from "react-router-dom"
 import { CheckCircleIcon } from "@heroicons/react/24/solid"
 import MarbellaMap from "../components/MarbellaMap"

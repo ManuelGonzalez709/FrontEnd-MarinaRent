@@ -4,7 +4,6 @@
  * @module components/buscador
  */
 
-"use client"
 
 import { useState } from "react"
 import { Search, Calendar, X } from "lucide-react"

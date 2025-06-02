@@ -1,5 +1,3 @@
-// Indica que este componente es del lado del cliente (Next.js, pero aquí es React puro)
-"use client" 
 
 // Importa componentes y hooks de React Router y los iconos de lucide-react
 import { Link, useNavigate } from "react-router-dom"

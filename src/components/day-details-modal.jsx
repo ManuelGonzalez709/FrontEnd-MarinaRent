@@ -4,7 +4,6 @@
  * @module components/day-details-modal
  */
 
-"use client"
 import { useState } from "react"
 import { Calendar, Clock, AlertTriangle } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
